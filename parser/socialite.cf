@@ -1,0 +1,81 @@
+-- Edge [int s:0..9999] ((int t, double dist)).
+-- Path [int t:0..9999] (double dist).
+-- #Path[t]($Min(d)) : t = 1; d = 0:0; (6)
+-- #:  Path[s](d1); Edge[s](t; d2); d=d1+d2:(7)
+
+-- programs ------------------------------------------------
+
+entrypoints Program ;
+
+Program.     Program ::= [Declaration] [Rule];
+
+-- declarations --------------------------------------------
+
+Declaration. Declaration ::= "declare" UIdent "[" TypeName Variable ":" Range "]" MoreDimensionsDeclaration ".";
+
+separator Declaration "";
+
+NoMoreDim.   MoreDimensionsDeclaration ::= ;
+MoreDim.     MoreDimensionsDeclaration ::= "(" [ColumnDeclaration] ")";
+
+ColumnDeclaration. ColumnDeclaration ::= TypeName Variable;
+separator ColumnDeclaration ",";
+
+TypeInt.     TypeName ::= "int";
+TypeDouble.  TypeName ::= "double";
+
+Range.       Range ::= Integer ".." Integer;
+
+-- rules ---------------------------------------------------
+
+Rule.     Rule ::= Predicate [RuleGoal] ".";
+
+RuleGoal. RuleGoal ::= ":-" [OneGoal];
+separator nonempty RuleGoal ";";
+
+separator Rule "" ;
+
+PredicateAtom.   Predicate ::= Atom;
+PredicateStruct. Predicate ::= Structure;
+
+GoalPredicate.  OneGoal ::= Predicate;
+GoalEquation.   OneGoal ::= Equation;
+
+separator nonempty OneGoal "," ;
+
+TermAtom.        Term ::= Atom;
+TermValue.       Term ::= Value;
+
+ValueInt.        Value ::= Integer;
+ValueVar.        Value ::= Variable;
+ValueDouble.	 Value ::= Double;
+
+separator nonempty Term "," ;
+
+Variable.        Variable ::= LIdent;
+
+Atom.            Atom ::= UIdent "[" Value "]";
+
+Structure.       Structure ::= Atom "(" [Term] ")" ;
+
+Equation.        Equation ::= Variable "=" Exp;
+
+EAdd.            Exp ::= Exp "+" Exp1;
+ESub.            Exp ::= Exp "-" Exp1;
+EMul.            Exp1 ::= Exp1 "*" Exp2;
+EDiv.            Exp1 ::= Exp1 "/" Exp2;
+EInt.            Exp2 ::= Value;
+EVar.            Exp2 ::= Variable;
+coercions Exp 2;              
+
+token UIdent (upper (letter | digit | '_')*) ;
+token LIdent (lower (letter | digit | '_')*) ;
+
+-- comments ------------------------------------------------
+
+comment    "#" ;
+
+comment    "//" ;
+
+comment    "/*" "*/" ;
+
