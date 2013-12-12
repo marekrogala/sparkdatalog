@@ -1,8 +1,3 @@
--- Edge [int s:0..9999] ((int t, double dist)).
--- Path [int t:0..9999] (double dist).
--- #Path[t]($Min(d)) : t = 1; d = 0:0; (6)
--- #:  Path[s](d1); Edge[s](t; d2); d=d1+d2:(7)
-
 -- programs ------------------------------------------------
 
 entrypoints Program ;
@@ -11,7 +6,8 @@ Program.     Program ::= [Declaration] [Rule];
 
 -- declarations --------------------------------------------
 
-Declaration. Declaration ::= "declare" UIdent "[" TypeName Variable ":" Range "]" MoreDimensionsDeclaration ".";
+DeclarationTable. Declaration ::= "declare" UIdent "[" TypeName Variable ":" Range "]" MoreDimensionsDeclaration ".";
+DeclarationConst. Declaration ::= "const" TypeName UIdent "=" Exp ".";
 
 separator Declaration "";
 
@@ -24,7 +20,7 @@ separator ColumnDeclaration ",";
 TypeInt.     TypeName ::= "int";
 TypeDouble.  TypeName ::= "double";
 
-Range.       Range ::= Integer ".." Integer;
+Range.       Range ::= Exp ".." Exp;
 
 -- rules ---------------------------------------------------
 
@@ -45,31 +41,39 @@ separator nonempty OneGoal "," ;
 
 TermAtom.        Term ::= Atom;
 TermValue.       Term ::= Value;
+TermCall.	 Term ::= DIdent "(" [Term] ")";
 
 ValueInt.        Value ::= Integer;
 ValueVar.        Value ::= Variable;
 ValueDouble.	 Value ::= Double;
+ValueConst.      Value ::= Constant;
 
 separator nonempty Term "," ;
 
 Variable.        Variable ::= LIdent;
 
-Atom.            Atom ::= UIdent "[" Value "]";
+Constant.        Constant ::= UIdent;
+
+AtomSharded.     Atom ::= UIdent "[" Value "]";
+AtomSingle.      Atom ::= UIdent;
 
 Structure.       Structure ::= Atom "(" [Term] ")" ;
 
-Equation.        Equation ::= Variable "=" Exp;
+Comparison.     Equation ::= Exp CompOp Exp;
+CompOpEq.       CompOp ::= "=";
+CompOpGt.       CompOp ::= ">";
+CompOpLt.       CompOp ::= "<";
 
 EAdd.            Exp ::= Exp "+" Exp1;
 ESub.            Exp ::= Exp "-" Exp1;
 EMul.            Exp1 ::= Exp1 "*" Exp2;
 EDiv.            Exp1 ::= Exp1 "/" Exp2;
 EInt.            Exp2 ::= Value;
-EVar.            Exp2 ::= Variable;
 coercions Exp 2;              
 
 token UIdent (upper (letter | digit | '_')*) ;
 token LIdent (lower (letter | digit | '_')*) ;
+token DIdent '$' (upper (letter | digit | '_')*) ;
 
 -- comments ------------------------------------------------
 
