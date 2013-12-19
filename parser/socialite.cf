@@ -41,7 +41,7 @@ separator nonempty OneGoal "," ;
 
 TermAtom.        Term ::= Atom;
 TermValue.       Term ::= Value;
-TermCall.	 Term ::= DIdent "(" [Term] ")";
+TermCall.	     Term ::= DIdent "(" [Term] ")";
 
 ValueInt.        Value ::= Integer;
 ValueVar.        Value ::= Variable;
