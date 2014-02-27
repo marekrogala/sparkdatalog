@@ -164,7 +164,9 @@ public class VisitSkel
     {
       /* Code For PredicateStruct Goes Here */
 
-      p.structure_.accept(new StructureVisitor<R,A>(), arg);
+      p.atom_.accept(new AtomVisitor<R,A>(), arg);
+      for (Term x : p.listterm_) {
+      }
 
       return null;
     }
@@ -180,11 +182,22 @@ public class VisitSkel
 
       return null;
     }
-    public R visit(socialite.Absyn.GoalEquation p, A arg)
+    public R visit(socialite.Absyn.GoalComparison p, A arg)
     {
-      /* Code For GoalEquation Goes Here */
+      /* Code For GoalComparison Goes Here */
 
-      p.equation_.accept(new EquationVisitor<R,A>(), arg);
+      p.exp_1.accept(new ExpVisitor<R,A>(), arg);
+      p.compop_.accept(new CompOpVisitor<R,A>(), arg);
+      p.exp_2.accept(new ExpVisitor<R,A>(), arg);
+
+      return null;
+    }
+    public R visit(socialite.Absyn.GoalAssign p, A arg)
+    {
+      /* Code For GoalAssign Goes Here */
+
+      p.variable_.accept(new VariableVisitor<R,A>(), arg);
+      p.exp_.accept(new ExpVisitor<R,A>(), arg);
 
       return null;
     }
@@ -303,34 +316,6 @@ public class VisitSkel
       /* Code For AtomSingle Goes Here */
 
       //p.uident_;
-
-      return null;
-    }
-
-  }
-  public class StructureVisitor<R,A> implements Structure.Visitor<R,A>
-  {
-    public R visit(socialite.Absyn.Struct p, A arg)
-    {
-      /* Code For Struct Goes Here */
-
-      p.atom_.accept(new AtomVisitor<R,A>(), arg);
-      for (Term x : p.listterm_) {
-      }
-
-      return null;
-    }
-
-  }
-  public class EquationVisitor<R,A> implements Equation.Visitor<R,A>
-  {
-    public R visit(socialite.Absyn.Comparison p, A arg)
-    {
-      /* Code For Comparison Goes Here */
-
-      p.exp_1.accept(new ExpVisitor<R,A>(), arg);
-      p.compop_.accept(new CompOpVisitor<R,A>(), arg);
-      p.exp_2.accept(new ExpVisitor<R,A>(), arg);
 
       return null;
     }

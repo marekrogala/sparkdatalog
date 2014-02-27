@@ -4,7 +4,8 @@ public abstract class OneGoal implements java.io.Serializable {
   public abstract <R,A> R accept(OneGoal.Visitor<R,A> v, A arg);
   public interface Visitor <R,A> {
     public R visit(socialite.Absyn.GoalPredicate p, A arg);
-    public R visit(socialite.Absyn.GoalEquation p, A arg);
+    public R visit(socialite.Absyn.GoalComparison p, A arg);
+    public R visit(socialite.Absyn.GoalAssign p, A arg);
 
   }
 

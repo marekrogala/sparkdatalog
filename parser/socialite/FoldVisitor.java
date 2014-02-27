@@ -109,7 +109,10 @@ public abstract class FoldVisitor<R,A> implements AllVisitor<R,A> {
     }
     public R visit(socialite.Absyn.PredicateStruct p, A arg) {
       R r = leaf(arg);
-      r = combine(p.structure_.accept(this, arg), r, arg);
+      r = combine(p.atom_.accept(this, arg), r, arg);
+      for (Term x : p.listterm_) {
+        r = combine(x.accept(this,arg), r, arg);
+      }
       return r;
     }
 
@@ -119,9 +122,17 @@ public abstract class FoldVisitor<R,A> implements AllVisitor<R,A> {
       r = combine(p.predicate_.accept(this, arg), r, arg);
       return r;
     }
-    public R visit(socialite.Absyn.GoalEquation p, A arg) {
+    public R visit(socialite.Absyn.GoalComparison p, A arg) {
       R r = leaf(arg);
-      r = combine(p.equation_.accept(this, arg), r, arg);
+      r = combine(p.exp_1.accept(this, arg), r, arg);
+      r = combine(p.compop_.accept(this, arg), r, arg);
+      r = combine(p.exp_2.accept(this, arg), r, arg);
+      return r;
+    }
+    public R visit(socialite.Absyn.GoalAssign p, A arg) {
+      R r = leaf(arg);
+      r = combine(p.variable_.accept(this, arg), r, arg);
+      r = combine(p.exp_.accept(this, arg), r, arg);
       return r;
     }
 
@@ -188,25 +199,6 @@ public abstract class FoldVisitor<R,A> implements AllVisitor<R,A> {
     }
     public R visit(socialite.Absyn.AtomSingle p, A arg) {
       R r = leaf(arg);
-      return r;
-    }
-
-/* Structure */
-    public R visit(socialite.Absyn.Struct p, A arg) {
-      R r = leaf(arg);
-      r = combine(p.atom_.accept(this, arg), r, arg);
-      for (Term x : p.listterm_) {
-        r = combine(x.accept(this,arg), r, arg);
-      }
-      return r;
-    }
-
-/* Equation */
-    public R visit(socialite.Absyn.Comparison p, A arg) {
-      R r = leaf(arg);
-      r = combine(p.exp_1.accept(this, arg), r, arg);
-      r = combine(p.compop_.accept(this, arg), r, arg);
-      r = combine(p.exp_2.accept(this, arg), r, arg);
       return r;
     }
 

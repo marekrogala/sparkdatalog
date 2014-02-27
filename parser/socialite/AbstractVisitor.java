@@ -54,7 +54,8 @@ public class AbstractVisitor<R,A> implements AllVisitor<R,A> {
     }
 /* OneGoal */
     public R visit(socialite.Absyn.GoalPredicate p, A arg) { return visitDefault(p, arg); }
-    public R visit(socialite.Absyn.GoalEquation p, A arg) { return visitDefault(p, arg); }
+    public R visit(socialite.Absyn.GoalComparison p, A arg) { return visitDefault(p, arg); }
+    public R visit(socialite.Absyn.GoalAssign p, A arg) { return visitDefault(p, arg); }
     public R visitDefault(socialite.Absyn.OneGoal p, A arg) {
       throw new IllegalArgumentException(this.getClass().getName() + ": " + p);
     }
@@ -88,16 +89,6 @@ public class AbstractVisitor<R,A> implements AllVisitor<R,A> {
     public R visit(socialite.Absyn.AtomSharded p, A arg) { return visitDefault(p, arg); }
     public R visit(socialite.Absyn.AtomSingle p, A arg) { return visitDefault(p, arg); }
     public R visitDefault(socialite.Absyn.Atom p, A arg) {
-      throw new IllegalArgumentException(this.getClass().getName() + ": " + p);
-    }
-/* Structure */
-    public R visit(socialite.Absyn.Struct p, A arg) { return visitDefault(p, arg); }
-    public R visitDefault(socialite.Absyn.Structure p, A arg) {
-      throw new IllegalArgumentException(this.getClass().getName() + ": " + p);
-    }
-/* Equation */
-    public R visit(socialite.Absyn.Comparison p, A arg) { return visitDefault(p, arg); }
-    public R visitDefault(socialite.Absyn.Equation p, A arg) {
       throw new IllegalArgumentException(this.getClass().getName() + ": " + p);
     }
 /* CompOp */

@@ -375,36 +375,6 @@ public class PrettyPrinter
     buf_.delete(0,buf_.length());
     return temp;
   }
-  public static String print(socialite.Absyn.Structure foo)
-  {
-    pp(foo, 0);
-    trim();
-    String temp = buf_.toString();
-    buf_.delete(0,buf_.length());
-    return temp;
-  }
-  public static String show(socialite.Absyn.Structure foo)
-  {
-    sh(foo);
-    String temp = buf_.toString();
-    buf_.delete(0,buf_.length());
-    return temp;
-  }
-  public static String print(socialite.Absyn.Equation foo)
-  {
-    pp(foo, 0);
-    trim();
-    String temp = buf_.toString();
-    buf_.delete(0,buf_.length());
-    return temp;
-  }
-  public static String show(socialite.Absyn.Equation foo)
-  {
-    sh(foo);
-    String temp = buf_.toString();
-    buf_.delete(0,buf_.length());
-    return temp;
-  }
   public static String print(socialite.Absyn.CompOp foo)
   {
     pp(foo, 0);
@@ -643,7 +613,10 @@ public class PrettyPrinter
     {
        socialite.Absyn.PredicateStruct _predicatestruct = (socialite.Absyn.PredicateStruct) foo;
        if (_i_ > 0) render(_L_PAREN);
-       pp(_predicatestruct.structure_, 0);
+       pp(_predicatestruct.atom_, 0);
+       render("(");
+       pp(_predicatestruct.listterm_, 0);
+       render(")");
        if (_i_ > 0) render(_R_PAREN);
     }
   }
@@ -657,11 +630,22 @@ public class PrettyPrinter
        pp(_goalpredicate.predicate_, 0);
        if (_i_ > 0) render(_R_PAREN);
     }
-    else     if (foo instanceof socialite.Absyn.GoalEquation)
+    else     if (foo instanceof socialite.Absyn.GoalComparison)
     {
-       socialite.Absyn.GoalEquation _goalequation = (socialite.Absyn.GoalEquation) foo;
+       socialite.Absyn.GoalComparison _goalcomparison = (socialite.Absyn.GoalComparison) foo;
        if (_i_ > 0) render(_L_PAREN);
-       pp(_goalequation.equation_, 0);
+       pp(_goalcomparison.exp_1, 0);
+       pp(_goalcomparison.compop_, 0);
+       pp(_goalcomparison.exp_2, 0);
+       if (_i_ > 0) render(_R_PAREN);
+    }
+    else     if (foo instanceof socialite.Absyn.GoalAssign)
+    {
+       socialite.Absyn.GoalAssign _goalassign = (socialite.Absyn.GoalAssign) foo;
+       if (_i_ > 0) render(_L_PAREN);
+       pp(_goalassign.variable_, 0);
+       render("=");
+       pp(_goalassign.exp_, 0);
        if (_i_ > 0) render(_R_PAREN);
     }
   }
@@ -802,40 +786,13 @@ public class PrettyPrinter
     }
   }
 
-  private static void pp(socialite.Absyn.Structure foo, int _i_)
-  {
-    if (foo instanceof socialite.Absyn.Struct)
-    {
-       socialite.Absyn.Struct _struct = (socialite.Absyn.Struct) foo;
-       if (_i_ > 0) render(_L_PAREN);
-       pp(_struct.atom_, 0);
-       render("(");
-       pp(_struct.listterm_, 0);
-       render(")");
-       if (_i_ > 0) render(_R_PAREN);
-    }
-  }
-
-  private static void pp(socialite.Absyn.Equation foo, int _i_)
-  {
-    if (foo instanceof socialite.Absyn.Comparison)
-    {
-       socialite.Absyn.Comparison _comparison = (socialite.Absyn.Comparison) foo;
-       if (_i_ > 0) render(_L_PAREN);
-       pp(_comparison.exp_1, 0);
-       pp(_comparison.compop_, 0);
-       pp(_comparison.exp_2, 0);
-       if (_i_ > 0) render(_R_PAREN);
-    }
-  }
-
   private static void pp(socialite.Absyn.CompOp foo, int _i_)
   {
     if (foo instanceof socialite.Absyn.CompOpEq)
     {
        socialite.Absyn.CompOpEq _compopeq = (socialite.Absyn.CompOpEq) foo;
        if (_i_ > 0) render(_L_PAREN);
-       render("=");
+       render("==");
        if (_i_ > 0) render(_R_PAREN);
     }
     else     if (foo instanceof socialite.Absyn.CompOpGt)
@@ -1111,7 +1068,10 @@ public class PrettyPrinter
        socialite.Absyn.PredicateStruct _predicatestruct = (socialite.Absyn.PredicateStruct) foo;
        render("(");
        render("PredicateStruct");
-       sh(_predicatestruct.structure_);
+       sh(_predicatestruct.atom_);
+       render("[");
+       sh(_predicatestruct.listterm_);
+       render("]");
        render(")");
     }
   }
@@ -1126,12 +1086,23 @@ public class PrettyPrinter
        sh(_goalpredicate.predicate_);
        render(")");
     }
-    if (foo instanceof socialite.Absyn.GoalEquation)
+    if (foo instanceof socialite.Absyn.GoalComparison)
     {
-       socialite.Absyn.GoalEquation _goalequation = (socialite.Absyn.GoalEquation) foo;
+       socialite.Absyn.GoalComparison _goalcomparison = (socialite.Absyn.GoalComparison) foo;
        render("(");
-       render("GoalEquation");
-       sh(_goalequation.equation_);
+       render("GoalComparison");
+       sh(_goalcomparison.exp_1);
+       sh(_goalcomparison.compop_);
+       sh(_goalcomparison.exp_2);
+       render(")");
+    }
+    if (foo instanceof socialite.Absyn.GoalAssign)
+    {
+       socialite.Absyn.GoalAssign _goalassign = (socialite.Absyn.GoalAssign) foo;
+       render("(");
+       render("GoalAssign");
+       sh(_goalassign.variable_);
+       sh(_goalassign.exp_);
        render(")");
     }
   }
@@ -1269,35 +1240,6 @@ public class PrettyPrinter
        render("(");
        render("AtomSingle");
        sh(_atomsingle.uident_);
-       render(")");
-    }
-  }
-
-  private static void sh(socialite.Absyn.Structure foo)
-  {
-    if (foo instanceof socialite.Absyn.Struct)
-    {
-       socialite.Absyn.Struct _struct = (socialite.Absyn.Struct) foo;
-       render("(");
-       render("Struct");
-       sh(_struct.atom_);
-       render("[");
-       sh(_struct.listterm_);
-       render("]");
-       render(")");
-    }
-  }
-
-  private static void sh(socialite.Absyn.Equation foo)
-  {
-    if (foo instanceof socialite.Absyn.Comparison)
-    {
-       socialite.Absyn.Comparison _comparison = (socialite.Absyn.Comparison) foo;
-       render("(");
-       render("Comparison");
-       sh(_comparison.exp_1);
-       sh(_comparison.compop_);
-       sh(_comparison.exp_2);
        render(")");
     }
   }

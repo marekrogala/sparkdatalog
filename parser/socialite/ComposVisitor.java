@@ -19,8 +19,6 @@ public class ComposVisitor<A> implements
   socialite.Absyn.Variable.Visitor<socialite.Absyn.Variable,A>,
   socialite.Absyn.Constant.Visitor<socialite.Absyn.Constant,A>,
   socialite.Absyn.Atom.Visitor<socialite.Absyn.Atom,A>,
-  socialite.Absyn.Structure.Visitor<socialite.Absyn.Structure,A>,
-  socialite.Absyn.Equation.Visitor<socialite.Absyn.Equation,A>,
   socialite.Absyn.CompOp.Visitor<socialite.Absyn.CompOp,A>,
   socialite.Absyn.Exp.Visitor<socialite.Absyn.Exp,A>
 {
@@ -144,9 +142,13 @@ public class ComposVisitor<A> implements
     }
     public Predicate visit(socialite.Absyn.PredicateStruct p, A arg)
     {
-      Structure structure_ = p.structure_.accept(this, arg);
+      Atom atom_ = p.atom_.accept(this, arg);
+      ListTerm listterm_ = new ListTerm();
+      for (Term x : p.listterm_) {
+        listterm_.add(x.accept(this,arg));
+      }
 
-      return new socialite.Absyn.PredicateStruct(structure_);
+      return new socialite.Absyn.PredicateStruct(atom_, listterm_);
     }
 
 /* OneGoal */
@@ -156,11 +158,20 @@ public class ComposVisitor<A> implements
 
       return new socialite.Absyn.GoalPredicate(predicate_);
     }
-    public OneGoal visit(socialite.Absyn.GoalEquation p, A arg)
+    public OneGoal visit(socialite.Absyn.GoalComparison p, A arg)
     {
-      Equation equation_ = p.equation_.accept(this, arg);
+      Exp exp_1 = p.exp_1.accept(this, arg);
+      CompOp compop_ = p.compop_.accept(this, arg);
+      Exp exp_2 = p.exp_2.accept(this, arg);
 
-      return new socialite.Absyn.GoalEquation(equation_);
+      return new socialite.Absyn.GoalComparison(exp_1, compop_, exp_2);
+    }
+    public OneGoal visit(socialite.Absyn.GoalAssign p, A arg)
+    {
+      Variable variable_ = p.variable_.accept(this, arg);
+      Exp exp_ = p.exp_.accept(this, arg);
+
+      return new socialite.Absyn.GoalAssign(variable_, exp_);
     }
 
 /* Term */
@@ -247,28 +258,6 @@ public class ComposVisitor<A> implements
       String uident_ = p.uident_;
 
       return new socialite.Absyn.AtomSingle(uident_);
-    }
-
-/* Structure */
-    public Structure visit(socialite.Absyn.Struct p, A arg)
-    {
-      Atom atom_ = p.atom_.accept(this, arg);
-      ListTerm listterm_ = new ListTerm();
-      for (Term x : p.listterm_) {
-        listterm_.add(x.accept(this,arg));
-      }
-
-      return new socialite.Absyn.Struct(atom_, listterm_);
-    }
-
-/* Equation */
-    public Equation visit(socialite.Absyn.Comparison p, A arg)
-    {
-      Exp exp_1 = p.exp_1.accept(this, arg);
-      CompOp compop_ = p.compop_.accept(this, arg);
-      Exp exp_2 = p.exp_2.accept(this, arg);
-
-      return new socialite.Absyn.Comparison(exp_1, compop_, exp_2);
     }
 
 /* CompOp */

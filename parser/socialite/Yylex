@@ -36,18 +36,19 @@ IDENT = ({LETTER}|{DIGIT}|['_])
 <YYINITIAL>:- { return new Symbol(sym._SYMB_9); }
 <YYINITIAL>; { return new Symbol(sym._SYMB_10); }
 <YYINITIAL>_ { return new Symbol(sym._SYMB_11); }
-<YYINITIAL>> { return new Symbol(sym._SYMB_12); }
-<YYINITIAL>< { return new Symbol(sym._SYMB_13); }
-<YYINITIAL>>= { return new Symbol(sym._SYMB_14); }
-<YYINITIAL><= { return new Symbol(sym._SYMB_15); }
-<YYINITIAL>\+ { return new Symbol(sym._SYMB_16); }
-<YYINITIAL>- { return new Symbol(sym._SYMB_17); }
-<YYINITIAL>\* { return new Symbol(sym._SYMB_18); }
-<YYINITIAL>/ { return new Symbol(sym._SYMB_19); }
-<YYINITIAL>const { return new Symbol(sym._SYMB_20); }
-<YYINITIAL>declare { return new Symbol(sym._SYMB_21); }
-<YYINITIAL>double { return new Symbol(sym._SYMB_22); }
-<YYINITIAL>int { return new Symbol(sym._SYMB_23); }
+<YYINITIAL>== { return new Symbol(sym._SYMB_12); }
+<YYINITIAL>> { return new Symbol(sym._SYMB_13); }
+<YYINITIAL>< { return new Symbol(sym._SYMB_14); }
+<YYINITIAL>>= { return new Symbol(sym._SYMB_15); }
+<YYINITIAL><= { return new Symbol(sym._SYMB_16); }
+<YYINITIAL>\+ { return new Symbol(sym._SYMB_17); }
+<YYINITIAL>- { return new Symbol(sym._SYMB_18); }
+<YYINITIAL>\* { return new Symbol(sym._SYMB_19); }
+<YYINITIAL>/ { return new Symbol(sym._SYMB_20); }
+<YYINITIAL>const { return new Symbol(sym._SYMB_21); }
+<YYINITIAL>declare { return new Symbol(sym._SYMB_22); }
+<YYINITIAL>double { return new Symbol(sym._SYMB_23); }
+<YYINITIAL>int { return new Symbol(sym._SYMB_24); }
 <YYINITIAL>"#"[^\n]*\n { /* BNFC single-line comment */ }
 <YYINITIAL>"//"[^\n]*\n { /* BNFC single-line comment */ }
 <YYINITIAL>"/*" { yybegin(COMMENT); }
