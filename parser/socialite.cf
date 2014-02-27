@@ -2,32 +2,32 @@
 
 entrypoints Program ;
 
-Program.     Program ::= [Declaration] [Rule];
+Prog.       Program ::= [Declaration] [Rule];
 
 -- declarations --------------------------------------------
 
-DeclarationDistributed. Declaration ::= "declare" UIdent "[" TypeName Variable ":" Range "]" MoreDimensionsDeclaration ".";
-DeclarationGlobal.      Declaration ::= "declare" UIdent MoreDimensionsDeclaration ".";
-DeclarationConst. Declaration ::= "const" TypeName UIdent "=" Exp ".";
+DeclarationDistributed.  Declaration ::= "declare" UIdent "[" TypeName Variable ":" Range "]" MoreDimensionsDeclaration ".";
+DeclarationGlobal.       Declaration ::= "declare" UIdent MoreDimensionsDeclaration ".";
+DeclarationConst.        Declaration ::= "const" TypeName UIdent "=" Exp ".";
 
 separator Declaration "";
 
-NoMoreDim.   MoreDimensionsDeclaration ::= ;
-MoreDim.     MoreDimensionsDeclaration ::= "(" [ColumnDeclaration] ")";
+NoMoreDim.       MoreDimensionsDeclaration ::= ;
+MoreDim.         MoreDimensionsDeclaration ::= "(" [ColumnDeclaration] ")";
 
-ColumnDeclaration. ColumnDeclaration ::= TypeName Variable;
-separator ColumnDeclaration ",";
+ColumnDecl.      ColumnDeclaration ::= TypeName Variable;
+separator        ColumnDeclaration ",";
 
-TypeInt.     TypeName ::= "int";
-TypeDouble.  TypeName ::= "double";
+TypeInt.         TypeName ::= "int";
+TypeDouble.      TypeName ::= "double";
 
-Range.       Range ::= Exp ".." Exp;
+RangeDef.        Range ::= Exp ".." Exp;
 
 -- rules ---------------------------------------------------
 
-Rule.     Rule ::= Predicate [RuleGoal] ".";
+RuleDef.         Rule ::= Predicate [RuleGoal] ".";
 
-RuleGoal. RuleGoal ::= ":-" [OneGoal];
+RuleGoalDef.     RuleGoal ::= ":-" [OneGoal];
 separator nonempty RuleGoal ";";
 
 separator Rule "" ;
@@ -35,8 +35,9 @@ separator Rule "" ;
 PredicateAtom.   Predicate ::= Atom;
 PredicateStruct. Predicate ::= Structure;
 
-GoalPredicate.  OneGoal ::= Predicate;
-GoalEquation.   OneGoal ::= Equation;
+GoalPredicate.   OneGoal ::= Predicate;
+GoalEquation.    OneGoal ::= Equation;
+GoalAssign.      OneGoal ::= Variable "=" Exp;
 
 separator nonempty OneGoal "," ;
 
@@ -53,21 +54,21 @@ ValueIgnore.     Value ::= "_";
 
 separator nonempty Term "," ;
 
-Variable.        Variable ::= LIdent;
+Var.             Variable ::= LIdent;
 
-Constant.        Constant ::= UIdent;
+Const.           Constant ::= UIdent;
 
 AtomSharded.     Atom ::= UIdent "[" Value "]";
 AtomSingle.      Atom ::= UIdent;
 
-Structure.       Structure ::= Atom "(" [Term] ")" ;
+Struct.          Structure ::= Atom "(" [Term] ")" ;
 
-Comparison.     Equation ::= Exp CompOp Exp;
-CompOpEq.       CompOp ::= "=";
-CompOpGt.       CompOp ::= ">";
-CompOpLt.       CompOp ::= "<";
-CompOpGe.       CompOp ::= ">=";
-CompOpLe.       CompOp ::= "<=";
+Comparison.      Equation ::= Exp CompOp Exp;
+CompOpEq.        CompOp ::= "==";
+CompOpGt.        CompOp ::= ">";
+CompOpLt.        CompOp ::= "<";
+CompOpGe.        CompOp ::= ">=";
+CompOpLe.        CompOp ::= "<=";
 
 EAdd.            Exp ::= Exp "+" Exp1;
 ESub.            Exp ::= Exp "-" Exp1;
