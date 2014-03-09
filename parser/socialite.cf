@@ -32,8 +32,8 @@ separator nonempty RuleGoal ";";
 
 separator Rule "" ;
 
-PredicateAtom.   Predicate ::= Atom;
-PredicateStruct. Predicate ::= Atom "(" [Term] ")";
+PredicateSingle.  Predicate ::= UIdent "(" [Term] ")";
+PredicateSharded. Predicate ::= UIdent "[" Value "]" "(" [Term] ")";
 
 GoalPredicate.   OneGoal ::= Predicate;
 GoalComparison.  OneGoal ::= Exp CompOp Exp;
@@ -41,7 +41,6 @@ GoalAssign.      OneGoal ::= Variable "=" Exp;
 
 separator nonempty OneGoal "," ;
 
-TermAtom.        Term ::= Atom;
 TermValue.       Term ::= Value;
 TermCall.	     Term ::= DIdent "(" [Term] ")";
 
@@ -56,9 +55,6 @@ separator nonempty Term "," ;
 Var.             Variable ::= LIdent;
 
 Const.           Constant ::= UIdent;
-
-AtomSharded.     Atom ::= UIdent "[" Value "]";
-AtomSingle.      Atom ::= UIdent;
 
 CompOpEq.        CompOp ::= "==";
 CompOpGt.        CompOp ::= ">";

@@ -102,14 +102,16 @@ public abstract class FoldVisitor<R,A> implements AllVisitor<R,A> {
     }
 
 /* Predicate */
-    public R visit(socialite.Absyn.PredicateAtom p, A arg) {
+    public R visit(socialite.Absyn.PredicateSingle p, A arg) {
       R r = leaf(arg);
-      r = combine(p.atom_.accept(this, arg), r, arg);
+      for (Term x : p.listterm_) {
+        r = combine(x.accept(this,arg), r, arg);
+      }
       return r;
     }
-    public R visit(socialite.Absyn.PredicateStruct p, A arg) {
+    public R visit(socialite.Absyn.PredicateSharded p, A arg) {
       R r = leaf(arg);
-      r = combine(p.atom_.accept(this, arg), r, arg);
+      r = combine(p.value_.accept(this, arg), r, arg);
       for (Term x : p.listterm_) {
         r = combine(x.accept(this,arg), r, arg);
       }
@@ -137,11 +139,6 @@ public abstract class FoldVisitor<R,A> implements AllVisitor<R,A> {
     }
 
 /* Term */
-    public R visit(socialite.Absyn.TermAtom p, A arg) {
-      R r = leaf(arg);
-      r = combine(p.atom_.accept(this, arg), r, arg);
-      return r;
-    }
     public R visit(socialite.Absyn.TermValue p, A arg) {
       R r = leaf(arg);
       r = combine(p.value_.accept(this, arg), r, arg);
@@ -187,17 +184,6 @@ public abstract class FoldVisitor<R,A> implements AllVisitor<R,A> {
 
 /* Constant */
     public R visit(socialite.Absyn.Const p, A arg) {
-      R r = leaf(arg);
-      return r;
-    }
-
-/* Atom */
-    public R visit(socialite.Absyn.AtomSharded p, A arg) {
-      R r = leaf(arg);
-      r = combine(p.value_.accept(this, arg), r, arg);
-      return r;
-    }
-    public R visit(socialite.Absyn.AtomSingle p, A arg) {
       R r = leaf(arg);
       return r;
     }

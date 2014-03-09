@@ -42,7 +42,6 @@ nonterminal socialite.Absyn.Value Value;
 nonterminal socialite.Absyn.ListTerm ListTerm;
 nonterminal socialite.Absyn.Variable Variable;
 nonterminal socialite.Absyn.Constant Constant;
-nonterminal socialite.Absyn.Atom Atom;
 nonterminal socialite.Absyn.CompOp CompOp;
 nonterminal socialite.Absyn.Exp Exp;
 nonterminal socialite.Absyn.Exp Exp1;
@@ -121,8 +120,8 @@ ListRuleGoal ::= RuleGoal:p_1  {: RESULT = new socialite.Absyn.ListRuleGoal(); R
 ListRule ::=  /* empty */  {: RESULT = new socialite.Absyn.ListRule(); :} 
   | ListRule:p_1 Rule:p_2  {: RESULT = p_1; p_1.addLast(p_2); :}
 ;
-Predicate ::= Atom:p_1  {: RESULT = new socialite.Absyn.PredicateAtom(p_1); :} 
-  | Atom:p_1 _SYMB_5 ListTerm:p_3 _SYMB_6  {: RESULT = new socialite.Absyn.PredicateStruct(p_1,p_3); :}
+Predicate ::= UIdent:p_1 _SYMB_5 ListTerm:p_3 _SYMB_6  {: RESULT = new socialite.Absyn.PredicateSingle(p_1,p_3); :} 
+  | UIdent:p_1 _SYMB_0 Value:p_3 _SYMB_2 _SYMB_5 ListTerm:p_6 _SYMB_6  {: RESULT = new socialite.Absyn.PredicateSharded(p_1,p_3,p_6); :}
 ;
 OneGoal ::= Predicate:p_1  {: RESULT = new socialite.Absyn.GoalPredicate(p_1); :} 
   | Exp:p_1 CompOp:p_2 Exp:p_3  {: RESULT = new socialite.Absyn.GoalComparison(p_1,p_2,p_3); :}
@@ -131,8 +130,7 @@ OneGoal ::= Predicate:p_1  {: RESULT = new socialite.Absyn.GoalPredicate(p_1); :
 ListOneGoal ::= OneGoal:p_1  {: RESULT = new socialite.Absyn.ListOneGoal(); RESULT.addLast(p_1); :} 
   | OneGoal:p_1 _SYMB_7 ListOneGoal:p_3  {: RESULT = p_3; p_3.addFirst(p_1); :}
 ;
-Term ::= Atom:p_1  {: RESULT = new socialite.Absyn.TermAtom(p_1); :} 
-  | Value:p_1  {: RESULT = new socialite.Absyn.TermValue(p_1); :}
+Term ::= Value:p_1  {: RESULT = new socialite.Absyn.TermValue(p_1); :} 
   | DIdent:p_1 _SYMB_5 ListTerm:p_3 _SYMB_6  {: RESULT = new socialite.Absyn.TermCall(p_1,p_3); :}
 ;
 Value ::= _INTEGER_:p_1  {: RESULT = new socialite.Absyn.ValueInt(p_1); :} 
@@ -147,9 +145,6 @@ ListTerm ::= Term:p_1  {: RESULT = new socialite.Absyn.ListTerm(); RESULT.addLas
 Variable ::= LIdent:p_1  {: RESULT = new socialite.Absyn.Var(p_1); :} 
 ;
 Constant ::= UIdent:p_1  {: RESULT = new socialite.Absyn.Const(p_1); :} 
-;
-Atom ::= UIdent:p_1 _SYMB_0 Value:p_3 _SYMB_2  {: RESULT = new socialite.Absyn.AtomSharded(p_1,p_3); :} 
-  | UIdent:p_1  {: RESULT = new socialite.Absyn.AtomSingle(p_1); :}
 ;
 CompOp ::= _SYMB_12  {: RESULT = new socialite.Absyn.CompOpEq(); :} 
   | _SYMB_13  {: RESULT = new socialite.Absyn.CompOpGt(); :}

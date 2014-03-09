@@ -18,7 +18,6 @@ public interface AllVisitor<R,A> extends
   socialite.Absyn.Value.Visitor<R,A>,
   socialite.Absyn.Variable.Visitor<R,A>,
   socialite.Absyn.Constant.Visitor<R,A>,
-  socialite.Absyn.Atom.Visitor<R,A>,
   socialite.Absyn.CompOp.Visitor<R,A>,
   socialite.Absyn.Exp.Visitor<R,A>
 {}

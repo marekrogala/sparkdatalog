@@ -360,21 +360,6 @@ public class PrettyPrinter
     buf_.delete(0,buf_.length());
     return temp;
   }
-  public static String print(socialite.Absyn.Atom foo)
-  {
-    pp(foo, 0);
-    trim();
-    String temp = buf_.toString();
-    buf_.delete(0,buf_.length());
-    return temp;
-  }
-  public static String show(socialite.Absyn.Atom foo)
-  {
-    sh(foo);
-    String temp = buf_.toString();
-    buf_.delete(0,buf_.length());
-    return temp;
-  }
   public static String print(socialite.Absyn.CompOp foo)
   {
     pp(foo, 0);
@@ -602,20 +587,26 @@ public class PrettyPrinter
 
   private static void pp(socialite.Absyn.Predicate foo, int _i_)
   {
-    if (foo instanceof socialite.Absyn.PredicateAtom)
+    if (foo instanceof socialite.Absyn.PredicateSingle)
     {
-       socialite.Absyn.PredicateAtom _predicateatom = (socialite.Absyn.PredicateAtom) foo;
+       socialite.Absyn.PredicateSingle _predicatesingle = (socialite.Absyn.PredicateSingle) foo;
        if (_i_ > 0) render(_L_PAREN);
-       pp(_predicateatom.atom_, 0);
+       pp(_predicatesingle.uident_, 0);
+       render("(");
+       pp(_predicatesingle.listterm_, 0);
+       render(")");
        if (_i_ > 0) render(_R_PAREN);
     }
-    else     if (foo instanceof socialite.Absyn.PredicateStruct)
+    else     if (foo instanceof socialite.Absyn.PredicateSharded)
     {
-       socialite.Absyn.PredicateStruct _predicatestruct = (socialite.Absyn.PredicateStruct) foo;
+       socialite.Absyn.PredicateSharded _predicatesharded = (socialite.Absyn.PredicateSharded) foo;
        if (_i_ > 0) render(_L_PAREN);
-       pp(_predicatestruct.atom_, 0);
+       pp(_predicatesharded.uident_, 0);
+       render("[");
+       pp(_predicatesharded.value_, 0);
+       render("]");
        render("(");
-       pp(_predicatestruct.listterm_, 0);
+       pp(_predicatesharded.listterm_, 0);
        render(")");
        if (_i_ > 0) render(_R_PAREN);
     }
@@ -665,14 +656,7 @@ public class PrettyPrinter
 
   private static void pp(socialite.Absyn.Term foo, int _i_)
   {
-    if (foo instanceof socialite.Absyn.TermAtom)
-    {
-       socialite.Absyn.TermAtom _termatom = (socialite.Absyn.TermAtom) foo;
-       if (_i_ > 0) render(_L_PAREN);
-       pp(_termatom.atom_, 0);
-       if (_i_ > 0) render(_R_PAREN);
-    }
-    else     if (foo instanceof socialite.Absyn.TermValue)
+    if (foo instanceof socialite.Absyn.TermValue)
     {
        socialite.Absyn.TermValue _termvalue = (socialite.Absyn.TermValue) foo;
        if (_i_ > 0) render(_L_PAREN);
@@ -761,27 +745,6 @@ public class PrettyPrinter
        socialite.Absyn.Const _const = (socialite.Absyn.Const) foo;
        if (_i_ > 0) render(_L_PAREN);
        pp(_const.uident_, 0);
-       if (_i_ > 0) render(_R_PAREN);
-    }
-  }
-
-  private static void pp(socialite.Absyn.Atom foo, int _i_)
-  {
-    if (foo instanceof socialite.Absyn.AtomSharded)
-    {
-       socialite.Absyn.AtomSharded _atomsharded = (socialite.Absyn.AtomSharded) foo;
-       if (_i_ > 0) render(_L_PAREN);
-       pp(_atomsharded.uident_, 0);
-       render("[");
-       pp(_atomsharded.value_, 0);
-       render("]");
-       if (_i_ > 0) render(_R_PAREN);
-    }
-    else     if (foo instanceof socialite.Absyn.AtomSingle)
-    {
-       socialite.Absyn.AtomSingle _atomsingle = (socialite.Absyn.AtomSingle) foo;
-       if (_i_ > 0) render(_L_PAREN);
-       pp(_atomsingle.uident_, 0);
        if (_i_ > 0) render(_R_PAREN);
     }
   }
@@ -1055,22 +1018,26 @@ public class PrettyPrinter
 
   private static void sh(socialite.Absyn.Predicate foo)
   {
-    if (foo instanceof socialite.Absyn.PredicateAtom)
+    if (foo instanceof socialite.Absyn.PredicateSingle)
     {
-       socialite.Absyn.PredicateAtom _predicateatom = (socialite.Absyn.PredicateAtom) foo;
+       socialite.Absyn.PredicateSingle _predicatesingle = (socialite.Absyn.PredicateSingle) foo;
        render("(");
-       render("PredicateAtom");
-       sh(_predicateatom.atom_);
+       render("PredicateSingle");
+       sh(_predicatesingle.uident_);
+       render("[");
+       sh(_predicatesingle.listterm_);
+       render("]");
        render(")");
     }
-    if (foo instanceof socialite.Absyn.PredicateStruct)
+    if (foo instanceof socialite.Absyn.PredicateSharded)
     {
-       socialite.Absyn.PredicateStruct _predicatestruct = (socialite.Absyn.PredicateStruct) foo;
+       socialite.Absyn.PredicateSharded _predicatesharded = (socialite.Absyn.PredicateSharded) foo;
        render("(");
-       render("PredicateStruct");
-       sh(_predicatestruct.atom_);
+       render("PredicateSharded");
+       sh(_predicatesharded.uident_);
+       sh(_predicatesharded.value_);
        render("[");
-       sh(_predicatestruct.listterm_);
+       sh(_predicatesharded.listterm_);
        render("]");
        render(")");
     }
@@ -1119,14 +1086,6 @@ public class PrettyPrinter
 
   private static void sh(socialite.Absyn.Term foo)
   {
-    if (foo instanceof socialite.Absyn.TermAtom)
-    {
-       socialite.Absyn.TermAtom _termatom = (socialite.Absyn.TermAtom) foo;
-       render("(");
-       render("TermAtom");
-       sh(_termatom.atom_);
-       render(")");
-    }
     if (foo instanceof socialite.Absyn.TermValue)
     {
        socialite.Absyn.TermValue _termvalue = (socialite.Absyn.TermValue) foo;
@@ -1219,27 +1178,6 @@ public class PrettyPrinter
        render("(");
        render("Const");
        sh(_const.uident_);
-       render(")");
-    }
-  }
-
-  private static void sh(socialite.Absyn.Atom foo)
-  {
-    if (foo instanceof socialite.Absyn.AtomSharded)
-    {
-       socialite.Absyn.AtomSharded _atomsharded = (socialite.Absyn.AtomSharded) foo;
-       render("(");
-       render("AtomSharded");
-       sh(_atomsharded.uident_);
-       sh(_atomsharded.value_);
-       render(")");
-    }
-    if (foo instanceof socialite.Absyn.AtomSingle)
-    {
-       socialite.Absyn.AtomSingle _atomsingle = (socialite.Absyn.AtomSingle) foo;
-       render("(");
-       render("AtomSingle");
-       sh(_atomsingle.uident_);
        render(")");
     }
   }

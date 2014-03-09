@@ -152,19 +152,22 @@ public class VisitSkel
   }
   public class PredicateVisitor<R,A> implements Predicate.Visitor<R,A>
   {
-    public R visit(socialite.Absyn.PredicateAtom p, A arg)
+    public R visit(socialite.Absyn.PredicateSingle p, A arg)
     {
-      /* Code For PredicateAtom Goes Here */
+      /* Code For PredicateSingle Goes Here */
 
-      p.atom_.accept(new AtomVisitor<R,A>(), arg);
+      //p.uident_;
+      for (Term x : p.listterm_) {
+      }
 
       return null;
     }
-    public R visit(socialite.Absyn.PredicateStruct p, A arg)
+    public R visit(socialite.Absyn.PredicateSharded p, A arg)
     {
-      /* Code For PredicateStruct Goes Here */
+      /* Code For PredicateSharded Goes Here */
 
-      p.atom_.accept(new AtomVisitor<R,A>(), arg);
+      //p.uident_;
+      p.value_.accept(new ValueVisitor<R,A>(), arg);
       for (Term x : p.listterm_) {
       }
 
@@ -205,14 +208,6 @@ public class VisitSkel
   }
   public class TermVisitor<R,A> implements Term.Visitor<R,A>
   {
-    public R visit(socialite.Absyn.TermAtom p, A arg)
-    {
-      /* Code For TermAtom Goes Here */
-
-      p.atom_.accept(new AtomVisitor<R,A>(), arg);
-
-      return null;
-    }
     public R visit(socialite.Absyn.TermValue p, A arg)
     {
       /* Code For TermValue Goes Here */
@@ -293,27 +288,6 @@ public class VisitSkel
     public R visit(socialite.Absyn.Const p, A arg)
     {
       /* Code For Const Goes Here */
-
-      //p.uident_;
-
-      return null;
-    }
-
-  }
-  public class AtomVisitor<R,A> implements Atom.Visitor<R,A>
-  {
-    public R visit(socialite.Absyn.AtomSharded p, A arg)
-    {
-      /* Code For AtomSharded Goes Here */
-
-      //p.uident_;
-      p.value_.accept(new ValueVisitor<R,A>(), arg);
-
-      return null;
-    }
-    public R visit(socialite.Absyn.AtomSingle p, A arg)
-    {
-      /* Code For AtomSingle Goes Here */
 
       //p.uident_;
 

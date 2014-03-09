@@ -18,7 +18,6 @@ public class ComposVisitor<A> implements
   socialite.Absyn.Value.Visitor<socialite.Absyn.Value,A>,
   socialite.Absyn.Variable.Visitor<socialite.Absyn.Variable,A>,
   socialite.Absyn.Constant.Visitor<socialite.Absyn.Constant,A>,
-  socialite.Absyn.Atom.Visitor<socialite.Absyn.Atom,A>,
   socialite.Absyn.CompOp.Visitor<socialite.Absyn.CompOp,A>,
   socialite.Absyn.Exp.Visitor<socialite.Absyn.Exp,A>
 {
@@ -134,21 +133,26 @@ public class ComposVisitor<A> implements
     }
 
 /* Predicate */
-    public Predicate visit(socialite.Absyn.PredicateAtom p, A arg)
+    public Predicate visit(socialite.Absyn.PredicateSingle p, A arg)
     {
-      Atom atom_ = p.atom_.accept(this, arg);
-
-      return new socialite.Absyn.PredicateAtom(atom_);
-    }
-    public Predicate visit(socialite.Absyn.PredicateStruct p, A arg)
-    {
-      Atom atom_ = p.atom_.accept(this, arg);
+      String uident_ = p.uident_;
       ListTerm listterm_ = new ListTerm();
       for (Term x : p.listterm_) {
         listterm_.add(x.accept(this,arg));
       }
 
-      return new socialite.Absyn.PredicateStruct(atom_, listterm_);
+      return new socialite.Absyn.PredicateSingle(uident_, listterm_);
+    }
+    public Predicate visit(socialite.Absyn.PredicateSharded p, A arg)
+    {
+      String uident_ = p.uident_;
+      Value value_ = p.value_.accept(this, arg);
+      ListTerm listterm_ = new ListTerm();
+      for (Term x : p.listterm_) {
+        listterm_.add(x.accept(this,arg));
+      }
+
+      return new socialite.Absyn.PredicateSharded(uident_, value_, listterm_);
     }
 
 /* OneGoal */
@@ -175,12 +179,6 @@ public class ComposVisitor<A> implements
     }
 
 /* Term */
-    public Term visit(socialite.Absyn.TermAtom p, A arg)
-    {
-      Atom atom_ = p.atom_.accept(this, arg);
-
-      return new socialite.Absyn.TermAtom(atom_);
-    }
     public Term visit(socialite.Absyn.TermValue p, A arg)
     {
       Value value_ = p.value_.accept(this, arg);
@@ -243,21 +241,6 @@ public class ComposVisitor<A> implements
       String uident_ = p.uident_;
 
       return new socialite.Absyn.Const(uident_);
-    }
-
-/* Atom */
-    public Atom visit(socialite.Absyn.AtomSharded p, A arg)
-    {
-      String uident_ = p.uident_;
-      Value value_ = p.value_.accept(this, arg);
-
-      return new socialite.Absyn.AtomSharded(uident_, value_);
-    }
-    public Atom visit(socialite.Absyn.AtomSingle p, A arg)
-    {
-      String uident_ = p.uident_;
-
-      return new socialite.Absyn.AtomSingle(uident_);
     }
 
 /* CompOp */
