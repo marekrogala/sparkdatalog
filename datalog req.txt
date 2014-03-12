@@ -1,0 +1,26 @@
+Datalog requirements
+
+1. disallows complex terms as arguments of predicates, e.g., p (1, 2) is admissible but not p (f (1), 2),
+2. imposes certain stratification restrictions on the use of negation and recursion,
+3. requires that every variable that appears in the head of a clause also appears in a nonarithmetic positive (i.e not negated) literal in the body of the clause,
+4. requires that every variable appearing in a negative literal in the body of a clause also appears in some positive literal in the body of the clause[4]
+
+
+
+
+
+-----------
+
+Semi-Naive works only for linear recursion!! (5-datalog-eval-2.pdf)
+Or: linearize recursion
+
+
+
+ull.pdf : describes evaluation very well
+consistent terminology
+Start with positive subgoals
+
+
+
+
+implemented simple rules. somewhat chaotic, but made me think how to do it consistently
