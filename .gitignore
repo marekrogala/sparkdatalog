@@ -1,3 +1,16 @@
 *~
 parser/socialite
+parser2/socialite
+parser2/Makefile
 */JLex
+*.bak
+*.aux
+*.dvi
+*.log
+*.ps
+*.tex*
+*/target
+compiler/src/main/java/socialite
+compiler/lib
+.idea
+*.iml

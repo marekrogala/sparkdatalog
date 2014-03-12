@@ -25,11 +25,12 @@ TypeDouble.      TypeName ::= "double";
 
 -- rules ---------------------------------------------------
 
-RuleDef.             Rule ::= LPredicate [RuleBody] ".";
+RuleDef.             Rule ::= Head [RuleBody] ".";
 separator Rule "" ;
 
-LPredicateSingle.    LPredicate ::= UIdent "(" [Variable] ")";
--- LPredicateSharded. LPredicate ::= UIdent "[" Value "]" "(" [Term] ")";
+HeadSingle.       Head ::= UIdent "(" [Variable] ")";
+-- HeadSingle.       Head ::= UIdent "(" [Term] ")";
+-- HeadSharded.      Head ::= UIdent "[" Value "]" "(" [Term] ")";
 
 RuleBodyDef.         RuleBody ::= ":-" [Subgoal];
 separator nonempty RuleBody ";";
@@ -55,6 +56,7 @@ ValueDouble.	 Value ::= Double;
 separator nonempty Value "," ;
 
 Var.             Variable ::= LIdent;
+separator nonempty Variable "," ;
 
 -- Const.           Constant ::= UIdent;
 
@@ -68,8 +70,8 @@ EAdd.            Exp ::= Exp "+" Exp1;
 ESub.            Exp ::= Exp "-" Exp1;
 EMul.            Exp1 ::= Exp1 "*" Exp2;
 EDiv.            Exp1 ::= Exp1 "/" Exp2;
-EInt.            Exp2 ::= Value;
-coercions Exp 2;             
+EValue.          Exp2 ::= Value;
+coercions Exp 2;              
 
 token UIdent (upper (letter | digit | '_')*) ;
 token LIdent (lower (letter | digit | '_')*) ;
