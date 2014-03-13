@@ -47,9 +47,9 @@ class Visitor[A]
   override def visit(p: GoalPredicate, arg: A): ast.Subgoal = ast.GoalPredicate(p.predicate_.accept(this, arg))
 
   override def visit(p: PredicateSingle, arg: A): ast.Predicate =
-    ast.PredicateSingle(p.uident_, p.listvalue_ map (_.accept(this, arg)))
+    ast.PredicateSingle(p.uident_, p.listvalue_.toList map (_.accept(this, arg)))
 
-  override def visit(p: RuleBodyDef, arg: A): ast.RuleBody = ast.RuleBody(p.listsubgoal_ map (_.accept(this, arg)))
+  override def visit(p: RuleBodyDef, arg: A): ast.RuleBody = ast.RuleBody(p.listsubgoal_.toList map (_.accept(this, arg)))
 
   override def visit(p: ColumnDecl, arg: A): ast.ColumnDeclaration =
     ast.ColumnDeclaration(p.typename_.accept(this, arg), p.variable_.accept(this, arg))
@@ -59,10 +59,10 @@ class Visitor[A]
   override def visit(p: TypeInt, arg: A): ast.Type = new ast.TypeInt()
 
   override def visit(p: RuleDef, arg: A): ast.Rule =
-    ast.Rule(p.head_.accept(this, arg), p.listrulebody_ map (_.accept(this, arg)))
+    ast.Rule(p.head_.accept(this, arg), p.listrulebody_.toList map (_.accept(this, arg)))
 
   override def visit(p: HeadSingle, arg: A): ast.Head =
-    ast.HeadSingle(p.uident_, p.listvariable_ map (_.accept(this, arg)))
+    ast.HeadSingle(p.uident_, p.listvariable_.toList map (_.accept(this, arg)))
 
   override def visit(p: EValue, arg: A): ast.Exp = ast.EValue(p.value_.accept(this, arg))
 
@@ -72,5 +72,5 @@ class Visitor[A]
 
   override def visit(p: ESub, arg: A): ast.Exp = ???
 
-  override def visit(p: EAdd, arg: A): ast.Exp = ???
+  override def visit(p: EAdd, arg: A): ast.Exp = ast.EBinaryOp(p.exp_1.accept(this, arg), p.exp_2.accept(this, arg), ast.BinaryAdd())
 }

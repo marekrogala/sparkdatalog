@@ -11,7 +11,7 @@ class NaiveEvaluation {
       println("Iteration " + (iteration+1));
       makeIteration(program);
       iteration += 1;
-    } while(state.wasChangedInLastIteration());
+    } while(state.wasChangedInLastIteration);
     "made " + iteration + " iters\n\n -- Env --\n" + state.toString() + "";
   }
 
