@@ -1,6 +1,6 @@
 package s2g.eval
 
-import s2g.ast.{ValueVar, ValueLiteral, Value}
+import s2g.ast.value.{ValueLiteral, ValueVar, Value}
 
 case class TableState(instances: Set[Instance] = Set()) {
 

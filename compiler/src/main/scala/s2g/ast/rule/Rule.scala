@@ -1,4 +1,4 @@
-package s2g.ast
+package s2g.ast.rule
 
 import s2g.eval.EvaluationState
 

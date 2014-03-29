@@ -1,6 +1,7 @@
-package s2g.ast
+package s2g.ast.predicate
 
-import s2g.eval.{Pattern, EvaluationState, PartialSolution}
+import s2g.eval.{EvaluationState, Pattern, PartialSolution}
+import s2g.ast.value.Value
 
 case class PredicateSingle(tableName: String, args: Seq[Value]) extends Predicate {
 

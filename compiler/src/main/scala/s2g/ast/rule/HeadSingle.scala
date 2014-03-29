@@ -1,6 +1,6 @@
-package s2g.ast
+package s2g.ast.rule
 
-import s2g.eval.{Instance, PartialSolution, EvaluationState}
+import s2g.eval.{EvaluationState, Instance, PartialSolution}
 
 case class HeadSingle(name: String, args: Seq[String]) extends Head {
 

@@ -40,7 +40,7 @@ PredicateSingle.     Predicate ::= UIdent "(" [Value] ")";
 -- PredicateSharded. Predicate ::= UIdent "[" Value "]" "(" [Value] ")";
 
 GoalPredicate.       Subgoal ::= Predicate;
--- GoalComparison.      Subgoal ::= Exp CompOp Exp;
+GoalComparison.      Subgoal ::= Exp CompOp Exp;
 GoalAssign.          Subgoal ::= Variable "=" Exp;
 separator nonempty Subgoal "," ;
 
@@ -60,11 +60,12 @@ separator nonempty Variable "," ;
 
 -- Const.           Constant ::= UIdent;
 
--- CompOpEq.        CompOp ::= "==";
--- CompOpGt.        CompOp ::= ">";
--- CompOpLt.        CompOp ::= "<";
--- CompOpGe.        CompOp ::= ">=";
--- CompOpLe.        CompOp ::= "<=";
+CompOpEq.        CompOp ::= "==";
+CompOpNe.        CompOp ::= "!=";
+CompOpGt.        CompOp ::= ">";
+CompOpLt.        CompOp ::= "<";
+CompOpGe.        CompOp ::= ">=";
+CompOpLe.        CompOp ::= "<=";
 
 EAdd.            Exp ::= Exp "+" Exp1;
 ESub.            Exp ::= Exp "-" Exp1;

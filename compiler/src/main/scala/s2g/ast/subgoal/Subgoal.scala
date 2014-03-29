@@ -1,4 +1,4 @@
-package s2g.ast
+package s2g.ast.subgoal
 
 import s2g.eval.{EvaluationState, PartialSolution}
 
