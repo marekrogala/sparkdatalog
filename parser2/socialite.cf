@@ -8,7 +8,7 @@ Prog.       Program ::= [Declaration] [Rule];
 
 -- DeclarationDistributed.  Declaration ::= "declare" UIdent "[" TypeName Variable ":" Range "]" MoreDimensionsDeclaration "."; 
 DeclarationGlobal.       Declaration ::= "declare" UIdent MoreDimensionsDeclaration ".";
--- DeclarationConst.        Declaration ::= "const" TypeName UIdent "=" Exp "."; 
+DeclarationConst.        Declaration ::= "const" TypeName UIdent "=" Exp "."; 
 
 separator Declaration "";
 
@@ -51,14 +51,12 @@ separator nonempty Subgoal "," ;
 ValueInt.        Value ::= Integer;
 ValueVar.        Value ::= Variable;
 ValueDouble.	 Value ::= Double;
--- ValueConst.      Value ::= Constant;
+ValueConst.      Value ::= UIdent;
 -- ValueIgnore.     Value ::= "_";
 separator nonempty Value "," ;
 
 Var.             Variable ::= LIdent;
 separator nonempty Variable "," ;
-
--- Const.           Constant ::= UIdent;
 
 CompOpEq.        CompOp ::= "==";
 CompOpNe.        CompOp ::= "!=";

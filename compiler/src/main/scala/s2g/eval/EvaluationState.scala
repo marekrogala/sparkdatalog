@@ -1,6 +1,6 @@
 package s2g.eval
 
-class EvaluationState {
+class EvaluationState(val environment: PartialSolution) {
 
   var tables: Map[String, TableState] = Map()
   var wasChangedInLastIteration: Boolean = false

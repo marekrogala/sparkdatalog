@@ -33,6 +33,9 @@ class Visitor[A]
   override def visit(p: DeclarationGlobal, arg: A): ast.declaration.Declaration =
     ast.declaration.DeclarationGlobal(p.uident_, p.moredimensionsdeclaration_.accept(this, arg))
 
+  override def visit(p: DeclarationConst, arg: A): ast.declaration.Declaration =
+    ast.declaration.DeclarationConst(p.typename_.accept(this, arg), p.uident_, p.exp_.accept(this, arg))
+
   override def visit(p: Var, arg: A): String = p.lident_
 
   override def visit(p: ValueDouble, arg: A): ast.value.Value = ast.value.ValueLiteral(new ast.types.TypeDouble(), p.double_)
@@ -41,9 +44,10 @@ class Visitor[A]
 
   override def visit(p: ValueInt, arg: A): ast.value.Value = ast.value.ValueLiteral(new ast.types.TypeInt(), p.integer_)
 
+  override def visit(p: ValueConst, arg: A): ast.value.Value = ast.value.ValueVar(p.uident_)
+
   override def visit(p: GoalAssign, arg: A): ast.subgoal.Subgoal =
-    ast.subgoal.GoalAssign(p.variable_.accept(this, arg), p.exp_.accept(this, arg)
-  )
+    ast.subgoal.GoalAssign(p.variable_.accept(this, arg), p.exp_.accept(this, arg))
 
   override def visit(p: GoalPredicate, arg: A): ast.subgoal.Subgoal = ast.subgoal.GoalPredicate(p.predicate_.accept(this, arg))
 
@@ -89,4 +93,5 @@ class Visitor[A]
   override def visit(p: CompOpEq, arg: A): ComparisonOperator = CompareEq()
 
   override def visit(p: CompOpNe, arg: A): ComparisonOperator = CompareNe()
+
 }
