@@ -9,5 +9,5 @@ case class EValue(value: Value) extends Exp{
 
   override def tryToEvaluate(context: Context): Exp = EValue(value.tryToEvaluate(context))
 
-  override def getFreeVariables: Seq[String] = value.getFreeVariables
+  override def getFreeVariables: Set[String] = value.getFreeVariables
 }

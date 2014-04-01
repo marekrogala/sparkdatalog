@@ -5,6 +5,6 @@ import s2g.eval.Context
 trait Value {
   def tryToEvaluate(context: Context): Value
   def evaluate(context: Context): ValueLiteral
-  def getFreeVariables: Seq[String]
+  def getFreeVariables: Set[String]
 
 }

@@ -15,4 +15,9 @@ case class GoalComparison(left: Exp, right: Exp, operator: ComparisonOperator) e
       Set()
     }
   }
+
+  override def getInputs(context: Context): Set[String] =
+    left.tryToEvaluate(context).getFreeVariables ++ right.tryToEvaluate(context).getFreeVariables
+
+  override def getOutputs(context: Context): Set[String] = Set()
 }

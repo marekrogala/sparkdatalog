@@ -10,5 +10,5 @@ case class ValueLiteral(typ: Type, value: AnyVal) extends Value {
 
   override def tryToEvaluate(context: Context): Value = this
 
-  override def getFreeVariables: Seq[String] = Seq()
+  override def getFreeVariables: Set[String] = Set()
 }

@@ -12,5 +12,5 @@ case class ValueVar(name: String) extends Value {
     case None => this
   }
 
-  override def getFreeVariables: Seq[String] = Seq(name)
+  override def getFreeVariables: Set[String] = Set(name)
 }

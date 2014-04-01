@@ -7,5 +7,5 @@ trait Exp {
 
   def evaluate(context: Context): ValueLiteral
   def tryToEvaluate(context: Context): Exp
-  def getFreeVariables: Seq[String]
+  def getFreeVariables: Set[String]
 }

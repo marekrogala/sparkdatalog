@@ -9,5 +9,5 @@ case class EBinaryOp(left: Exp, right: Exp, op: BinaryOperator) extends Exp {
 
   override def tryToEvaluate(context: Context): Exp = EBinaryOp(left.tryToEvaluate(context), right.tryToEvaluate(context), op)
 
-  override def getFreeVariables: Seq[String] = left.getFreeVariables ++ right.getFreeVariables
+  override def getFreeVariables: Set[String] = left.getFreeVariables ++ right.getFreeVariables
 }

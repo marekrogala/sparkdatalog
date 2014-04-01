@@ -13,7 +13,7 @@ case class GoalAssign(toVariable: String, exp: Exp) extends Subgoal {
     }
   }
 
-  override def getOutputs(context: Context): Seq[String] = Seq(toVariable)
+  override def getOutputs(context: Context): Set[String] = Set(toVariable)
 
-  override def getInputs(context: Context): Seq[String] = exp.tryToEvaluate(context).getFreeVariables
+  override def getInputs(context: Context): Set[String] = exp.tryToEvaluate(context).getFreeVariables
 }
