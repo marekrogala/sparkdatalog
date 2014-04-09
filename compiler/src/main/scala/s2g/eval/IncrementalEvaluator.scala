@@ -18,7 +18,7 @@ class IncrementalEvaluator {
 
   private def makeIteration(state: EvaluationState, program: Program) {
     state.beginIteration()
-    program.rules foreach { _.apply(state) }
+    program.rules foreach { _(state) }
   }
 
 }

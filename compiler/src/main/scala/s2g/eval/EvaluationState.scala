@@ -2,16 +2,14 @@ package s2g.eval
 
 class EvaluationState(val environment: PartialSolution) {
 
-  var rTables: Map[String, TableState] = Map()
-  var deltaTables: Map[String, TableState] = Map()
+  var oldTables = new TableStates
+  var deltaTables = new TableStates
 
   var wasChangedInLastIteration: Boolean = false
 
   def squashDelta() = {
-    for((tableName, tableState) <- deltaTables) {
-      rTables += tableName -> (rTables.get(tableName) map (_ ++ tableState) getOrElse tableState)
-    }
-    deltaTables = Map()
+    oldTables = accumulatedTables
+    deltaTables = new TableStates
   }
 
   def beginIteration(): Unit = {
@@ -19,35 +17,18 @@ class EvaluationState(val environment: PartialSolution) {
     wasChangedInLastIteration = false
   }
 
-  override def toString: String = (rTables map (entry => entry._2.toStringInstances(entry._1))).mkString("\n\n")
-
-  private def inDeltaTable(tableName: String, instance: Instance) =
-    deltaTables.get(tableName) exists (_.contains(instance))
+  override def toString: String = "Accumulated: \n" + oldTables.toString + "\n\nDelta:\n" + deltaTables.toString + "\n\n"
   
-  private def inResultTable(tableName: String, instance: Instance) =
-    rTables.get(tableName) exists (_.contains(instance))
-  
-  private def inAnyTable(tableName: String, instance: Instance) =
-    inDeltaTable(tableName, instance) || inResultTable(tableName, instance)
+  private def contains(tableName: String, instance: Instance) =
+    deltaTables.contains(tableName, instance) || oldTables.contains(tableName, instance)
   
   def putInstance(tableName: String, instance: Instance): Unit = {
-    if (!inAnyTable(tableName, instance)) {
-      val tableState = rTables.getOrElse(tableName, new TableState())
-      rTables += tableName -> tableState.add(instance)
+    if (!contains(tableName, instance)) {
+      deltaTables = deltaTables.putInstance(tableName, instance)
       wasChangedInLastIteration = true
     }
   }
 
-  def findAnyMatchingInstances(tableName: String, pattern: Pattern): Set[PartialSolution] =
-    findMatchingInstancesInDelta(tableName, pattern) ++ findMatchingInstancesInR(tableName, pattern)
-
-  def findMatchingInstancesInDelta(tableName: String, pattern: Pattern): Set[PartialSolution] =
-    findMatchingInstancesInTable(deltaTables.get(tableName), pattern)
-
-  def findMatchingInstancesInR(tableName: String, pattern: Pattern): Set[PartialSolution] =
-    findMatchingInstancesInTable(rTables.get(tableName), pattern)
-
-  def findMatchingInstancesInTable(table: Option[TableState], pattern: Pattern): Set[PartialSolution] =
-    table map (_.findMatching(pattern)) getOrElse Set()
-
+  def accumulatedTables: TableStates = oldTables ++ deltaTables
+  
 }
