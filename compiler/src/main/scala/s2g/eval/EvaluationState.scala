@@ -15,7 +15,7 @@ class EvaluationState(val environment: PartialSolution) {
     val tableState = tables.getOrElse(tableName, new TableState())
     if (!tableState.contains(instance)) {
       tables += tableName -> tableState.add(instance)
-      wasChangedInLastIteration = true;
+      wasChangedInLastIteration = true
     }
   }
   
