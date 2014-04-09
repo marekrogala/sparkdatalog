@@ -47,11 +47,7 @@ class EvaluationState(val environment: PartialSolution) {
   def findMatchingInstancesInR(tableName: String, pattern: Pattern): Set[PartialSolution] =
     findMatchingInstancesInTable(rTables.get(tableName), pattern)
 
-  def findMatchingInstancesInTable(table: Option[TableState], pattern: Pattern): Set[PartialSolution] = {
-    table match {
-      case Some(tableState) => tableState.findMatching(pattern)
-      case None => Set()
-    }
-  }
+  def findMatchingInstancesInTable(table: Option[TableState], pattern: Pattern): Set[PartialSolution] =
+    table map (_.findMatching(pattern)) getOrElse Set()
 
 }
