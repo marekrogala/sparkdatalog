@@ -6,19 +6,19 @@ class IncrementalEvaluator {
 
   def eval(program: Program) = {
     var iteration = 0
-    val state = new EvaluationState(program.environment)
+    var state = new EvaluationState(program.environment)
 
     do {
       println("Iteration " + (iteration+1))
-      makeIteration(state, program)
+      state = makeIteration(state, program)
       iteration += 1
     } while(state.wasChangedInLastIteration)
     "made " + iteration + " iters\n\n -- Env --\n" + state.toString()
   }
 
-  private def makeIteration(state: EvaluationState, program: Program) {
-    state.beginIteration()
-    program.rules foreach { _(state) }
+  private def makeIteration(state: EvaluationState, program: Program): EvaluationState = {
+    val evaluated = program.rules.foldLeft(state){ case (acc, rule) => rule(acc) }
+    evaluated.toNextIteration
   }
 
 }

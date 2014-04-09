@@ -1,33 +1,28 @@
 package s2g.eval
 
-class EvaluationState(val environment: PartialSolution) {
+class EvaluationState private (
+      val environment: PartialSolution,
+      val oldTables: TableStates,
+      val deltaTables: TableStates) {
 
-  var oldTables = new TableStates
-  var deltaTables = new TableStates
+  def this(environment: PartialSolution) = this(environment, new TableStates, new TableStates)
 
-  var wasChangedInLastIteration: Boolean = false
+  def wasChangedInLastIteration: Boolean = !deltaTables.isEmpty
 
-  def squashDelta() = {
-    oldTables = accumulatedTables
-    deltaTables = new TableStates
-  }
+  def toNextIteration: EvaluationState = new EvaluationState(environment, accumulatedTables, new TableStates)
 
-  def beginIteration(): Unit = {
-    squashDelta()
-    wasChangedInLastIteration = false
-  }
-
-  override def toString: String = "Accumulated: \n" + oldTables.toString + "\n\nDelta:\n" + deltaTables.toString + "\n\n"
+  override def toString: String =
+    "Accumulated: \n" + oldTables.toString + "\n\nDelta:\n" + deltaTables.toString + "\n\n"
   
   private def contains(tableName: String, instance: Instance) =
     deltaTables.contains(tableName, instance) || oldTables.contains(tableName, instance)
   
-  def putInstance(tableName: String, instance: Instance): Unit = {
+  def putInstance(tableName: String, instance: Instance): EvaluationState =
     if (!contains(tableName, instance)) {
-      deltaTables = deltaTables.putInstance(tableName, instance)
-      wasChangedInLastIteration = true
+      new EvaluationState(environment, oldTables, deltaTables.putInstance(tableName, instance))
+    } else {
+      this
     }
-  }
 
   def accumulatedTables: TableStates = oldTables ++ deltaTables
   

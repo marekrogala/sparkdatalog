@@ -1,13 +1,14 @@
 package s2g.eval
 
-class TableStates(private val tables: Map[String, TableState]) {
+class TableStates private(private val tables: Map[String, TableState]) {
+  def isEmpty: Boolean = tables.isEmpty
+
   def ++(other: TableStates) = {
     val merged = other.tables.foldLeft(tables)({
-      case (acc, (tableName, tableState)) => {
+      case (acc, (tableName, tableState)) =>
         val newTableState = acc.get(tableName) map (_ ++ tableState) getOrElse tableState
         val newEntry = tableName -> newTableState
         acc + newEntry
-      }
     })
     new TableStates(merged)
   }
