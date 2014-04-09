@@ -8,7 +8,7 @@ case class PredicateSingle(tableName: String, args: Seq[Value]) extends Predicat
   def buildPattern(context: Context): Pattern = Pattern(args map (_.tryToEvaluate(context)))
 
   override def fetchMatchingInstances(partialSolution: PartialSolution, evaluationState: EvaluationState): Set[PartialSolution] =
-    evaluationState.findMatchingInstances(tableName, buildPattern(Context(evaluationState.environment, partialSolution))) map (_ ++ partialSolution)
+    evaluationState.findAnyMatchingInstances(tableName, buildPattern(Context(evaluationState.environment, partialSolution))) map (_ ++ partialSolution)
 
   override def getOutputs(context: Context): Set[String] = args.flatMap(_.tryToEvaluate(context).getFreeVariables).toSet
 

@@ -6,6 +6,8 @@ case class TableState(instances: Set[Instance] = Set()) {
 
   def add(instance: Instance): TableState = TableState(instances + instance)
 
+  def ++ (another: TableState): TableState = TableState(instances ++ another.instances)
+
   def contains(instance: Instance): Boolean = instances contains instance
 
   def findMatching(pattern: Pattern): Set[PartialSolution] =
