@@ -1,0 +1,16 @@
+Done
+arithmetic comparisons - done
+declared constants - done
+assignment resolved in topological order (rule "P(x) :- x = z, z = 1." should be valid) - done
+rest of expressions - skipped
+other types than int (string, double) - skipped 
+semi naive evaluation for linear recursion - in progress (I've got something, but it isn't working yet)
+
+TBD
+aggregations
+negation
+verify Datalog constraints (stratification, all variables appearing in head or in negative sense have to appear in positive sense, etc.)
+simulated distributed execution (i.e. allow distributed syntax, but execute locally)
+distributed rules rewriting to ensure all subgoal predicates data would be available locally on node
+simulated nodes in interpreter
+static verification of type safety etc. (currently everything is verified in runtime while interpreting) with sane error messages

@@ -16,3 +16,6 @@ compiler/lib
 *.iml
 compiler/project/target
 compiler/project/project/target
+compiler/src/main/scala/s2g/project/
+compiler/src/main/scala/s2g/target/
+

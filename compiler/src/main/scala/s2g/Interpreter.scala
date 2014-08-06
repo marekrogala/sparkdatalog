@@ -6,9 +6,9 @@ import s2g.eval.IncrementalEvaluator
 
 object Interpreter {
   def interpret(e: Program): String = {
-    val visitor = new Visitor[Any]();
-    val program = e.accept(visitor, null);
-    val eval = new IncrementalEvaluator();
-    eval.eval(program);
+    val visitor = new Visitor[Any]()
+    val program = e.accept(visitor, null)
+    val eval = new IncrementalEvaluator()
+    eval.eval(program)
   }
 }

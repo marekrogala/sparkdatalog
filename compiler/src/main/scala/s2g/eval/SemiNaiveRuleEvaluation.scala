@@ -5,9 +5,13 @@ import s2g.ast.subgoal.Subgoal
 class SemiNaiveRuleEvaluation(subgoalProcessor: SubgoalProcessor, state: EvaluationState) {
   def evaluate(sortedSubgoals: Seq[Subgoal]): Set[PartialSolution] = {
     // TODO: Consider passing tables only to GoalPredicates
-    val tablesForSubgoalsConfigurations = sortedSubgoals.indices map { deltaPosition => sortedSubgoals.indices map {
+
+
+
+    val tablesForSubgoalsConfigurations: Seq[Seq[TableStates]] =
+      sortedSubgoals.indices map { deltaPosition => sortedSubgoals.indices map {
         case `deltaPosition` => state.deltaTables
-        case _ => state.oldTables
+        case _ => state.accumulatedTables
       }
     }
 
