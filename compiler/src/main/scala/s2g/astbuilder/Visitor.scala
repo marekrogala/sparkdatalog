@@ -2,6 +2,7 @@ package s2g.astbuilder
 
 import s2g.ast
 import s2g.ast.comparisonoperator._
+import s2g.ast.declaration
 import socialite.Absyn._
 import scala.collection.JavaConversions._
 
@@ -19,7 +20,9 @@ class Visitor[A]
   with socialite.Absyn.Value.Visitor[ast.value.Value, A]
   with socialite.Absyn.Variable.Visitor[String, A]
   with socialite.Absyn.Exp.Visitor[ast.exp.Exp, A]
-  with socialite.Absyn.CompOp.Visitor[ast.comparisonoperator.ComparisonOperator, A] {
+  with socialite.Absyn.CompOp.Visitor[ast.comparisonoperator.ComparisonOperator, A]
+  with socialite.Absyn.AggregateSpecifier.Visitor[Option[ast.declaration.Function], A]
+  with socialite.Absyn.Function.Visitor[ast.declaration.Function, A] {
 
   override def visit(p: Prog, arg: A): ast.Program =
     ast.Program(p.listdeclaration_.toList map (_.accept(this, arg)),
@@ -60,7 +63,7 @@ class Visitor[A]
   override def visit(p: RuleBodyDef, arg: A): ast.rule.RuleBody = ast.rule.RuleBody(p.listsubgoal_.toList map (_.accept(this, arg)))
 
   override def visit(p: ColumnDecl, arg: A): ast.declaration.ColumnDeclaration =
-    ast.declaration.ColumnDeclaration(p.typename_.accept(this, arg), p.variable_.accept(this, arg))
+    ast.declaration.ColumnDeclaration(p.typename_.accept(this, arg), p.variable_.accept(this, arg), p.aggregatespecifier_.accept(this, arg))
 
   override def visit(p: TypeDouble, arg: A): ast.types.Type = new ast.types.TypeDouble()
 
@@ -94,4 +97,9 @@ class Visitor[A]
 
   override def visit(p: CompOpNe, arg: A): ComparisonOperator = CompareNe()
 
+  override def visit(p: Func, arg: A): declaration.Function = declaration.Function(p.uident_)
+
+  override def visit(p: AggregateWith, arg: A): Option[declaration.Function] = Some(p.function_.accept(this, arg))
+
+  override def visit(p: NoAggregation, arg: A): Option[declaration.Function] = None
 }

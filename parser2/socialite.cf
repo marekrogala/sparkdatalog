@@ -15,8 +15,11 @@ separator Declaration "";
 NoMoreDim.       MoreDimensionsDeclaration ::= ;
 MoreDim.         MoreDimensionsDeclaration ::= "(" [ColumnDeclaration] ")";
 
-ColumnDecl.      ColumnDeclaration ::= TypeName Variable;
+ColumnDecl.      ColumnDeclaration ::= TypeName Variable AggregateSpecifier;
 separator        ColumnDeclaration ",";
+
+AggregateWith.   AggregateSpecifier ::= "aggregate" Function;
+NoAggregation.   AggregateSpecifier ::= ;
 
 TypeInt.         TypeName ::= "int";
 TypeDouble.      TypeName ::= "double";
@@ -57,6 +60,8 @@ separator nonempty Value "," ;
 
 Var.             Variable ::= LIdent;
 separator nonempty Variable "," ;
+
+Func.            Function ::= UIdent;
 
 CompOpEq.        CompOp ::= "==";
 CompOpNe.        CompOp ::= "!=";

@@ -8,6 +8,7 @@ object Interpreter {
   def interpret(e: Program): String = {
     val visitor = new Visitor[Any]()
     val program = e.accept(visitor, null)
+    program.validate
     val eval = new IncrementalEvaluator()
     eval.eval(program)
   }

@@ -1,5 +1,5 @@
 declare Arc(int x, int z).
-declare Tc(int x aggregate R, int z aggregate Q).
+declare Tc(int x, int z).
  
 Arc(x, y) :- x=1, y=2.
 Arc(x, y) :- x=2, y=3.

@@ -1,5 +1,6 @@
 package s2g.ast.declaration
 
-class Declaration {
-
+trait Declaration {
+  def name: String
+  def validate(): Unit
 }
