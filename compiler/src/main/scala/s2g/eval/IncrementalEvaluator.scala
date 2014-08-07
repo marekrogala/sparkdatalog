@@ -19,6 +19,6 @@ class IncrementalEvaluator {
   }
 
   private def makeIteration(state: EvaluationState, program: Program): EvaluationState =
-    program.rules.foldLeft(state.toNextIteration){ case (acc, rule) => rule(acc) }
+    program.rules.foldLeft(state.toNextIteration) { case (acc, rule) => rule.apply(state, acc)}
 
 }

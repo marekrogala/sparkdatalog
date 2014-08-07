@@ -1,10 +1,10 @@
-declare Arc(int x, int z).
-declare Tc(int x aggregate R, int z aggregate Q).
+declare Edge(int a, int b, int d).
+declare Path(int t, int d aggregate Max).
  
-Arc(x, y) :- x=1, y=2.
-Arc(x, y) :- x=2, y=3.
-Arc(x, y) :- x=3, y=4.
+Edge(x, y, d) :- x=1, y=2, d=1.
+Edge(x, y, d) :- x=2, y=3, d=1.
+Edge(x, y, d) :- x=1, y=3, d=5.
 
-Tc(x, y) :- Arc(x, y).
-Tc(x, y) :- Arc(x, z), Tc(z, y).
+Path(x, d) :- Edge(1, x, d).
+Path(x, d) :- Path(y, da), Edge(y, x, db), d = da + db.
 

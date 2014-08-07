@@ -1,7 +1,9 @@
 package s2g.eval
 
+import s2g.ast.value.ValueLiteral
+
 class TableStates private(private val tables: Map[String, TableState]) {
-  def isEmpty: Boolean = tables.isEmpty
+  def isEmpty: Boolean = tables.forall({ case (_, state) => state.isEmpty })
 
   def ++(other: TableStates) = {
     val merged = other.tables.foldLeft(tables)({
@@ -13,12 +15,25 @@ class TableStates private(private val tables: Map[String, TableState]) {
     new TableStates(merged)
   }
 
+  def diff(other: TableStates) = {
+    val delta = tables.foldLeft(Map[String, TableState]())({
+      case (acc, (tableName, tableState)) =>
+        val tableDelta = other.tables.get(tableName) map tableState.diff getOrElse tableState
+        acc + (tableName -> tableDelta)
+    })
+    new TableStates(delta)
+  }
+
   def find(tableName: String, pattern: Pattern): Set[PartialSolution] =
     tables.get(tableName).map(_.findMatching(pattern)).getOrElse(Set())
 
-  def putInstance(tableName: String, instance: Instance): TableStates = {
+  def putInstance(
+      tableName: String,
+      instance: Instance,
+      aggregate: Option[(Int, (ValueLiteral, ValueLiteral) => ValueLiteral)]): TableStates = {
     val tableState = tables.getOrElse(tableName, new TableState())
-    new TableStates(tables + (tableName -> tableState.add(instance)))
+    val newTableState = tableState.add(instance).aggregate(aggregate)
+    new TableStates(tables + (tableName -> newTableState))
   }
 
   def contains(tableName: String, instance: Instance): Boolean =

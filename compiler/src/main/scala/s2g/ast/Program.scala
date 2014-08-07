@@ -25,7 +25,7 @@ case class Program(declarations: Seq[Declaration], rules: Seq[Rule]) {
     names.groupBy(l => l).filter({case (_, list) => list.length > 1}).map(_._1).foreach { name =>
       throw new LanguageError("Duplicate declaration of " + name)
     }
-    declarations.foreach(_.validate)
+    declarations.foreach(_.validate())
 
     // Rules
   }
