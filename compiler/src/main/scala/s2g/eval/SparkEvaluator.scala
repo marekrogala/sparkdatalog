@@ -2,7 +2,7 @@ package s2g.eval
 
 import s2g.ast.Program
 
-class IncrementalEvaluator extends Evaluator {
+class SparkEvaluator extends Evaluator {
 
   override def evaluate(program: Program): String = {
     var iteration = 0

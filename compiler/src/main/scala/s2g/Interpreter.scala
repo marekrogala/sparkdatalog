@@ -1,19 +1,18 @@
 package s2g
 
-import java.io.{StringReader, InputStream, Reader}
+import java.io.{InputStream, Reader, StringReader}
 
 import s2g.astbuilder.Visitor
-import s2g.eval.IncrementalEvaluator
+import s2g.eval.Evaluator
 import socialite.{Yylex, parser}
 import socialite.Absyn.Program
 
-object Interpreter {
+class Interpreter(evaluator: Evaluator) {
   def interpret(e: Program): String = {
     val visitor = new Visitor[Any]()
     val program = e.accept(visitor, null)
     program.validate()
-    val eval = new IncrementalEvaluator()
-    eval.eval(program)
+    evaluator.evaluate(program)
   }
 
   private def parse(lexer: Yylex) = try {
@@ -29,7 +28,7 @@ object Interpreter {
 
   private def parseAndInterpret(lexer: Yylex): Unit = {
     parse(lexer) foreach { parsed =>
-      System.out.println(Interpreter.interpret(parsed));
+      System.out.println(interpret(parsed));
     }
   }
 
