@@ -14,7 +14,7 @@ object SubgoalsTopologicalSort {
     } else {
       val (newEvaluable, notEvaluable) = toBeProcessed partition { case (_, inputs, _) => inputs subsetOf available }
       if (newEvaluable.isEmpty) {
-        throw new SemanticException // TODO: Specific error message for unbound variable.
+        throw new SemanticException("Unbound variable(s) " + notEvaluable.mkString("'", "', '", "'"))
       } else {
         val newBoundVariables = newEvaluable.flatMap(_._3).toSet
         val newEvaluatedSubgoals = newEvaluable map (_._1)
