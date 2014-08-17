@@ -1,7 +1,7 @@
 package s2g.ast.rule
 
-import s2g.eval.{PartialSolution, EvaluationState}
+import s2g.eval.{Fact, PartialSolution, EvaluationState}
 
 trait Head {
-  def emitSolutions(state: EvaluationState, solutions: Set[PartialSolution]): EvaluationState
+  def emitSolutions(solutions: Set[PartialSolution]): Set[Fact]
 }

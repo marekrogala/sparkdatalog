@@ -26,10 +26,12 @@ case class EvaluationState private (
   private def contains(tableName: String, instance: Instance) =
     deltaTables.contains(tableName, instance) || oldTables.contains(tableName, instance)
   
-  def putInstance(tableName: String, instance: Instance): EvaluationState = {
-    val aggregate = findTable(tableName).aggregateColumnFunction
-    this.copy(accumulatedTables = accumulatedTables.putInstance(tableName, instance, aggregate))
+  def putFact(fact: Fact): EvaluationState = {
+    val aggregate = findTable(fact.relationName).aggregateColumnFunction
+    this.copy(accumulatedTables = accumulatedTables.putInstance(fact.relationName, fact.instance, aggregate))
   }
+
+  def putFacts(set: Set[Fact]): EvaluationState = set.foldLeft(this){ case (acc, fact) => acc.putFact(fact) }
 
   def deltaTables: TableStates = accumulatedTables diff oldTables
   

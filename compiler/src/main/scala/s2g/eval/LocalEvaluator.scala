@@ -2,7 +2,7 @@ package s2g.eval
 
 import s2g.ast.Program
 
-class IncrementalEvaluator extends Evaluator {
+class LocalEvaluator extends Evaluator {
 
   override def evaluate(program: Program): String = {
     var iteration = 0
@@ -10,7 +10,7 @@ class IncrementalEvaluator extends Evaluator {
 
     do {
       println("Iteration " + (iteration+1))
-      state = makeIteration(state, program)
+      state = state.toNextIteration.putFacts(makeIteration(state, program))
       println("after: ")
       println(state.toString)
       iteration += 1
@@ -18,7 +18,6 @@ class IncrementalEvaluator extends Evaluator {
     "made " + iteration + " iters\n\n -- Env --\n" + state.toString()
   }
 
-  private def makeIteration(state: EvaluationState, program: Program): EvaluationState =
-    program.rules.foldLeft(state.toNextIteration) { case (acc, rule) => rule.apply(state, acc)}
-
+  private def makeIteration(state: EvaluationState, program: Program): Set[Fact] =
+    program.rules.map(_.apply(state)).flatten
 }

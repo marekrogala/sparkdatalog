@@ -4,7 +4,7 @@ import s2g.ast.declaration.{DeclarationGlobal, DeclarationConst, Declaration}
 import s2g.ast.rule.Rule
 import s2g.eval.{LanguageError, Context, PartialSolution}
 
-case class Program(declarations: Seq[Declaration], rules: Seq[Rule]) {
+case class Program(declarations: Seq[Declaration], rules: Set[Rule]) {
 
   val environment = evaluateConstants(extractConstants)
 
@@ -29,5 +29,8 @@ case class Program(declarations: Seq[Declaration], rules: Seq[Rule]) {
 
     // Rules
   }
+
+  def initializingRules = rules.filter(!_.hasRelationalSubgoal)
+  def relationalRules = rules.filter(_.hasRelationalSubgoal)
 
 }

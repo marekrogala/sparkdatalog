@@ -2,7 +2,7 @@ package s2g.eval
 
 import s2g.ast.value.ValueLiteral
 
-class TableStates private(private val tables: Map[String, TableState]) {
+case class TableStates private(private val tables: Map[String, TableState]) {
   def isEmpty: Boolean = tables.forall({ case (_, state) => state.isEmpty })
 
   def ++(other: TableStates) = {

@@ -2,12 +2,15 @@ package s2g
 
 import java.io.FileReader
 
-import s2g.eval.IncrementalEvaluator
+import s2g.eval.spark.SparkEvaluator
+import s2g.eval.{Evaluator, LocalEvaluator}
 
 object S2G
 {
   def main(args: Array[String]) = {
-    val interpreter = new Interpreter(new SparkEvaluator)
+    val evaluator: Evaluator = new SparkEvaluator
+    //val evaluator: Evaluator = new LocalEvaluator
+    val interpreter = new Interpreter(evaluator)
     if (args.length == 0) {
       interpreter.parseAndInterpret(System.in)
     } else {

@@ -26,7 +26,7 @@ class Visitor[A]
 
   override def visit(p: Prog, arg: A): ast.Program =
     ast.Program(p.listdeclaration_.toList map (_.accept(this, arg)),
-                p.listrule_.toList map (_.accept(this, arg)))
+                p.listrule_.toList.map(_.accept(this, arg)).toSet)
 
   override def visit(p: MoreDim, arg: A): Seq[ast.declaration.ColumnDeclaration] =
     p.listcolumndeclaration_.toList map (_.accept(this, arg))
@@ -70,7 +70,7 @@ class Visitor[A]
   override def visit(p: TypeInt, arg: A): ast.types.Type = new ast.types.TypeInt()
 
   override def visit(p: RuleDef, arg: A): ast.rule.Rule =
-    ast.rule.Rule(p.head_.accept(this, arg), p.listrulebody_.toList map (_.accept(this, arg)))
+    ast.rule.Rule(p.head_.accept(this, arg), p.listrulebody_.toList.map(_.accept(this, arg)).toSet)
 
   override def visit(p: HeadSingle, arg: A): ast.rule.Head =
     ast.rule.HeadSingle(p.uident_, p.listvariable_.toList map (_.accept(this, arg)))
