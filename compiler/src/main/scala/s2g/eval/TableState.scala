@@ -3,6 +3,8 @@ package s2g.eval
 import s2g.ast.value.{ValueLiteral, ValueVar, Value}
 
 case class TableState(instances: Set[Instance] = Set()) {
+  def filter(predicate: (Instance) => Boolean) = TableState(instances.filter(predicate))
+
   def isEmpty: Boolean = instances.isEmpty
 
   def add(instance: Instance): TableState = TableState(instances + instance)

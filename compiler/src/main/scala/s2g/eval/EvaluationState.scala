@@ -34,5 +34,8 @@ case class EvaluationState private (
   def putFacts(set: Set[Fact]): EvaluationState = set.foldLeft(this){ case (acc, fact) => acc.putFact(fact) }
 
   def deltaTables: TableStates = accumulatedTables diff oldTables
+
+  def filter(predicate: Instance => Boolean) =
+    new EvaluationState(environment, tables, accumulatedTables.filter(predicate), oldTables.filter(predicate))
   
 }

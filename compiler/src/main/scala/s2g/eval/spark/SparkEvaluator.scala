@@ -13,9 +13,11 @@ class SparkEvaluator extends Evaluator {
     val sc = new SparkContext(conf)
     val verticesIds = 0L until n
     val verticesParallelIds = sc.parallelize(verticesIds)
-    val edges = verticesParallelIds.flatMap(source => verticesIds.map((source, _)))
 
-    Graph.fromEdgeTuples(edges, VertexState(initialEvaluationState))
+    val vertices = verticesParallelIds.map(vertexId => (vertexId, VertexState(initialEvaluationState.filter(_.values(0).value.asInstanceOf[Int] == vertexId))))
+    val edges = verticesParallelIds.flatMap(source => verticesIds.map(Edge[Int](source, _)))
+
+    Graph(vertices, edges, VertexState(initialEvaluationState))
   }
 
   def prepareFakeGraph(program: Program, n: Int, initialEvaluationState: EvaluationState): FakeSparkGraph[VertexState] = {
@@ -31,14 +33,15 @@ class SparkEvaluator extends Evaluator {
 
     val graph = prepareGraph(program, 6, initialEvaluationState)
 
-    // TODO: jak to zrobic zeby wyniki initializingRules znalazly sie tylko we wlasciwych node'ach?
     val evaluation = graph.pregel(SparkEvaluator.makeIteration(initialEvaluationState, program.initializingRules), 3)(
       (vertexId, vertexState, incomingMessages) =>
         SparkEvaluator.vertexMethod(vertexId, vertexState, incomingMessages, program),
       triplet => SparkEvaluator.sendMethod(triplet.toTuple),
       (a, b) => a ++ b
     )
-    println(evaluation.vertices.collect.mkString("\n"))
+    println(evaluation.vertices.collect().mkString("\n"))
+    val output = evaluation.vertices.collect().map(_._2).map(_.evaluationState.accumulatedTables).reduce(_++_)
+    println("output: " + output)
     //println(evaluation.vertices.mkString("\n"))
 
     "done"

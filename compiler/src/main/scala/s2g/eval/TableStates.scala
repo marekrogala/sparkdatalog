@@ -3,6 +3,10 @@ package s2g.eval
 import s2g.ast.value.ValueLiteral
 
 case class TableStates private(private val tables: Map[String, TableState]) {
+
+  def filter(predicate: (Instance) => Boolean): TableStates =
+    TableStates(tables.map(table => (table._1, table._2.filter(predicate))))
+
   def isEmpty: Boolean = tables.forall({ case (_, state) => state.isEmpty })
 
   def ++(other: TableStates) = {
