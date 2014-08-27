@@ -2,9 +2,9 @@ package s2g.dsl
 
 
 object DatalogDSL {
-  case class Relation(name: String){
+  //case class Relation(name: String){
 
-  }
+  //}
   class Arrow(receiver: Symbol) {
     def :-(value: Symbol) = {
       Seq(receiver, value)
