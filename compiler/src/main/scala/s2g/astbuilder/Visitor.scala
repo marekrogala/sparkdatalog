@@ -58,7 +58,7 @@ class Visitor[A]
     ast.subgoal.GoalComparison(p.exp_1.accept(this, arg), p.exp_2.accept(this, arg), p.compop_.accept(this, arg))
 
   override def visit(p: PredicateSingle, arg: A): ast.predicate.Predicate =
-    ast.predicate.PredicateSingle(p.uident_, p.listvalue_.toList map (_.accept(this, arg)))
+    ast.predicate.Predicate(p.uident_, p.listvalue_.toList map (_.accept(this, arg)))
 
   override def visit(p: RuleBodyDef, arg: A): ast.rule.RuleBody = ast.rule.RuleBody(p.listsubgoal_.toList map (_.accept(this, arg)))
 

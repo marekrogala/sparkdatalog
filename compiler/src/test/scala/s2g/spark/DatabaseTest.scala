@@ -11,7 +11,7 @@ class DatabaseTest extends FlatSpec with Matchers {
   "RelationalDatabase" should "be created" in {
     val people = sc.parallelize(Seq((2, 15), (1, 20)))
     val parent = sc.parallelize(Seq((2, 15), (1, 20)))
-    val database = Database(Seq(Relation("People", people)))
+    val database = Database(Seq(Relation.fromTuple2("People", people), Relation.fromTuple2("Parent", parent)))
 
   }
 

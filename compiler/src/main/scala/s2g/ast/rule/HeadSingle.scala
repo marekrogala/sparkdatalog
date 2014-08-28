@@ -1,6 +1,8 @@
 package s2g.ast.rule
 
-import s2g.eval.{Fact, EvaluationState, Instance, PartialSolution}
+import org.apache.spark.rdd.RDD
+import s2g.eval.{Fact, Instance, PartialSolution}
+import s2g.spark.{Relation, Valuation}
 
 case class HeadSingle(name: String, args: Seq[String]) extends Head {
 
@@ -8,4 +10,8 @@ case class HeadSingle(name: String, args: Seq[String]) extends Head {
 
   override def emitSolutions(solutions: Set[PartialSolution]): Set[Fact] =
     solutions.map(bindArguments).map(Fact(name, _)).toSet
+
+  override def emitSolutionsSpark(valuations: RDD[Valuation]): Relation = {
+    Relation(name, valuations.map(args.map(_)))
+  }
 }

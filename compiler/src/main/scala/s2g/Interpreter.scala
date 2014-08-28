@@ -8,26 +8,12 @@ import socialite.{Yylex, parser}
 import socialite.Absyn.Program
 
 class Interpreter(evaluator: Evaluator) {
-  def interpret(e: Program): String = {
-    val visitor = new Visitor[Any]()
-    val program = e.accept(visitor, null)
-    program.validate()
+  def interpret(program: ast.Program): String = {
     evaluator.evaluate(program)
   }
 
-  private def parse(lexer: Yylex) = try {
-    val parser = new parser(lexer)
-    Some(parser.pProgram())
-  } catch {
-    case e: Throwable =>
-      System.err.println("At line " + lexer.line_num() + ", near \"" + lexer.buff() + "\" :")
-      System.err.println("     " + e.getMessage)
-      System.exit(1)
-      None
-  }
-
   private def parseAndInterpret(lexer: Yylex): Unit = {
-    parse(lexer) foreach { parsed =>
+    Parser(lexer) foreach { parsed =>
       System.out.println(interpret(parsed));
     }
   }
@@ -37,5 +23,6 @@ class Interpreter(evaluator: Evaluator) {
   def parseAndInterpret(reader: Reader): Unit = parseAndInterpret(new Yylex(reader))
 
   def parseAndInterpret(program: String): Unit = parseAndInterpret(new Yylex(new StringReader(program)))
+
 
 }

@@ -1,6 +1,7 @@
 package s2g.ast.value
 
 import s2g.eval.Context
+import s2g.spark.Valuation
 
 case class ValueVar(name: String) extends Value {
   override def evaluate(context: Context): ValueLiteral = context(name)
@@ -13,4 +14,6 @@ case class ValueVar(name: String) extends Value {
   }
 
   override def getFreeVariables: Set[String] = Set(name)
+
+  override def evaluate(valuation: Valuation): Int = valuation(name)
 }

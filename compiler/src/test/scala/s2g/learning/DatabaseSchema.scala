@@ -18,7 +18,7 @@ class DatabaseSchema extends FlatSpec with Matchers {
   "A Stack" should "pop values in last-in-first-out order" in {
     val people1 = sc.parallelize(Seq[XFact[_]](A("Ziom", 15), A("Ziom2", 20)))
     val people2 = sc.parallelize(Seq[XFact[_]](B("Ziom", 15), B("Ziom2", 20)))
-    people1.mapPartitionsWithIndex()
+    //people1.mapPartitionsWithIndex()
     println((people1 ++ people2).collect().mkString("\n"))
 
   }
