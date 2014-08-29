@@ -24,11 +24,25 @@ case class RuleBody(subgoals: Seq[Subgoal]) {
 
   /** Evaluation */
 
+
   def findSolutionsSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[RDD[Valuation]] = {
-    val firstSubgoal::restSubgoals = dynamicSubgoals
-    val initialValuations = firstSubgoal._1.select(constantValuations, firstSubgoal._2, fullDatabase)
-    restSubgoals.foldLeft(initialValuations)((valuationsOption, subgoal) =>
-      valuationsOption.flatMap(valuations => subgoal._1.join(valuations, subgoal._2, fullDatabase)))
+
+    val databasesForSubgoalsConfigurations: Seq[Seq[Database]] =
+      dynamicSubgoals.indices map { deltaPosition => dynamicSubgoals.indices map {
+        case `deltaPosition` => deltaDatabase
+        case _ => fullDatabase
+      }
+    }
+
+    val result: Seq[Option[RDD[Valuation]]] = for(databasesForSubgoalsConfiguration <- databasesForSubgoalsConfigurations) yield {
+      val ((firstSubgoal, initiallyBoundVariables), database) :: restSubgoals = dynamicSubgoals.zip(databasesForSubgoalsConfiguration)
+      val initialValuations = firstSubgoal.select(constantValuations, initiallyBoundVariables, database)
+      val finalValuations = restSubgoals.foldLeft(initialValuations)({ (valuationsOption, subgoalWithDatabase) =>
+        val ((subgoal, boundVariables), database) = subgoalWithDatabase
+        valuationsOption.flatMap(valuations => subgoal.join(valuations, boundVariables, database))
+      })
+      finalValuations
+    }.flatten
   }
 
 }
