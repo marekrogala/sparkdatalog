@@ -1,7 +1,6 @@
 *~
-parser/socialite
-parser2/socialite
-parser2/Makefile
+parsergen/socialite
+parsergen/Makefile
 */JLex
 *.bak
 *.aux
