@@ -6,7 +6,6 @@ Prog.       Program ::= [Declaration] [Rule];
 
 -- declarations --------------------------------------------
 
--- DeclarationDistributed.  Declaration ::= "declare" UIdent "[" TypeName Variable ":" Range "]" MoreDimensionsDeclaration "."; 
 DeclarationGlobal.       Declaration ::= "declare" UIdent MoreDimensionsDeclaration ".";
 DeclarationConst.        Declaration ::= "const" TypeName UIdent "=" Exp "."; 
 
@@ -22,9 +21,8 @@ AggregateWith.   AggregateSpecifier ::= "aggregate" Function;
 NoAggregation.   AggregateSpecifier ::= ;
 
 TypeInt.         TypeName ::= "int";
-TypeDouble.      TypeName ::= "double";
+-- TypeDouble.      TypeName ::= "double";
 
--- RangeDef.        Range ::= Exp ".." Exp; 
 
 -- rules ---------------------------------------------------
 
@@ -32,24 +30,17 @@ RuleDef.             Rule ::= Head [RuleBody] ".";
 separator Rule "" ;
 
 HeadSingle.       Head ::= UIdent "(" [Variable] ")";
--- HeadSingle.       Head ::= UIdent "(" [Term] ")";
--- HeadSharded.      Head ::= UIdent "[" Value "]" "(" [Term] ")";
 
 RuleBodyDef.         RuleBody ::= ":-" [Subgoal];
 separator nonempty RuleBody ";";
 
 
 PredicateSingle.     Predicate ::= UIdent "(" [Value] ")";
--- PredicateSharded. Predicate ::= UIdent "[" Value "]" "(" [Value] ")";
 
 GoalPredicate.       Subgoal ::= Predicate;
 GoalComparison.      Subgoal ::= Exp CompOp Exp;
 GoalAssign.          Subgoal ::= Variable "=" Exp;
 separator nonempty Subgoal "," ;
-
--- TermValue.        Term ::= Value;
--- TermCall.	     Term ::= DIdent "(" Variable ")";
--- separator nonempty Term "," ;
 
 ValueInt.        Value ::= Integer;
 ValueVar.        Value ::= Variable;
