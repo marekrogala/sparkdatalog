@@ -1,6 +1,6 @@
 package s2g.eval
 
-import s2g.ast.declaration.{DeclarationGlobal, Declaration}
+import s2g.ast.declaration.{DeclarationRelation, Declaration}
 
 case class EvaluationState private (
       environment: PartialSolution,
@@ -17,8 +17,8 @@ case class EvaluationState private (
   override def toString: String =
     "Old: \n" + oldTables.toString + "\n\nDelta:\n" + deltaTables.toString + "\n\n"
 
-  private def findTable(tableName: String): DeclarationGlobal = tables.find(_.name == tableName) match {
-    case Some(decl@DeclarationGlobal(_, _)) => decl
+  private def findTable(tableName: String): DeclarationRelation = tables.find(_.name == tableName) match {
+    case Some(decl@DeclarationRelation(_, _)) => decl
     case Some(_) => throw new LanguageError("Cannot use " + tableName + " as a predicate")
     case None => throw new LanguageError("Undeclared table " + tableName)
   }

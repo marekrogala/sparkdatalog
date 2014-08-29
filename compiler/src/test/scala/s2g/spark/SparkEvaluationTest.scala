@@ -14,14 +14,14 @@ class SparkEvaluationTest extends SparkTestUtils with Matchers {
     val programSource =
       """
         |Q(x) :- P(x).
-        |Q(x) :- Q(y), x < 7, x = y + 1.
+        |Q(x) :- Q(y), x < 4, x = y + 1.
       """.stripMargin
 
     //when
     val result = database.datalog(programSource)
 
     //then
-    result.collect() should contain ("Q" -> (Set() ++ (0 to 6).map(Seq(_))))
+    result.collect() should contain ("Q" -> (Set() ++ (0 to 3).map(Seq(_))))
   }
 
   sparkTest("correctly compute SSSP without aggregation") {
@@ -40,6 +40,18 @@ class SparkEvaluationTest extends SparkTestUtils with Matchers {
 
     //then
     result.collect() should be (Map("Edge" -> Set(Seq(1, 2, 1), Seq(2, 3, 1)), "Path" -> Set(Seq(2, 1), Seq(3, 2))))
+  }
+
+  sparkTest("empty program is identity") {
+    //given
+    val edge = sc.parallelize(Seq((1, 2, 1), (2, 3, 1)))
+    val database = Database(Seq(Relation.fromTuple3("Edge", edge)))
+
+    //when
+    val result = database.datalog("")
+
+    //then
+    result.collect() should be (Map("Edge" -> Set(Seq(1, 2, 1), Seq(2, 3, 1))))
   }
 
 }

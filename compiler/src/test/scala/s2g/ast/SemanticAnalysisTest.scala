@@ -15,4 +15,11 @@ class SemanticAnalysisTest extends FlatSpec with Matchers {
     }
   }
 
+  it must "throw if there is an unsafe rule" in {
+    val programSource = "Q(x, y) :- x = 2."
+    a [SemanticException] should be thrownBy {
+      Parser(programSource)
+    }
+  }
+
 }

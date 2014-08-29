@@ -34,7 +34,7 @@ class Visitor[A]
   override def visit(p: NoMoreDim, arg: A): Seq[ast.declaration.ColumnDeclaration] = Seq()
 
   override def visit(p: DeclarationGlobal, arg: A): ast.declaration.Declaration =
-    ast.declaration.DeclarationGlobal(p.uident_, p.moredimensionsdeclaration_.accept(this, arg))
+    ast.declaration.DeclarationRelation(p.uident_, p.moredimensionsdeclaration_.accept(this, arg))
 
   override def visit(p: DeclarationConst, arg: A): ast.declaration.Declaration =
     ast.declaration.DeclarationConst(p.typename_.accept(this, arg), p.uident_, p.exp_.accept(this, arg))

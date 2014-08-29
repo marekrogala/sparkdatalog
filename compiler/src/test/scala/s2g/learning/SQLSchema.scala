@@ -10,7 +10,7 @@ class SQLSchema extends FlatSpec with Matchers {
   val conf = new SparkConf().setAppName("Simple Application").setMaster("local")
   val sc = new SparkContext(conf)
 
-  "A Stack" should "pop values in last-in-first-out order" in {
+  it should "execute simple query" in {
     val sqlContext = new SQLContext(sc)
 
 
