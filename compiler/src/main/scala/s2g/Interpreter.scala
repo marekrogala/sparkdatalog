@@ -13,9 +13,7 @@ class Interpreter(evaluator: Evaluator) {
   }
 
   private def parseAndInterpret(lexer: Yylex): Unit = {
-    Parser(lexer) foreach { parsed =>
-      System.out.println(interpret(parsed));
-    }
+    interpret(Parser(lexer))
   }
 
   def parseAndInterpret(instream: InputStream): Unit = parseAndInterpret(new Yylex(instream))

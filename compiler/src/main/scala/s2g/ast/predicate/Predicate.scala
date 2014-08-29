@@ -10,13 +10,10 @@ import s2g.spark.{Valuation, Relation}
 
 case class Predicate(tableName: String, args: Seq[Value]) {
   def matchArgs(fact: Seq[Int]): Option[Valuation] = {
-    println("matching " + fact.toString() + " to " + args.toString())
-    val result = fact.zip(args).foldLeft(Some(Valuation()): Option[Valuation]) {
+    fact.zip(args).foldLeft(Some(Valuation()): Option[Valuation]) {
       case q@(valuationOption, (actualValue, literal: ValueLiteral)) =>
-        println("got1 " + q.toString())
         valuationOption.filter { _ => literal.value.asInstanceOf[Int] == actualValue }
       case q@(valuationOption, (actualValue, ValueVar(varName))) =>
-        println("got2 " + q.toString())
         valuationOption.flatMap { valuation =>
           valuation.get(varName) match {
             case Some(`actualValue`) => valuationOption
@@ -25,8 +22,6 @@ case class Predicate(tableName: String, args: Seq[Value]) {
           }
         }
     }
-    println(" --> " + result)
-    result
   }
 
   def evaluate(relation: Relation): RDD[Valuation] = {
@@ -45,7 +40,6 @@ case class Predicate(tableName: String, args: Seq[Value]) {
 
   def getInputs(context: Context): Set[String] = Set()
 
-  def getOutVariables: Set[String] = args.flatMap(_.getFreeVariables).toSet
+  def getVariables: Set[String] = args.flatMap(_.getFreeVariables).toSet
 
-  def getInVariables: Set[String] = Set()
 }

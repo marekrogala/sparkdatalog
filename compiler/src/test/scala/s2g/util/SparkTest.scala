@@ -24,7 +24,7 @@ trait SparkTestUtils extends FunSuite {
   def sparkTest(name: String, silenceSpark : Boolean = true)(body: => Unit) {
     test(name, SparkTest){
       val origLogLevels = if (silenceSpark) SparkUtil.silenceSpark() else null
-      sc = new SparkContext("local[4]", name)
+      sc = new SparkContext("local", name)
       try {
         body
       }

@@ -15,9 +15,9 @@ case class GoalPredicate(predicate: Predicate) extends Subgoal {
 
   override def getInputs(context: Context): Set[String] = predicate.getInputs(context)
 
-  override def getInVariables: Set[String] = predicate.getInVariables
+  override def getInVariables: Set[String] = Set()
 
-  override def getOutVariables: Set[String] = predicate.getOutVariables
+  override def getOutVariables: Set[String] = predicate.getVariables
 
   override def evaluateStatic(valuation: Valuation): Set[Valuation] = ???
 
@@ -28,31 +28,36 @@ case class GoalPredicate(predicate: Predicate) extends Subgoal {
 
   override def join(otherValuations: RDD[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] = {
     selectAll(database) map { currentValuations =>
-      val currentValuationsWithKey = extractBoundVariables(currentValuations, boundVariables)
-      val otherValuationsWithKey = extractBoundVariables(otherValuations, boundVariables)
+      val joinByVariables = boundVariables.intersect(predicate.getVariables)
+      val currentValuationsWithKey = extractBoundVariables(currentValuations, joinByVariables)
+      val otherValuationsWithKey = extractBoundVariables(otherValuations, joinByVariables)
       val joinedValuations = currentValuationsWithKey.join(otherValuationsWithKey)
+      //println("join " + currentValuationsWithKey.collect().mkString("; ") + " with "  + otherValuationsWithKey.collect().mkString("; ") + ", bound="+boundVariables.toString())
+      //println("Joined valuations: \t " + joinedValuations.collect().mkString("; "))
       val mergedValuations = joinedValuations.map(kvw => kvw._1 ++ kvw._2._1 ++ kvw._2._2)
       mergedValuations
     }
   }
 
   def selectAll(database: Database): Option[RDD[Valuation]] = {
-    println("selectAll " + predicate.tableName + " ... " + database.relations.map(_._2.data.collect().mkString(";")).mkString(" :: "))
+    println("selectAll " + predicate.tableName + " from database " + database.toString)
     database.relations.get(predicate.tableName).map(predicate.evaluate)
   }
 
   override def select(otherValuations: Set[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] = {
     val all = selectAll(database)
     all map { currentValuations =>
-      println("selecting " + currentValuations.collect().mkString("; "))
-      val currentValuationsWithKey = extractBoundVariables(currentValuations, boundVariables)
-      val otherValuationsMap = extractBoundVariables(otherValuations, boundVariables)
-      val mergedValuations = currentValuationsWithKey.groupByKey.flatMap({ keyValue =>
+      //println("selecting " + currentValuations.collect().mkString("; "))
+      val joinByVariables = boundVariables.intersect(predicate.getVariables)
+      val currentValuationsWithKey = extractBoundVariables(currentValuations, joinByVariables)
+      val otherValuationsMap = extractBoundVariables(otherValuations, joinByVariables)
+      val mergedValuations = currentValuationsWithKey.groupByKey().flatMap({ keyValue =>
         val (boundValuation, unboundValuations) = keyValue
         unboundValuations.flatMap { unboundValuation =>
           otherValuationsMap.get(boundValuation).map(_ ++ boundValuation ++ unboundValuation)
         }
       })
+      println("   --> " + mergedValuations.collect().mkString("; "))
       mergedValuations
     }
   }

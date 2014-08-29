@@ -3,7 +3,7 @@ package s2g.spark
 import s2g.ast.Program
 import s2g.ast.rule.Rule
 
-class SparkDedicatedEvaluator {
+object SparkDedicatedEvaluator {
 
   private def makeIteration(
       staticContext: StaticEvaluationContext,
@@ -12,8 +12,8 @@ class SparkDedicatedEvaluator {
       deltaDatabase: Database): (Database, Database) = {
     val generatedRelations = rules.map(_.evaluateOnSpark(staticContext, fullDatabase, deltaDatabase)).flatten
     val generatedDatabase = Database() ++ generatedRelations
-    val newFullDatabase = fullDatabase + generatedDatabase
-    val newDeltaDatabase = generatedDatabase // TODO: newFullDatabase - fullDatabase
+    val newFullDatabase = fullDatabase + generatedDatabase // TODO: aggregation etc.
+    val newDeltaDatabase = newFullDatabase - fullDatabase
     (newFullDatabase, newDeltaDatabase)
   }
 
@@ -29,9 +29,9 @@ class SparkDedicatedEvaluator {
         makeIteration(StaticEvaluationContext(program.declarations), program.rules, fullDatabase, deltaDatabase)
       fullDatabase = newFullDatabase
       deltaDatabase = newDeltaDatabase
-      println("after: \n\n" + database.toString)
+      println("after: \n\n" + fullDatabase.toString)
       iteration += 1
-    } while (iteration < 3) // TODO: check fix-point
+    } while (!deltaDatabase.empty)
     println("made " + iteration + " iters\n\n")
 
     fullDatabase

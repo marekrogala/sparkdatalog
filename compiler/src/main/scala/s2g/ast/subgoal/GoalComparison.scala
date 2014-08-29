@@ -34,7 +34,7 @@ case class GoalComparison(left: Exp, right: Exp, operator: ComparisonOperator) e
       Set()
 
   def decideStatic(valuation: Valuation): Boolean = {
-    operator.decide(left.evaluate(valuation) - left.evaluate(valuation))
+    operator.decide(left.evaluate(valuation) - right.evaluate(valuation))
   }
 
   override def join(valuations: RDD[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] =

@@ -2,36 +2,32 @@ package s2g
 
 import java.io.{Reader, InputStream, StringReader}
 
+import s2g.ast.SyntacticException
 import s2g.astbuilder.Visitor
 import socialite.Absyn.Program
 import socialite.{parser, Yylex}
 
 object Parser {
 
-  private def tryToParse(lexer: Yylex): Option[Program] = try {
+  private def tryToParse(lexer: Yylex): Program = try {
     val parser = new parser(lexer)
-    Some(parser.pProgram())
+    parser.pProgram()
   } catch {
     case e: Throwable =>
-      System.err.println("At line " + lexer.line_num() + ", near \"" + lexer.buff() + "\" :")
-      System.err.println("     " + e.getMessage)
-      System.exit(1)
-      None
+      throw new SyntacticException("At line " + lexer.line_num() + ", near \"" + lexer.buff() + "\" :\n     " + e.getMessage)
   }
 
-  def apply(lexer: Yylex): Option[ast.Program] = {
-    val parsed = tryToParse(lexer)
+  def apply(lexer: Yylex): ast.Program = {
+    val program = tryToParse(lexer)
     val visitor = new Visitor[Any]()
-    parsed.map { program =>
-      val programAst = program.accept(visitor, null)
-      programAst.validate()
-      programAst
-    }
+    val programAst = program.accept(visitor, null)
+    programAst.validate()
+    programAst
   }
 
-  def apply(instream: InputStream): Option[ast.Program] = apply(new Yylex(instream))
+  def apply(instream: InputStream): ast.Program = apply(new Yylex(instream))
 
-  def apply(reader: Reader): Option[ast.Program] = apply(new Yylex(reader))
+  def apply(reader: Reader): ast.Program = apply(new Yylex(reader))
 
-  def apply(program: String): Option[ast.Program] = apply(new StringReader(program))
+  def apply(program: String): ast.Program = apply(new StringReader(program))
 }

@@ -73,7 +73,7 @@ class Visitor[A]
     ast.rule.Rule(p.head_.accept(this, arg), p.listrulebody_.toList.map(_.accept(this, arg)).toSet)
 
   override def visit(p: HeadSingle, arg: A): ast.rule.Head =
-    ast.rule.HeadSingle(p.uident_, p.listvariable_.toList map (_.accept(this, arg)))
+    ast.rule.Head(p.uident_, p.listvariable_.toList map (_.accept(this, arg)))
 
   override def visit(p: EValue, arg: A): ast.exp.Exp = ast.exp.EValue(p.value_.accept(this, arg))
 
