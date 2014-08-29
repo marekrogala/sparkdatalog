@@ -27,22 +27,15 @@ case class RuleBody(subgoals: Seq[Subgoal]) {
 
   def findSolutionsSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[RDD[Valuation]] = {
 
-    val databasesForSubgoalsConfigurations: Seq[Seq[Database]] =
-      dynamicSubgoals.indices map { deltaPosition => dynamicSubgoals.indices map {
-        case `deltaPosition` => deltaDatabase
-        case _ => fullDatabase
-      }
-    }
+      val (firstSubgoal, initiallyBoundVariables) :: restSubgoals = dynamicSubgoals
+      val firstSubgoalEvaluator = firstSubgoal.select(constantValuations, initiallyBoundVariables, _)
+      val restSubgoalsEvaluators = restSubgoals.map({case (subgoal, boundVariables) => subgoal.join(_, boundVariables, _)})
+      val subgoalsEvaluators = firstSubgoalEvaluator::restSubgoalsEvaluators
 
-    val result: Seq[Option[RDD[Valuation]]] = for(databasesForSubgoalsConfiguration <- databasesForSubgoalsConfigurations) yield {
-      val ((firstSubgoal, initiallyBoundVariables), database) :: restSubgoals = dynamicSubgoals.zip(databasesForSubgoalsConfiguration)
-      val initialValuations = firstSubgoal.select(constantValuations, initiallyBoundVariables, database)
-      val finalValuations = restSubgoals.foldLeft(initialValuations)({ (valuationsOption, subgoalWithDatabase) =>
-        val ((subgoal, boundVariables), database) = subgoalWithDatabase
-        valuationsOption.flatMap(valuations => subgoal.join(valuations, boundVariables, database))
+      val finalValuations = restSubgoalsEvaluators.foldLeft(firstSubgoalEvaluator(fullDatabase))({ (valuationsOption, evaluator) =>
+        valuationsOption.flatMap(valuations => evaluator(valuations, fullDatabase))
       })
       finalValuations
-    }.flatten
   }
 
 }
