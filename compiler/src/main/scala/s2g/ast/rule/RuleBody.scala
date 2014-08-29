@@ -3,7 +3,7 @@ package s2g.ast.rule
 import org.apache.spark.rdd.RDD
 import s2g.ast.subgoal.{GoalPredicate, Subgoal, SubgoalsTopologicalSort}
 import s2g.eval._
-import s2g.spark.{Valuation, Database, StaticEvaluationContext}
+import s2g.spark.{Database, StaticEvaluationContext, Valuation}
 
 case class RuleBody(subgoals: Seq[Subgoal]) {
 
@@ -28,14 +28,6 @@ case class RuleBody(subgoals: Seq[Subgoal]) {
     val initialValuations = firstSubgoal._1.select(constantValuations, firstSubgoal._2, fullDatabase)
     restSubgoals.foldLeft(initialValuations)((valuationsOption, subgoal) =>
       valuationsOption.flatMap(valuations => subgoal._1.join(valuations, subgoal._2, fullDatabase)))
-  }
-
-  def findSolutions(state: EvaluationState): Set[PartialSolution] = {
-    val sortedSubgoals = SubgoalsTopologicalSort(subgoals, state.environment)
-
-    val subgoalProcessor = new SubgoalProcessor(state.environment)
-    val evaluation = new SemiNaiveRuleEvaluation(subgoalProcessor, state)
-    evaluation.evaluate(sortedSubgoals)
   }
 
 }

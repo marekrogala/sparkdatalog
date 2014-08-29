@@ -1,7 +1,7 @@
 package s2g.ast.declaration
 
 import s2g.ast.value.ValueLiteral
-import s2g.eval.{SemanticException, LanguageError}
+import s2g.eval.SemanticException
 
 case class DeclarationRelation(name: String, columns: Seq[ColumnDeclaration]) extends Declaration {
   /** Semantic analysis */

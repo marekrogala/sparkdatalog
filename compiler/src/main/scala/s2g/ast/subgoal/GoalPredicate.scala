@@ -3,20 +3,11 @@ package s2g.ast.subgoal
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import s2g.ast.predicate.Predicate
-import s2g.eval.{Context, PartialSolution, TableStates}
 import s2g.spark.{Database, Valuation}
 
 case class GoalPredicate(predicate: Predicate) extends Subgoal {
-  override def solveOn(context: Context, tableStates: TableStates): Set[PartialSolution] = {
-    predicate.fetchMatchingInstances(context.partialSolution, tableStates, context.environment)
-  }
-
-  override def getOutputs(context: Context): Set[String] = predicate.getOutputs(context)
-
-  override def getInputs(context: Context): Set[String] = predicate.getInputs(context)
 
   override def getInVariables: Set[String] = Set()
-
   override def getOutVariables: Set[String] = predicate.getVariables
 
   override def evaluateStatic(valuation: Valuation): Set[Valuation] = ???

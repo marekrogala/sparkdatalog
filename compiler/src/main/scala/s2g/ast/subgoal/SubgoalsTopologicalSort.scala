@@ -1,7 +1,8 @@
 package s2g.ast.subgoal
 
-import s2g.eval.{SemanticException, PartialSolution, Context}
 import scala.annotation.tailrec
+
+import s2g.eval.SemanticException
 
 object SubgoalsTopologicalSort {
 
@@ -22,20 +23,10 @@ object SubgoalsTopologicalSort {
       }
     }
 
-
-  def apply(subgoals: Seq[Subgoal], environment: PartialSolution): Seq[Subgoal] = {
-    val context = Context(environment, PartialSolution())
-    val subgoalsWithVariables = for(subgoal <- subgoals)
-      yield (subgoal, subgoal.getInputs(context), subgoal.getOutputs(context))
-    iterate(Seq(), subgoalsWithVariables, Set())._1
-  }
-
-
   def apply(subgoals: Seq[Subgoal]): (Seq[Subgoal], Set[String]) = {
     val subgoalsWithVariables = for(subgoal <- subgoals)
       yield (subgoal, subgoal.getInVariables, subgoal.getOutVariables)
     iterate(Seq(), subgoalsWithVariables, Set())
   }
-
 
 }

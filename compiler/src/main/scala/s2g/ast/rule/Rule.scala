@@ -1,7 +1,7 @@
 package s2g.ast.rule
 
-import s2g.eval.{SemanticException, Fact, EvaluationState}
-import s2g.spark.{Relation, Database, StaticEvaluationContext}
+import s2g.eval.SemanticException
+import s2g.spark.{Database, Fact, Relation, StaticEvaluationContext}
 
 case class Rule(head: Head, rules: Set[RuleBody]) {
 
@@ -20,12 +20,5 @@ case class Rule(head: Head, rules: Set[RuleBody]) {
     val generatedRelations = rules.flatMap(_.findSolutionsSpark(context, fullDatabase, deltaDatabase).map(head.emitSolutionsSpark))
     generatedRelations.reduceOption(_ + _)
   }
-
-  def apply(state: EvaluationState): Set[Fact] =
-    rules.map { rule =>
-      val solutions = rule.findSolutions(state)
-      val result = head.emitSolutions(solutions)
-      result
-    }.flatten
 
 }
