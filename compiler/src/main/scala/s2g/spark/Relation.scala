@@ -1,19 +1,26 @@
 package s2g.spark
 
-import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
+import org.apache.spark.SparkContext._
 
-case class Relation(name: String, data: RDD[Seq[Int]]) {
-  def -(other: Relation) = {
+case class Relation(name: String, data: RDD[Fact]) {
+  def subtract(other: Relation) = {
     require(name == other.name, "Relation cannot be subtracted from a relation with a different name")
     copy(data = data.subtract(other.data))
   }
 
   def empty: Boolean = data.count() == 0
 
-  def combine: Relation = copy(data = data.distinct()) // TODO: Here will be aggregation.
+  private def combine(aggregation: Option[Aggregation]): Relation = {
+    val combinedData = aggregation.map { aggregation =>
+      data.map(aggregation.partition).reduceByKey(aggregation.operator).map(aggregation.merge)
+    } getOrElse data.distinct()
+    copy(data = combinedData)
+  }
 
-  def +(relation: Relation): Relation = Relation(name, data.union(relation.data)).combine
+  def union(relation: Relation, aggregation: Option[Aggregation]): Relation =
+    copy(data = data.union(relation.data)).combine(aggregation)
+
   override def toString = data.collect().map(name + "(" + _.toString() + ")").mkString("; ")
 }
 

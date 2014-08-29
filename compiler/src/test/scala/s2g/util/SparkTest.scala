@@ -19,11 +19,9 @@ trait SparkTestUtils extends FunSuite {
    * when you are actively debugging one test, you may want to turn the logs on
    *
    * @param name the name of the test
-   * @param silenceSpark true to turn off spark logging
    */
-  def sparkTest(name: String, silenceSpark : Boolean = true)(body: => Unit) {
+  def sparkTest(name: String)(body: => Unit) {
     test(name, SparkTest){
-      val origLogLevels = if (silenceSpark) SparkUtil.silenceSpark() else null
       sc = new SparkContext("local", name)
       try {
         body
@@ -36,21 +34,4 @@ trait SparkTestUtils extends FunSuite {
       }
     }
   }
-}
-
-object SparkUtil {
-  def silenceSpark() {
-    setLogLevels(Level.WARN, Seq("spark", "org.eclipse.jetty", "akka"))
-  }
-
-  def setLogLevels(level: org.apache.log4j.Level, loggers: TraversableOnce[String]) = {
-    loggers.map{
-      loggerName =>
-        val logger = Logger.getLogger(loggerName)
-        val prevLevel = logger.getLevel()
-        logger.setLevel(level)
-        loggerName -> prevLevel
-    }.toMap
-  }
-
 }

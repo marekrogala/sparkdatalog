@@ -3,9 +3,10 @@ package s2g.spark
 import s2g.SparkDatalog
 
 case class Database(relations: Map[String, Relation]) {
-  def -(other: Database) = {
+
+  def subtract(other: Database) = {
     val relationsDifference = for ((name, relation) <- relations) yield {
-      name -> other.relations.get(name).map(relation - _).getOrElse(relation)
+      name -> other.relations.get(name).map(relation.subtract).getOrElse(relation)
     }
     Database(relationsDifference)
   }
@@ -16,28 +17,19 @@ case class Database(relations: Map[String, Relation]) {
     relations.mapValues(relation => relation.data.collect().toSet)
   }
 
-  def +(other: Database) = {
-    val mergedRelations = (relations.keySet ++ other.relations.keySet).map(key => {
-      val mergedRelation = (relations.get(key), other.relations.get(key)) match {
-        case (Some(r1), Some(r2)) => r1 + r2
-        case (Some(r1), None) => r1
-        case (None, Some(r2)) => r2
-        case _ => ???
-      }
-    key -> mergedRelation
-    }).toMap
-    Database(mergedRelations)
-  }
+  def union(other: Database, aggregations: Map[String, Aggregation]) =
+    this.mergeIn(other.relations.values, aggregations)
 
-  def +(relation: Relation): Database = {
+  def mergeIn(relation: Relation, aggregation: Option[Aggregation]): Database = {
     val newInstance = relations.get(relation.name) match {
       case None => relation
-      case Some(previousInstance) => previousInstance + relation
+      case Some(previousInstance) => previousInstance.union(relation, aggregation)
     }
     new Database(relations + (newInstance.name -> newInstance))
   }
 
-  def ++(relations: Iterable[Relation]): Database = relations.foldLeft(this)(_ + _)
+  def mergeIn(relations: Iterable[Relation], aggregations: Map[String, Aggregation]): Database =
+    relations.foldLeft(this)({ case (db, rel) => db.mergeIn(rel, aggregations.get(rel.name)) })
 
   def datalog(datalogQuery: String) = {
     SparkDatalog.datalog(this, datalogQuery)
@@ -45,6 +37,6 @@ case class Database(relations: Map[String, Relation]) {
 }
 
 object Database {
-  def apply(relations: Seq[Relation] = Seq()) =
+  def apply(relations: Iterable[Relation] = Seq()) =
     new Database(Map() ++ relations.map(relation => (relation.name, relation)))
 }

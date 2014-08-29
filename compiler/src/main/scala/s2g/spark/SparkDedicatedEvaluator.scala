@@ -11,10 +11,8 @@ object SparkDedicatedEvaluator {
       fullDatabase: Database,
       deltaDatabase: Database): (Database, Database) = {
     val generatedRelations = rules.map(_.evaluateOnSpark(staticContext, fullDatabase, deltaDatabase)).flatten
-    val generatedDatabase = Database() ++ generatedRelations
-    val newFullDatabase = fullDatabase + generatedDatabase // TODO: aggregation etc.
-    val newDeltaDatabase = newFullDatabase - fullDatabase
-    (newFullDatabase, newDeltaDatabase)
+    val newFullDatabase = fullDatabase.mergeIn(generatedRelations, staticContext.aggregations)
+    (newFullDatabase, newFullDatabase.subtract(fullDatabase))
   }
 
   def evaluate(database: Database, program: Program): Database = {
@@ -26,7 +24,7 @@ object SparkDedicatedEvaluator {
     do {
       println("Iteration " + (iteration+1))
       val (newFullDatabase, newDeltaDatabase) =
-        makeIteration(StaticEvaluationContext(program.declarations), program.rules, fullDatabase, deltaDatabase)
+        makeIteration(StaticEvaluationContext(program.aggregations), program.rules, fullDatabase, deltaDatabase)
       fullDatabase = newFullDatabase
       deltaDatabase = newDeltaDatabase
       println("after: \n\n" + fullDatabase.toString)

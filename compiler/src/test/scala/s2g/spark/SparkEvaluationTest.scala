@@ -54,4 +54,24 @@ class SparkEvaluationTest extends SparkTestUtils with Matchers {
     result.collect() should be (Map("Edge" -> Set(Seq(1, 2, 1), Seq(2, 3, 1))))
   }
 
+
+  sparkTest("correctly compute SSSP with aggregation") {
+    //given
+    val edge = sc.parallelize(Seq((1, 2, 1), (1, 3, 5), (2, 3, 1)))
+    val database = Database(Seq(Relation.fromTuple3("Edge", edge)))
+
+    val programSource =
+      """
+        |declare Path(int v, int dist aggregate Min)
+        |Path(x, d) :- Edge(1, x, d).
+        |Path(x, d) :- Path(y, da), Edge(y, x, db), d = da + db.
+      """.stripMargin
+
+    //when
+    val result = database.datalog(programSource)
+
+    //then
+    result.collect() should be (Map("Edge" -> Set(Seq(1, 2, 1), Seq(2, 3, 1)), "Path" -> Set(Seq(2, 1), Seq(3, 2))))
+  }
+
 }
