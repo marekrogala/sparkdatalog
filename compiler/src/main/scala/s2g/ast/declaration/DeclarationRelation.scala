@@ -12,6 +12,9 @@ case class DeclarationRelation(name: String, columns: Seq[ColumnDeclaration]) ex
   def aggregateColumnFunction: Option[(Int, (ValueLiteral, ValueLiteral) => ValueLiteral)] =
     aggregatedColumn map (column => (column, columns(column).aggregate.get.toScalaFunction))
 
+  def aggregateColumnAndFunction: Option[(Int, (Int, Int) => Int)] =
+    aggregatedColumn map (column => (column, columns(column).aggregate.get.toScalaIntFunction))
+
   def aggregatedColumn: Option[Int] = columns.indexWhere(_.aggregate.isDefined) match {
     case -1 => None
     case position => Some(position)

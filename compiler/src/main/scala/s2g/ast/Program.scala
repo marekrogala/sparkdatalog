@@ -11,7 +11,9 @@ case class Program(declarations: Seq[Declaration], rules: Set[Rule]) {
   val constants = declarations collect { case const: DeclarationConst => const }
   val environment = evaluateConstants(constants)
   val tables = declarations collect { case const: DeclarationRelation => const }
-  val aggregations: Map[String, Aggregation] = Map() // TODO
+  val aggregations: Map[String, Aggregation] = Map() ++ (tables.map { table =>
+      table.aggregateColumnAndFunction.map(Function.tupled(Aggregation)).map(table.name -> _)
+    } flatten)
 
   declarations.map(_.name).groupBy(l => l).filter({case (_, list) => list.length > 1}).map(_._1).foreach { name =>
     throw new SyntacticException("Duplicate declaration of relation '" + name + "'")

@@ -11,7 +11,7 @@ case class Relation(name: String, data: RDD[Fact]) {
 
   def empty: Boolean = data.count() == 0
 
-  private def combine(aggregation: Option[Aggregation]): Relation = {
+  def combine(aggregation: Option[Aggregation]): Relation = {
     val combinedData = aggregation.map { aggregation =>
       data.map(aggregation.partition).reduceByKey(aggregation.operator).map(aggregation.merge)
     } getOrElse data.distinct()
@@ -20,6 +20,8 @@ case class Relation(name: String, data: RDD[Fact]) {
 
   def union(relation: Relation, aggregation: Option[Aggregation]): Relation =
     copy(data = data.union(relation.data)).combine(aggregation)
+
+  def + (relation: Relation): Relation = copy(data = data.union(relation.data))
 
   override def toString = data.collect().map(name + "(" + _.toString() + ")").mkString("; ")
 }

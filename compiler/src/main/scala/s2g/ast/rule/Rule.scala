@@ -18,7 +18,7 @@ case class Rule(head: Head, rules: Set[RuleBody]) {
   /** Evaluation */
   def evaluateOnSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[Relation] = {
     val generatedRelations = rules.flatMap(_.findSolutionsSpark(context, fullDatabase, deltaDatabase).map(head.emitSolutionsSpark))
-    generatedRelations.reduceOption(_ + _).map(_.combine)
+    generatedRelations.reduceOption(_ + _)
   }
 
   def apply(state: EvaluationState): Set[Fact] =

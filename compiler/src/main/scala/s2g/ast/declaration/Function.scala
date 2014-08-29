@@ -26,4 +26,12 @@ case class Function(name: String) {
     }
   }
 
+  def toScalaIntFunction: (Int, Int) => Int = {
+    name match {
+      case "Max" => math.max
+      case "Min" => math.min
+      case _ => throw new SemanticException("Unknown aggregate function '%s', available functions are 'Min' and 'Max'".format(name))
+    }
+  }
+
 }
