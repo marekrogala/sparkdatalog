@@ -43,7 +43,7 @@ object SparkDatalogExample
     // We can now save the paths RDD to distributed storage or perform further computations on it.
     // We can of course also print it to stdout:
     val resultPathsRdd: RDD[Seq[Int]] = resultDatabase("Path")
-    print(resultPathsRdd.collect().map("Path(" + _.mkString(", ") + ")").mkString("\n"))
+    println(resultPathsRdd.collect().map("Path(" + _.mkString(", ") + ")").mkString("\n"))
 
   }
 }
