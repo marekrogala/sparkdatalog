@@ -32,8 +32,8 @@ case class GoalAssign(lValueVariable: String, exp: Exp) extends Subgoal {
     }
   }
 
-  override def join(valuations: RDD[Valuation], boundVariables: Set[String], database: Database): RDD[Valuation] =
-    valuations.flatMap(evaluateStatic)
+  override def join(valuations: RDD[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] =
+    Some(valuations.flatMap(evaluateStatic))
 
-  override def select(initialValuations: Set[Valuation], boundVariables: Set[String], database: Database): RDD[Valuation] = ???
+  override def select(initialValuations: Set[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] = ???
 }

@@ -12,6 +12,7 @@ case class HeadSingle(name: String, args: Seq[String]) extends Head {
     solutions.map(bindArguments).map(Fact(name, _)).toSet
 
   override def emitSolutionsSpark(valuations: RDD[Valuation]): Relation = {
+    println("emitting [" + valuations.collect().mkString("; ") + "] to " + name + "(" + args.mkString(", ") + ")")
     Relation(name, valuations.map(args.map(_)))
   }
 }

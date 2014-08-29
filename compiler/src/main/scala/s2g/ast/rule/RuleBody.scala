@@ -13,16 +13,18 @@ case class RuleBody(subgoals: Seq[Subgoal]) {
       context: StaticEvaluationContext,
       fullDatabase: Database,
       deltaDatabase: Database,
-      subgoals: Seq[(Subgoal, Set[String])]): RDD[Valuation] = {
+      subgoals: Seq[(Subgoal, Set[String])]): Option[RDD[Valuation]] = {
+    println("\tevaluating dynamic subgoals.  cV=" + constantValuations.toString())
     val firstSubgoal::restSubgoals = subgoals
     val initialValuations = firstSubgoal._1.select(constantValuations, firstSubgoal._2, fullDatabase)
-
-    restSubgoals.foldLeft(initialValuations)((valuations, subgoal) => subgoal._1.join(initialValuations, subgoal._2, fullDatabase))
+    //println("\t\tinitialValuations = " + initialValuations.get.collect().mkString(", "))
+    restSubgoals.foldLeft(initialValuations)((valuationsOption, subgoal) =>
+      valuationsOption.flatMap(valuations => subgoal._1.join(valuations, subgoal._2, fullDatabase)))
   }
 
-  def findSolutionsSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): RDD[Valuation] = {
+  def findSolutionsSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[RDD[Valuation]] = {
     require(hasRelationalSubgoal, "TODO!! - reguly bez relsubgoals na samym poczatku policzyc") // TODO
-
+    println("RULE BODY ["+subgoals.toString()+"].findSolutionsSpark(fullDatabase="+fullDatabase.toString+")")
     // TODO: maybe extract to analyze phase
     val firstRelationalSubgoal = subgoals.indexWhere(isRelational)
     val boundVariables = subgoals.scanLeft(Set[String]())((acc, subgoal) => acc ++ subgoal.getOutVariables).dropRight(1)
@@ -30,7 +32,9 @@ case class RuleBody(subgoals: Seq[Subgoal]) {
 
     val constantValuations = constantSubgoals.foldLeft(Set(Valuation()))((valuations, subgoal) => valuations.flatMap(subgoal._1.evaluateStatic))
 
-    evaluateDynamicSubgoals(constantValuations, context, fullDatabase, deltaDatabase, dynamicSubgoals)
+    val result = evaluateDynamicSubgoals(constantValuations, context, fullDatabase, deltaDatabase, dynamicSubgoals)
+
+    result
   }
 
   def hasRelationalSubgoal: Boolean = subgoals.exists(isRelational)

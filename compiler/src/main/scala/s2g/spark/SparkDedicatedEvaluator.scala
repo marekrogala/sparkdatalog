@@ -10,7 +10,7 @@ class SparkDedicatedEvaluator {
       rules: Iterable[Rule],
       fullDatabase: Database,
       deltaDatabase: Database): (Database, Database) = {
-    val generatedRelations = rules.map(_.evaluateOnSpark(staticContext, fullDatabase, deltaDatabase))
+    val generatedRelations = rules.map(_.evaluateOnSpark(staticContext, fullDatabase, deltaDatabase)).flatten
     val generatedDatabase = Database() ++ generatedRelations
     val newFullDatabase = fullDatabase + generatedDatabase
     val newDeltaDatabase = generatedDatabase // TODO: newFullDatabase - fullDatabase

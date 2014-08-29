@@ -3,8 +3,10 @@ package s2g.spark
 import org.apache.spark.rdd.RDD
 
 case class Relation(name: String, data: RDD[Seq[Int]]) {
-  def +(relation: Relation): Relation = Relation(name, data.union(relation.data))
-  override def toString = data.collect().mkString("\n")
+  def combine: Relation = copy(data = data.distinct()) // TODO: Here will be aggregation.
+
+  def +(relation: Relation): Relation = Relation(name, data.union(relation.data)).combine
+  override def toString = data.collect().mkString("; ")
 }
 
 object Relation {

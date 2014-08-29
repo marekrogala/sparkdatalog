@@ -26,20 +26,25 @@ case class GoalPredicate(predicate: Predicate) extends Subgoal {
   def extractBoundVariables(valuations: Set[Valuation], boundVariables: Set[String]): Map[Valuation, Valuation] =
     Map() ++ valuations.map(_.partition { keyValue => boundVariables.contains(keyValue._1)})
 
-  override def join(otherValuations: RDD[Valuation], boundVariables: Set[String], database: Database): RDD[Valuation] = {
-    selectAll(database)
-    val currentValuationsWithKey = extractBoundVariables(currentValuations, boundVariables)
-    val otherValuationsWithKey = extractBoundVariables(otherValuations, boundVariables)
-    val joinedValuations = currentValuationsWithKey.join(otherValuationsWithKey)
-    val mergedValuations = joinedValuations.map(kvw => kvw._1 ++ kvw._2._1 ++ kvw._2._2)
-    mergedValuations
+  override def join(otherValuations: RDD[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] = {
+    selectAll(database) map { currentValuations =>
+      val currentValuationsWithKey = extractBoundVariables(currentValuations, boundVariables)
+      val otherValuationsWithKey = extractBoundVariables(otherValuations, boundVariables)
+      val joinedValuations = currentValuationsWithKey.join(otherValuationsWithKey)
+      val mergedValuations = joinedValuations.map(kvw => kvw._1 ++ kvw._2._1 ++ kvw._2._2)
+      mergedValuations
+    }
   }
 
-  def selectAll(database: Database): Option[RDD[Valuation]] =
+  def selectAll(database: Database): Option[RDD[Valuation]] = {
+    println("selectAll " + predicate.tableName + " ... " + database.relations.map(_._2.data.collect().mkString(";")).mkString(" :: "))
     database.relations.get(predicate.tableName).map(predicate.evaluate)
+  }
 
   override def select(otherValuations: Set[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] = {
-    selectAll(database) map { currentValuations =>
+    val all = selectAll(database)
+    all map { currentValuations =>
+      println("selecting " + currentValuations.collect().mkString("; "))
       val currentValuationsWithKey = extractBoundVariables(currentValuations, boundVariables)
       val otherValuationsMap = extractBoundVariables(otherValuations, boundVariables)
       val mergedValuations = currentValuationsWithKey.groupByKey.flatMap({ keyValue =>

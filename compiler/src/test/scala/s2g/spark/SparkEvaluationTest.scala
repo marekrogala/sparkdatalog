@@ -1,14 +1,17 @@
 package s2g.spark
 
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.{SparkContext, SparkConf}
 import org.scalatest._
+import s2g.util.SparkTestUtils
 import s2g.{Parser, Interpreter}
 
-class SparkEvaluationTest extends FlatSpec with Matchers {
-  val conf = new SparkConf().setAppName("Simple Application").setMaster("local")
-  val sc = new SparkContext(conf)
+class SparkEvaluationTest extends SparkTestUtils with Matchers {
+  sparkTest("correctly compute SSSP") {
 
-  it should "correctly compute SSSP" in {
+    val logger = Logger.getLogger("spark")
+    logger.setLevel(Level.WARN)
+
     val edge = sc.parallelize(Seq((1, 2, 1), (2, 3, 1)))
     val database = Database(Seq(Relation.fromTuple3("Edge", edge)))
 

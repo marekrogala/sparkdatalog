@@ -37,8 +37,8 @@ case class GoalComparison(left: Exp, right: Exp, operator: ComparisonOperator) e
     operator.decide(left.evaluate(valuation) - left.evaluate(valuation))
   }
 
-  override def join(valuations: RDD[Valuation], boundVariables: Set[String], database: Database): RDD[Valuation] =
-    valuations.filter(decideStatic)
+  override def join(valuations: RDD[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] =
+    Some(valuations.filter(decideStatic))
 
-  override def select(initialValuations: Set[Valuation], boundVariables: Set[String], database: Database): RDD[Valuation] = ???
+  override def select(initialValuations: Set[Valuation], boundVariables: Set[String], database: Database): Option[RDD[Valuation]] = ???
 }

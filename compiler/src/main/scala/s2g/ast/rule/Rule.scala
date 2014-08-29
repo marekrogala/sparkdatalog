@@ -5,7 +5,7 @@ import s2g.spark.{Relation, Database, StaticEvaluationContext}
 
 case class Rule(head: Head, rules: Set[RuleBody]) {
 
-  def evaluateOnSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Relation = {
+  def evaluateOnSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[Relation] = {
     rules.foreach(body => {
       val notBoundHeadVariables = head.args.toSet -- body.outVariables
       if (notBoundHeadVariables.nonEmpty)
@@ -15,13 +15,10 @@ case class Rule(head: Head, rules: Set[RuleBody]) {
           "; but positive variables in body are: " + body.outVariables.mkString(", ") + ")")
     })
 
-    val generatedRelations = rules.map { rule =>
-      val solutions = rule.findSolutionsSpark(context, fullDatabase, deltaDatabase)
-      val result = head.emitSolutionsSpark(solutions)
-      result
-    }
+    val generatedRelations =
+      rules.flatMap(_.findSolutionsSpark(context, fullDatabase, deltaDatabase).map(head.emitSolutionsSpark))
 
-    generatedRelations.reduce(_ + _)
+    generatedRelations.reduceOption(_ + _).map(_.combine)
   }
 
   def apply(state: EvaluationState): Set[Fact] =
