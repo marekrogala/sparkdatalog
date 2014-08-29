@@ -19,6 +19,6 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 
 libraryDependencies += "log4j" % "log4j" % "1.2.17"
 
-mainClass in (Compile, run) := Some("s2g.S2G")
+mainClass in (Compile, run) := Some("pl.appsilon.marek.sparkdatalog.SparkDatalogExample")
 
 
