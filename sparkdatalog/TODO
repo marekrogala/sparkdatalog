@@ -1,5 +1,4 @@
 operators -, *, /
 other types than int (string, double) - skipped 
-semi naive evaluation
 constants
 caching, persisting & unpersisting RDDs
