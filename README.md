@@ -46,7 +46,7 @@ git clone git@github.com:marekrogala/sparkdatalog.git
 
 Run the example program:
 ```
-cd sparkdatalog\sparkdatalog
+cd sparkdatalog/sparkdatalog
 sbt run
 ```
 
