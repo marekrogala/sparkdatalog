@@ -20,9 +20,10 @@ object SparkEvaluator {
 
     var iteration = 0
     var fullDatabase = database
-    var deltaDatabase = Database()
+    var deltaDatabase = database
 
     do {
+//      println("Iteration " + iteration)
       val (newFullDatabase, newDeltaDatabase) =
         makeIteration(StaticEvaluationContext(program.aggregations), program.rules, fullDatabase, deltaDatabase)
       fullDatabase = newFullDatabase
