@@ -31,9 +31,14 @@ val resultDatabase: Database = database.datalog(query)
 val resultPathsRdd: RDD[Seq[Int]] = resultDatabase("Path")
 
 
-// We can now save the paths RDD to distributed storage or perform further computations on it.
+// We can now save the paths RDD to distributed storage
+// or perform further computations on it.
+
 // We can of course also print it to stdout:
 print(resultPathsRdd.collect().map("Path(" + _.mkString(", ") + ")").mkString("\n"))
+// Outputs:
+//   Path(3, 2)
+//   Path(2, 1)
 ```
 
 
