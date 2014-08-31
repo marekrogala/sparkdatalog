@@ -18,14 +18,19 @@ object SparkEvaluator {
 
   def evaluate(database: Database, program: Program): Database = {
 
+    database.cache()
+
     var iteration = 0
     var fullDatabase = database
     var deltaDatabase = database
 
     do {
-//      println("Iteration " + iteration)
-      val (newFullDatabase, newDeltaDatabase) =
-        makeIteration(StaticEvaluationContext(program.aggregations), program.rules, fullDatabase, deltaDatabase)
+      val (newFullDatabase, newDeltaDatabase) = makeIteration(
+        StaticEvaluationContext(program.aggregations), program.rules, fullDatabase.cache(), deltaDatabase.cache())
+
+      fullDatabase.unpersist(blocking = false)
+      deltaDatabase.unpersist(blocking = false)
+
       fullDatabase = newFullDatabase
       deltaDatabase = newDeltaDatabase
       iteration += 1

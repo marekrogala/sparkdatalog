@@ -37,6 +37,17 @@ case class Database(relations: Map[String, Relation]) {
   }
 
   def apply(relationName: String): RDD[Seq[Int]] = relations(relationName).data
+
+  def cache(): this.type = {
+    relations.foreach(_._2.data.cache())
+    this
+  }
+
+  def unpersist(blocking: Boolean = true): this.type = {
+    relations.foreach(_._2.data.unpersist(blocking))
+    this
+  }
+
 }
 
 object Database {
