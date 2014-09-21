@@ -1,10 +1,9 @@
 package pl.appsilon.marek.sparkdatalog
 
 import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog.eval.SparkDatalog
+import pl.appsilon.marek.sparkdatalog.eval.{StateShard, LocalDatalog, SparkDatalog}
 
 case class Database(relations: Map[String, Relation]) {
-
   def subtract(other: Database) = {
     val relationsDifference = for ((name, relation) <- relations) yield {
       name -> other.relations.get(name).map(relation.subtract).getOrElse(relation)
@@ -14,7 +13,7 @@ case class Database(relations: Map[String, Relation]) {
 
   def empty = relations.forall(_._2.empty)
 
-  def collect(): Map[String, Set[Seq[Int]]] = {
+  def collect(): Map[String, Set[Fact]] = {
     relations.mapValues(relation => relation.data.collect().toSet)
   }
 
@@ -36,7 +35,11 @@ case class Database(relations: Map[String, Relation]) {
     SparkDatalog.datalog(this, datalogQuery)
   }
 
-  def apply(relationName: String): RDD[Seq[Int]] = relations(relationName).data
+  def datalogLocally(datalogQuery: String): Seq[(Long, StateShard)] = {
+    LocalDatalog.datalog(this, datalogQuery)
+  }
+
+  def apply(relationName: String): RDD[Fact] = relations(relationName).data
 
   def cache(): this.type = {
     relations.foreach(_._2.data.cache())
@@ -45,6 +48,11 @@ case class Database(relations: Map[String, Relation]) {
 
   def unpersist(blocking: Boolean = true): this.type = {
     relations.foreach(_._2.data.unpersist(blocking))
+    this
+  }
+
+  def materialize(): this.type = {
+    relations.foreach(_._2.data.count())
     this
   }
 

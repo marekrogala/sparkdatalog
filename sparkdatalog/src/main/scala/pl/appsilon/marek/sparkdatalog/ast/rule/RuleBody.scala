@@ -5,7 +5,7 @@ import pl.appsilon.marek.sparkdatalog
 import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
 import pl.appsilon.marek.sparkdatalog.ast.subgoal.{GoalPredicate, Subgoal, SubgoalsTopologicalSort}
-import pl.appsilon.marek.sparkdatalog.eval.StaticEvaluationContext
+import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, State, StaticEvaluationContext}
 
 case class RuleBody(subgoals: Seq[Subgoal]) {
 
@@ -24,6 +24,18 @@ case class RuleBody(subgoals: Seq[Subgoal]) {
   }
 
   /** Evaluation */
+
+  def processSubgoal(valuations: Seq[Valuation], subgoal: Subgoal, relations: Map[String, RelationInstance]): Seq[Valuation] =
+    subgoal.solveOnSet(valuations, relations)
+
+
+  def findSolutions(context: StaticEvaluationContext, shard: StateShard): Seq[Valuation] = {
+    dynamicSubgoals.map(_._1).foldLeft(constantValuations.toSeq)(processSubgoal(_, _, shard.relations))
+  }
+
+
+
+  /** Spark Joins method */
 
 
   def findSolutionsSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[RDD[Valuation]] = {

@@ -2,6 +2,7 @@ package pl.appsilon.marek.sparkdatalog
 
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
+import it.unimi.dsi.fastutil.ints
 
 case class Relation(name: String, data: RDD[Fact]) {
   def subtract(other: Relation) = {
@@ -28,10 +29,10 @@ case class Relation(name: String, data: RDD[Fact]) {
 }
 
 object Relation {
-  def unary(name: String, data: RDD[Int]) = Relation(name, data.map(item => Seq(item)))
-  def binary(name: String, data: RDD[(Int, Int)]) = Relation(name, data.map(item => Seq(item._1, item._2)))
-  def ternary(name: String, data: RDD[(Int, Int, Int)]) = Relation(name, data.map(item => Seq(item._1, item._2, item._3)))
-  def ofArity4(name: String, data: RDD[(Int, Int, Int, Int)]) = Relation(name, data.map(item => Seq(item._1, item._2, item._3, item._4)))
-  def ofArity5(name: String, data: RDD[(Int, Int, Int, Int, Int)]) = Relation(name, data.map(item => Seq(item._1, item._2, item._3, item._4, item._5)))
+  def unary(name: String, data: RDD[Int]) = Relation(name, data.map(item => Array(item)))
+  def binary(name: String, data: RDD[(Int, Int)]) = Relation(name, data.map(item => Array(item._1, item._2)))
+  def ternary(name: String, data: RDD[(Int, Int, Int)]) = Relation(name, data.map(item => Array(item._1, item._2, item._3)))
+  def ofArity4(name: String, data: RDD[(Int, Int, Int, Int)]) = Relation(name, data.map(item => Array(item._1, item._2, item._3, item._4)))
+  def ofArity5(name: String, data: RDD[(Int, Int, Int, Int, Int)]) = Relation(name, data.map(item => Array(item._1, item._2, item._3, item._4, item._5)))
   // TODO: Implement for the rest of tuple arities.
 }

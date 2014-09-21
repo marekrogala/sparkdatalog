@@ -6,7 +6,8 @@ import pl.appsilon.marek.sparkdatalog.astbuilder.Parser
 object SparkDatalog {
 
   def datalog(database: Database, programSource: String): Database = {
-    SparkEvaluator.evaluate(database, Parser(programSource))
+    //SparkEvaluator.evaluate(database, Parser(programSource))
+    SparkShardedEvaluator.evaluate(database, ExtendWithSwapRelations(Parser(programSource)))
   }
 
 }

@@ -2,9 +2,10 @@ package pl.appsilon.marek.sparkdatalog.ast.rule
 
 import pl.appsilon.marek.sparkdatalog.{Database, Relation}
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
-import pl.appsilon.marek.sparkdatalog.eval.StaticEvaluationContext
+import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, State, StaticEvaluationContext}
 
 case class Rule(head: Head, rules: Set[RuleBody]) {
+
 
   /** Semantic analysis */
   rules.foreach(body => {
@@ -15,6 +16,13 @@ case class Rule(head: Head, rules: Set[RuleBody]) {
         " (head has free variables: " + head.args.mkString(", ") +
         "; but positive variables in body are: " + body.outVariables.mkString(", ") + ")")
   })
+
+
+  def evaluate(context: StaticEvaluationContext, shard: StateShard): Option[Seq[(Long, RelationInstance)]] = {
+    val generatedRelations = rules.map(_.findSolutions(context, shard)).map(head.emitSolutions)
+   // println("evaluate shard = " + " \n\n\t -> " + generatedRelations.head.facts.size)
+    generatedRelations.reduceOption(_.merge(_, context.aggregations.get(head.name))).map(_.toKeyValue)
+  }
 
   /** Evaluation */
   def evaluateOnSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[Relation] = {

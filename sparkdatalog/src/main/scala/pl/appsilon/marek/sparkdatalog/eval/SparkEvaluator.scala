@@ -12,28 +12,38 @@ object SparkEvaluator {
       fullDatabase: Database,
       deltaDatabase: Database): (Database, Database) = {
     val generatedRelations = rules.map(_.evaluateOnSpark(staticContext, fullDatabase, deltaDatabase)).flatten
-    val newFullDatabase = fullDatabase.mergeIn(generatedRelations, staticContext.aggregations)
-    (newFullDatabase, newFullDatabase.subtract(fullDatabase))
+    val newFullDatabase = fullDatabase.mergeIn(generatedRelations, staticContext.aggregations).cache().materialize()
+    val newDeltaDatabase = newFullDatabase.subtract(fullDatabase).cache().materialize()
+    (newFullDatabase, newDeltaDatabase)
   }
 
   def evaluate(database: Database, program: Program): Database = {
-
-    database.cache()
-
     var iteration = 0
+    database.cache()
     var fullDatabase = database
     var deltaDatabase = database
 
     do {
-      val (newFullDatabase, newDeltaDatabase) = makeIteration(
-        StaticEvaluationContext(program.aggregations), program.rules, fullDatabase.cache(), deltaDatabase.cache())
+      println("Making iteration " + iteration)
 
-      fullDatabase.unpersist(blocking = false)
-      deltaDatabase.unpersist(blocking = false)
+      //println("pr1 = " + fullDatabase.sc.getPersistentRDDs.size)
+
+
+      //println("pr2 = " + fullDatabase.sc.getPersistentRDDs.size)
+
+      val (newFullDatabase, newDeltaDatabase) = makeIteration(
+        StaticEvaluationContext(program.aggregations), program.rules, fullDatabase, deltaDatabase)
+
+      // fullDatabase.unpersist(blocking = false)
+      // deltaDatabase.unpersist(blocking = false)
 
       fullDatabase = newFullDatabase
       deltaDatabase = newDeltaDatabase
       iteration += 1
+
+      //println("pr4 = " + fullDatabase.sc.getPersistentRDDs.size)
+      println(fullDatabase("Path").collect().map("Path(" + _.mkString(", ") + ")").mkString("\n"))
+      //println("pr5 = " + fullDatabase.sc.getPersistentRDDs.size)
     } while (!deltaDatabase.empty)
 
     fullDatabase
