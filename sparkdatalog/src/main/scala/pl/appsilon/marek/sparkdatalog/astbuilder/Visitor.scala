@@ -70,7 +70,7 @@ class Visitor[A]
   override def visit(p: TypeInt, arg: A): ast.types.Type = new ast.types.TypeInt()
 
   override def visit(p: RuleDef, arg: A): ast.rule.Rule =
-    ast.rule.Rule(p.head_.accept(this, arg), p.listrulebody_.toList.map(_.accept(this, arg)).toSet)
+    ast.rule.Rule(p.head_.accept(this, arg), p.listrulebody_.toList.map(_.accept(this, arg)))
 
   override def visit(p: HeadSingle, arg: A): ast.rule.Head =
     ast.rule.Head(p.uident_, p.listvariable_.toList.toArray map (_.accept(this, arg)))  // <-- .toArray ?

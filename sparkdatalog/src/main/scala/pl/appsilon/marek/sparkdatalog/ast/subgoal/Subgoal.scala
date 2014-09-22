@@ -5,6 +5,7 @@ import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 
 trait Subgoal {
+  def getLocation: Option[String]
 
   def solveOn(valuation: Valuation, relations: Map[String, RelationInstance]): Seq[Valuation]
   def solveOnSet(valuations: Seq[Valuation], relations: Map[String, RelationInstance]): Seq[Valuation]

@@ -29,4 +29,6 @@ case class GoalComparison(left: Exp, right: Exp, operator: ComparisonOperator) e
 
   override def solveOnSet(valuations: Seq[Valuation], relations: Map[String, RelationInstance]): Seq[Valuation] =
     valuations.filter(decideStatic)
+
+  override def getLocation: Option[String] = None
 }

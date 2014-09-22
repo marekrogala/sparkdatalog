@@ -4,11 +4,11 @@ import pl.appsilon.marek.sparkdatalog.{Database, Relation}
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
 import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, State, StaticEvaluationContext}
 
-case class Rule(head: Head, rules: Set[RuleBody]) {
+case class Rule(head: Head, ruleBodies: Seq[RuleBody]) {
 
 
   /** Semantic analysis */
-  rules.foreach(body => {
+  ruleBodies.foreach(body => {
     val notBoundHeadVariables = head.args.toSet -- body.outVariables
     if (notBoundHeadVariables.nonEmpty)
       throw new SemanticException("Unbound variable(s) in rule head: " +
@@ -19,14 +19,14 @@ case class Rule(head: Head, rules: Set[RuleBody]) {
 
 
   def evaluate(context: StaticEvaluationContext, shard: StateShard): Option[Seq[(Long, RelationInstance)]] = {
-    val generatedRelations = rules.map(_.findSolutions(context, shard)).map(head.emitSolutions)
+    val generatedRelations = ruleBodies.map(_.findSolutions(context, shard)).map(head.emitSolutions)
    // println("evaluate shard = " + " \n\n\t -> " + generatedRelations.head.facts.size)
     generatedRelations.reduceOption(_.merge(_, context.aggregations.get(head.name))).map(_.toKeyValue)
   }
 
   /** Evaluation */
   def evaluateOnSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[Relation] = {
-    val generatedRelations = rules.flatMap(_.findSolutionsSpark(context, fullDatabase, deltaDatabase).map(head.emitSolutionsSpark))
+    val generatedRelations = ruleBodies.flatMap(_.findSolutionsSpark(context, fullDatabase, deltaDatabase).map(head.emitSolutionsSpark))
     generatedRelations.reduceOption(_ + _)
   }
 

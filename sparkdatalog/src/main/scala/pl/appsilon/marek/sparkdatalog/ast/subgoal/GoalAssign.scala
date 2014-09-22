@@ -29,4 +29,6 @@ case class GoalAssign(lValueVariable: String, exp: Exp) extends Subgoal {
 
   override def solveOnSet(valuations: Seq[Valuation], relations: Map[String, RelationInstance]): Seq[Valuation] =
     valuations.map(evaluateStatic).flatten // TODO maybe some more effective way?
+
+  override def getLocation: Option[String] = None
 }

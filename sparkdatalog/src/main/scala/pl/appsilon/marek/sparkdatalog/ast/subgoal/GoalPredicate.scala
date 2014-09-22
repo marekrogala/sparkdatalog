@@ -2,6 +2,7 @@ package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalog.ast.value.ValueVar
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.predicate.Predicate
@@ -78,5 +79,12 @@ case class GoalPredicate(predicate: Predicate) extends Subgoal {
 
    // println("solve " + predicate + " OnSet " + valuations + " relations = " + relations + "\n\t --> " + result)
     result
+  }
+
+  override def getLocation: Option[String] = {
+    predicate.args(0) match {
+      case ValueVar(name) => Some(name)
+      case _ => ???
+    }
   }
 }
