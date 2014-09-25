@@ -3,6 +3,7 @@ package pl.appsilon.marek.sparkdatalog.astbuilder
 import pl.appsilon.marek.sparkdatalog.ast
 import pl.appsilon.marek.sparkdatalog.ast.comparisonoperator._
 import pl.appsilon.marek.sparkdatalog.ast.declaration
+import pl.appsilon.marek.sparkdatalog.ast.types.TypeDouble
 import socialite.Absyn._
 import scala.collection.JavaConversions._
 
@@ -65,12 +66,10 @@ class Visitor[A]
   override def visit(p: ColumnDecl, arg: A): ast.declaration.ColumnDeclaration =
     ast.declaration.ColumnDeclaration(p.typename_.accept(this, arg), p.variable_.accept(this, arg), p.aggregatespecifier_.accept(this, arg))
 
-  override def visit(p: TypeDouble, arg: A): ast.types.Type = new ast.types.TypeDouble()
-
   override def visit(p: TypeInt, arg: A): ast.types.Type = new ast.types.TypeInt()
 
   override def visit(p: RuleDef, arg: A): ast.rule.Rule =
-    ast.rule.Rule(p.head_.accept(this, arg), p.listrulebody_.toList.map(_.accept(this, arg)))
+    ast.rule.Rule(p.head_.accept(this, arg), p.rulebody_.accept(this, arg))
 
   override def visit(p: HeadSingle, arg: A): ast.rule.Head =
     ast.rule.Head(p.uident_, p.listvariable_.toList.toArray map (_.accept(this, arg)))  // <-- .toArray ?

@@ -16,7 +16,7 @@ object SparkShardedEvaluator {
     def generateMessages(key: Long, shard: StateShard): Seq[(Long, RelationInstance)] = {
       val intermediate = rules.map(_.evaluate(staticContext, shard))
       //println("generateMessages(%s, %s): \n  result: %s".format(key.toString, shard.toString, intermediate.toString))  // TODO: duplikaty?!
-      val result = intermediate.flatten.reduce(_ ++ _)
+      val result = intermediate.reduce(_ ++ _)
 
       result
     }

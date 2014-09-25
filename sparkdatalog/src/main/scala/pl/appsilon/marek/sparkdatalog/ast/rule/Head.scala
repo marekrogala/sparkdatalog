@@ -11,4 +11,6 @@ case class Head(name: String, args: Seq[String]) {
   def emitSolutionsSpark(valuations: RDD[Valuation]): Relation = {
     Relation(name, valuations.map(args.map(_)))
   }
+
+  override def toString = name + args.mkString("(", ", ", ")")
 }

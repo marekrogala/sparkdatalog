@@ -12,7 +12,7 @@ object LocalEvaluator {
       rules: Iterable[Rule],
       state: Seq[(Long, StateShard)]): Seq[(Long, StateShard)] = {
     def generateMessages(key: Long, shard: StateShard): Seq[(Long, RelationInstance)] = {
-      Timed("generateMessages " + key, () => rules.map(_.evaluate(staticContext, shard)).flatten.reduce(_ ++ _))
+      NTimed("generateMessages " + key, () => rules.map(_.evaluate(staticContext, shard)).reduce(_ ++ _))
     }
 
     val rawMessages = state.flatMap(Function.tupled(generateMessages))

@@ -26,13 +26,12 @@ TypeInt.         TypeName ::= "int";
 
 -- rules ---------------------------------------------------
 
-RuleDef.             Rule ::= Head [RuleBody] ".";
+RuleDef.             Rule ::= Head RuleBody ".";
 separator Rule "" ;
 
 HeadSingle.       Head ::= UIdent "(" [Variable] ")";
 
 RuleBodyDef.         RuleBody ::= ":-" [Subgoal];
-separator nonempty RuleBody ";";
 
 
 PredicateSingle.     Predicate ::= UIdent "(" [Value] ")";
