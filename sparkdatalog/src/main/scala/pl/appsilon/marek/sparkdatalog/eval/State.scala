@@ -4,6 +4,7 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog
 import pl.appsilon.marek.sparkdatalog.{Database, Relation}
+import pl.appsilon.marek.sparkdatalog.spark.OuterJoinableRDD._
 
 case class State(shards: RDD[(Long, StateShard)]) {
   def deltaEmpty: Boolean = shards.map(_._2.deltaEmpty).collect().forall(identity)
@@ -55,12 +56,13 @@ object State {
 
     val relations = rddRelations.tail.foldLeft(relationToKeyValue(rddRelations.head))({
       case (acc, relation) =>
-        acc.join(relationToKeyValue(relation)).map({
-          case (key, (left, right)) => (key, left ++ right)
+        acc.fullOuterJoin(relationToKeyValue(relation)).map({
+          case (key, (Some(left), Some(right))) => (key, left ++ right)
+          case (key, (None, Some(right))) => (key, right)
+          case (key, (Some(left), None)) => (key, left)
         })
     })
     new State(relations)
-
   }
 
 }

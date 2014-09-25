@@ -11,9 +11,11 @@ case class StateShard(relations: Map[String, RelationInstance], delta: Map[Strin
     copy(delta = delta)
   }
 
-  def merge(instance: RelationInstance, context: StaticEvaluationContext): StateShard =
+  def merge(instance: RelationInstance, context: StaticEvaluationContext): StateShard = {
+    //println("merging " + instance.toString + " into " + this.relations)
     StateShard(relations + (instance.name ->
       relations.get(instance.name).map(_.merge(instance, context.aggregations.get(instance.name))).getOrElse(instance)))
+  }
 
   def ++(other: StateShard): StateShard = StateShard(relations ++ other.relations)    // TODO: merge a nie zastap
 

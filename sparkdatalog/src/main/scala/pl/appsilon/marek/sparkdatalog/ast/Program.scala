@@ -4,7 +4,7 @@ import pl.appsilon.marek.sparkdatalog.Aggregation
 import pl.appsilon.marek.sparkdatalog.ast.declaration.{Declaration, DeclarationConst, DeclarationRelation}
 import pl.appsilon.marek.sparkdatalog.ast.rule.Rule
 
-case class Program(declarations: Seq[Declaration], rules: Set[Rule]) {
+case class Program(declarations: Seq[Declaration], rules: Seq[Rule]) {
 
   /** Semantic analysis */
   val constants = declarations collect { case const: DeclarationConst => const }

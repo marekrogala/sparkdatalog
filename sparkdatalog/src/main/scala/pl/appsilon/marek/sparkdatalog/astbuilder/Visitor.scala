@@ -26,7 +26,7 @@ class Visitor[A]
 
   override def visit(p: Prog, arg: A): ast.Program =
     ast.Program(p.listdeclaration_.toList map (_.accept(this, arg)),
-                p.listrule_.toList.map(_.accept(this, arg)).toSet)
+                p.listrule_.toList.map(_.accept(this, arg)))
 
   override def visit(p: MoreDim, arg: A): Seq[ast.declaration.ColumnDeclaration] =
     p.listcolumndeclaration_.toList map (_.accept(this, arg))

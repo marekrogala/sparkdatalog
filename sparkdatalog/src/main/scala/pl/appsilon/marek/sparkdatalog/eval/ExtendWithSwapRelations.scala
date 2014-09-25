@@ -47,8 +47,7 @@ object ExtendWithSwapRelations {
           }
         }
 
-    newRules
-    
-    program
+    println("new rules: " + newRules.toString)
+    program.copy(rules = newRules.flatten)
   }
 }

@@ -1,11 +1,9 @@
 package pl.appsilon.marek.sparkdatalog.eval
 
-import org.apache.spark.SparkContext._
-import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog
-import pl.appsilon.marek.sparkdatalog.{Fact, Database}
+import pl.appsilon.marek.sparkdatalog.Database
 import pl.appsilon.marek.sparkdatalog.ast.Program
 import pl.appsilon.marek.sparkdatalog.ast.rule.Rule
+import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
 
 object LocalEvaluator {
 
@@ -14,7 +12,7 @@ object LocalEvaluator {
       rules: Iterable[Rule],
       state: Seq[(Long, StateShard)]): Seq[(Long, StateShard)] = {
     def generateMessages(key: Long, shard: StateShard): Seq[(Long, RelationInstance)] = {
-      rules.map(_.evaluate(staticContext, shard)).flatten.reduce(_ ++ _)
+      Timed("generateMessages " + key, () => rules.map(_.evaluate(staticContext, shard)).flatten.reduce(_ ++ _))
     }
 
     val rawMessages = state.flatMap(Function.tupled(generateMessages))
