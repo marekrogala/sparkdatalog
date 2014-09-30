@@ -5,8 +5,6 @@ import pl.appsilon.marek.sparkdatalog.ast.types.Type
 
 case class ValueLiteral(typ: Type, value: AnyVal) extends Value {
   override def toString: String = value.toString
-
   override def getFreeVariables: Set[String] = Set()
-
-  override def evaluate(valuation: Valuation): Int = value.asInstanceOf[Int]
+  override def analyze(variableIds: Map[String, Int]): AnalyzedValue = AnalyzedValueLiteral(typ, value)
 }

@@ -19,15 +19,18 @@ object LocalEvaluator {
     val messages = rawMessages.groupBy(_._1).map({
       case (key, values) => key -> values.map(_._2).reduce(_.merge(_, staticContext))
     })
-    val newStateShards = state.map({
-      case (key, left) =>
-        messages.get(key) match {
-          case Some(right) => (key, left.merge(right, staticContext))
-          case None => (key, left)
+    val oldStateShards = state.toMap
+    val newStateShards = (state.map(_._1) ++ messages.keys).map({
+      case key =>
+        (oldStateShards.get(key), messages.get(key)) match {
+          case (Some(left), Some(right)) => (key, left.merge(right, staticContext))
+          case (Some(left), None) => (key, left)
+          case (None, Some(right)) => (key, StateShard.fromRelationInstance(right, staticContext))
+          case _ => ???
         }
     })
+    println("All messages = " + messages + "\n+old shards = " + state + " \n --> new shards = " + newStateShards)
 
-    val oldStateShards = state.toMap
     val result = newStateShards.map({
       case (key, left) => key -> left.delted(oldStateShards.get(key))
     })

@@ -15,20 +15,15 @@ case class Rule(head: Head, body: RuleBody) {
       notBoundHeadVariables.mkString(", ") +
       " (head has free variables: " + head.args.mkString(", ") +
       "; but positive variables in body are: " + body.outVariables.mkString(", ") + ")")
-
-
+  val variableIds: Map[String, Int] = body.outVariables.toSeq.zipWithIndex.toMap
+  val analyzedBody = body.analyze(variableIds)
 
   def evaluate(context: StaticEvaluationContext, shard: StateShard): Seq[(Long, RelationInstance)] = {
-    val solutions: Seq[Valuation] = Timed("findSolutions_"+head, () => body.findSolutions(context, shard))
-    val generatedRelations = Timed("emitSolutions_"+head, () =>head.emitSolutions(solutions))
-   // println("evaluate shard = " + " \n\n\t -> " + generatedRelations.head.facts.size)
-    generatedRelations.toKeyValue
-  }
+    val solutions: Seq[Valuation] = Timed("findSolutions_"+head, () => analyzedBody.findSolutions(context, shard))
 
-  /** Evaluation */
-  def evaluateOnSpark(context: StaticEvaluationContext, fullDatabase: Database, deltaDatabase: Database): Option[Relation] = {
-    val generatedRelations = body.findSolutionsSpark(context, fullDatabase, deltaDatabase).map(head.emitSolutionsSpark)
-    generatedRelations
+    val generatedRelations = Timed("emitSolutions_"+head, () =>head.emitSolutions(solutions, variableIds))
+    println("evaluate shard = " + " \n\n\t -> " + generatedRelations)
+    generatedRelations.toKeyValue
   }
 
 }

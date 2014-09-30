@@ -21,3 +21,7 @@ case class StateShard(relations: Map[String, RelationInstance], delta: Map[Strin
 
   override def toString = "StateShard(relations: " + relations + "\n\t delta: " + delta
 }
+
+object StateShard {
+  def fromRelationInstance(relation: RelationInstance, context: StaticEvaluationContext) = StateShard(Map()).merge(relation, context)
+}
