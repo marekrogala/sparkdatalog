@@ -1,6 +1,6 @@
 package pl.appsilon.marek.sparkdatalog.ast.rule
 
-import pl.appsilon.marek.sparkdatalog.util.Timed
+import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
 import pl.appsilon.marek.sparkdatalog.{Valuation, Database, Relation}
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
 import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, StaticEvaluationContext}
@@ -21,8 +21,8 @@ case class Rule(head: Head, body: RuleBody) {
   def evaluate(context: StaticEvaluationContext, shard: StateShard): Seq[(Long, RelationInstance)] = {
     val solutions: Seq[Valuation] = Timed("findSolutions_"+head, () => analyzedBody.findSolutions(context, shard))
 
-    val generatedRelations = Timed("emitSolutions_"+head, () =>head.emitSolutions(solutions, variableIds))
-    println("evaluate shard = " + " \n\n\t -> " + generatedRelations)
+    val generatedRelations = NTimed("emitSolutions_"+head, () =>head.emitSolutions(solutions, variableIds))
+    //println("evaluate shard = " + " \n\n\t -> " + generatedRelations)
     generatedRelations.toKeyValue
   }
 

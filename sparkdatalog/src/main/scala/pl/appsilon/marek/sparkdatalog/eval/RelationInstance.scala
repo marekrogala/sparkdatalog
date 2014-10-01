@@ -1,6 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.eval
 
 import pl.appsilon.marek.sparkdatalog
+import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
 import pl.appsilon.marek.sparkdatalog.{Aggregation, Fact}
 
 case class RelationInstance(name: String, facts: Seq[Fact]) {
@@ -11,16 +12,19 @@ case class RelationInstance(name: String, facts: Seq[Fact]) {
     copy(facts = facts.diff(other.facts))
   }
 
-  def combine(aggregation: Option[Aggregation]): RelationInstance = {
+  def combine(aggregation: Option[Aggregation]): RelationInstance = NTimed("combine %d facts".format(facts.size), () => {
     val combined = aggregation.map { aggregation =>
-      facts.map(aggregation.partition).groupBy(_._1)
-        .map({case (key, values) => key -> values.map(_._2).reduce(aggregation.operator)})
-        .map(aggregation.merge).toSeq // TODO: moze iterable?
+      val operator = aggregation.operator
+      val partitioned = NTimed("partitioned", () => facts.map(aggregation.partition))
+      val grouped = NTimed("grouped", () => partitioned.groupBy(_._1))
+      val reduced = NTimed("reduced", () => grouped.map({case (key, values) => key -> values.map(_._2).reduce(operator)}))
+      val merged = NTimed("merged", () => reduced.map(aggregation.merge).toSeq) // TODO: moze iterable?
+      merged
     } getOrElse facts
     copy(facts = combined)
-  }
+  })
 
-  def merge(other: RelationInstance, aggregation: Option[Aggregation]) = {
+  def merge(other: RelationInstance, aggregation: Option[Aggregation]): RelationInstance = {
     require(name == other.name)
     val result = RelationInstance(name, facts ++ other.facts).combine(aggregation)
     //println("Merge " + other.toString + " into " + this.toString + " with " + aggregation.toString + " ---> " + result.toString)
@@ -36,4 +40,11 @@ case class RelationInstance(name: String, facts: Seq[Fact]) {
     }).toSeq
 
   override def toString = "RelationInstance " + name + " : " + facts.map(fact => fact.toString + fact.mkString("(", ", ", ")")).mkString(" ")
+}
+
+object RelationInstance {
+  def createCombined(instances: Iterable[RelationInstance], context: StaticEvaluationContext): RelationInstance = {
+    val name = instances.head.name
+    RelationInstance(name, instances.flatMap(_.facts)(collection.breakOut)).combine(context.aggregations.get(name))
+  }
 }
