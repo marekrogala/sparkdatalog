@@ -2,7 +2,6 @@ package pl.appsilon.marek.sparkdatalog
 
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
-import it.unimi.dsi.fastutil.ints
 
 case class Relation(name: String, data: RDD[Fact]) {
   def subtract(other: Relation) = {
