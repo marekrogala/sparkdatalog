@@ -14,3 +14,11 @@ object NTimed {
     f()
   }
 }
+
+object TimedN {
+  def apply[A](f: () => A, n: Int) = {
+    val start = System.nanoTime
+    val result = for(i <- 1 to n) f()
+    println("TIME  --> " + (System.nanoTime - start) / 1e6 + " ms")
+  }
+}

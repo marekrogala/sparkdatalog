@@ -62,7 +62,8 @@ object State {
           case (key, (Some(left), None)) => (key, left)
         })
     })
-    new State(relations)
+    val deltedRelations = relations.map({ case (k, v) => k -> v.delted(None)})
+    new State(deltedRelations)
   }
 
 }

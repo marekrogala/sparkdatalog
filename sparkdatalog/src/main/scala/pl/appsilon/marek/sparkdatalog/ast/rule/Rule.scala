@@ -16,10 +16,10 @@ case class Rule(head: Head, body: RuleBody) {
       " (head has free variables: " + head.args.mkString(", ") +
       "; but positive variables in body are: " + body.outVariables.mkString(", ") + ")")
   val variableIds: Map[String, Int] = body.outVariables.toSeq.zipWithIndex.toMap
-  val analyzedBody = body.analyze(variableIds)
+  val analyzedBodies = body.analyze(variableIds)
 
   def evaluate(context: StaticEvaluationContext, shard: StateShard): Seq[(Long, RelationInstance)] = {
-    val solutions: Seq[Valuation] = Timed("findSolutions_"+head, () => analyzedBody.findSolutions(context, shard))
+    val solutions: Seq[Valuation] = NTimed("findSolutions_"+head, () => analyzedBodies.flatMap(_.findSolutions(context, shard)))
 
     val generatedRelations = NTimed("emitSolutions_"+head, () =>head.emitSolutions(solutions, variableIds))
     //println("evaluate shard = " + " \n\n\t -> " + generatedRelations)

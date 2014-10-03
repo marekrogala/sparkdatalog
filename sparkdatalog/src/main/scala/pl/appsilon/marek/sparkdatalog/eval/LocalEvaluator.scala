@@ -15,7 +15,7 @@ object LocalEvaluator {
       Timed("generateMessages " + key, () => rules.map(_.evaluate(staticContext, shard)).reduce(_ ++ _))
     }
 
-    val rawMessages = Timed("generateAllMsgs", () => state.flatMap(Function.tupled(generateMessages)))
+    val rawMessages = NTimed("generateAllMsgs", () => state.flatMap(Function.tupled(generateMessages)))
     val messages = NTimed("groupBy", () => rawMessages.groupBy(_._1).mapValues(_.map(_._2).groupBy(_.name)))
     val oldStateShards = NTimed("state.toMap", () => state.toMap)
     val newStateShards = Timed("newStateShards", () => {
@@ -45,7 +45,7 @@ object LocalEvaluator {
       case (name, instance) => RelationInstance(name, instance.data.collect()).toKeyValue }).flatten
     var state: Seq[(Long, StateShard)] = relationsWithKeys.groupBy(_._1).map({
       case (key, relations) =>
-        key -> relations.map(_._2).map(rel => StateShard(Map(rel.name -> rel))).reduce(_ ++ _ )
+        key -> relations.map(_._2).map(rel => StateShard(Map(rel.name -> rel))).reduce(_ ++ _ ).delted(None) // TODO sprawdzic poprawnosc i efektywnosc
     }).toSeq
 
     var iteration = 0

@@ -1,5 +1,8 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
+import pl.appsilon.marek.sparkdatalog.eval.join.Join
+import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
+
 import scala.collection.mutable
 
 import pl.appsilon.marek.sparkdatalog.Valuation
@@ -25,20 +28,20 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
       .getOrElse(Seq())
 
   override def solveOnSet(valuations: Seq[Valuation], relations: Map[String, RelationInstance]): Seq[Valuation] = {
-    val result = relations.get(predicate.tableName).map(predicate.evaluateLocally).map({ currentValuations =>
-      val currentValuationsWithKey = extractBoundVariables(currentValuations)
-      val otherValuationsMap = extractBoundVariables(valuations).groupBy(_._1)
-      //println("valuations = " + valuations + "\ncurrentValWK=" + currentValuationsWithKey + "\noVM = " + otherValuationsMap)
-      currentValuationsWithKey.groupBy(_._1).toSeq.flatMap({ keyValue =>
-          val (boundValuation, currentValuations) = keyValue
-          val otherValuations = otherValuationsMap.getOrElse(boundValuation, Seq())
-
-          val result = for(currentValuation <- currentValuations;
-              otherValuation <- otherValuations) yield {
-            currentValuation._2.zip(otherValuation._2).map({ case (l, r) => l.orElse(r) } )
+    val variablesFromTable: Option[Seq[Valuation]] = NTimed("evaluateLocally", () => relations.get(predicate.tableName).map(predicate.evaluateLocally))
+    val result = variablesFromTable.map({ currentValuations => {
+        val left = extractBoundVariables(currentValuations)
+        val right = extractBoundVariables(valuations)
+  
+        val joined = for ((boundVariables, (currentKeyValuations, otherKeyValuations)) <- Join.innerJoin(left, right)) yield
+        {
+          for (currentValuation <- currentKeyValuations;
+               otherValuation <- otherKeyValuations) yield {
+            currentValuation.zip(otherValuation).map({ case (l, r) => l.orElse(r)})
           }
-          result
-        })
+        }
+        joined.toSeq.flatten
+    }
     }).getOrElse(Seq())
 
     //println("solve " + predicate + " OnSet " + valuations + " relations = " + relations + "\n\t --> " + result)

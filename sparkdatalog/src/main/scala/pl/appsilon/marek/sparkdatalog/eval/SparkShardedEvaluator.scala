@@ -6,6 +6,7 @@ import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog.Database
 import pl.appsilon.marek.sparkdatalog.ast.Program
 import pl.appsilon.marek.sparkdatalog.ast.rule.Rule
+import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
 
 object SparkShardedEvaluator {
 
@@ -21,16 +22,20 @@ object SparkShardedEvaluator {
       result
     }
 
-    val messages: RDD[(Long, RelationInstance)] = state.shards.flatMap(Function.tupled(generateMessages)).reduceByKey(_.merge(_, staticContext))
+    val messages: RDD[(Long, RelationInstance)] =
+      NTimed("generate Messages", () => state.shards.flatMap(Function.tupled(generateMessages)).reduceByKey(_.merge(_, staticContext)))
     //println("messages: \n\t" + messages.collect().mkString(", "))
+    messages.cache()
 
-    val newStateShards: RDD[(Long, StateShard)] = state.shards.fullOuterJoin(messages) map {
+    val newStateShards: RDD[(Long, StateShard)] = NTimed("newStateShards", () => state.shards.fullOuterJoin(messages) map {
       case (key, (None, Some(right))) => (key, StateShard(Map()).merge(right, staticContext))
       case (key, (Some(left), Some(right))) => (key, left.merge(right, staticContext))
       case (key, (Some(left), None)) => (key, left)
-    }
+    })
+    NTimed("materialize NSS", () => newStateShards.count())
+    messages.unpersist(blocking = false)
     //println("newStateShards: \n\t" + newStateShards.collect().mkString(", "))
-    state.step(newStateShards)
+    NTimed("step", () => state.step(newStateShards))
   }
 
   def evaluate(database: Database, program: Program): Database = {
@@ -38,19 +43,20 @@ object SparkShardedEvaluator {
     var iteration = 0
     state.cache()
 
-    println("Initial state= " + state.toString)
+    //println("Initial state= " + state.toString)
 
     do {
       println("Making iteration " + iteration)
 
       val oldState = state
-      state = makeIteration(StaticEvaluationContext(program.aggregations), program.rules, state)
-      state.cache()
-      //state.materialize()
-      oldState.unpersist(blocking = false)
+      state = Timed("iteration", () => makeIteration(StaticEvaluationContext(program.aggregations), program.rules, state))
+      Timed("cache", () => state.cache())
+      Timed("checkpoint", () => state.shards.checkpoint())
+      Timed("materialize", () => state.materialize())
+      Timed("unpersist", () => oldState.unpersist(blocking = false))
 
       iteration += 1
-    } while (!state.deltaEmpty)
+    } while (!Timed("deltaempty", () => state.deltaEmpty))
 
 //    println(state.toString)
 

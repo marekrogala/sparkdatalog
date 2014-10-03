@@ -19,7 +19,6 @@ object SparkDatalogExample
     val edgesRdd = sc.parallelize(exampleEdges)
     val sourceRdd = sc.parallelize(sourceNode)
 
-
     // -----------------------------------------------------------------------------------
     // Compute shortests paths from the source node using Spark Datalog API:
     //   1. Create a Database from Relations built from RDDs.
@@ -44,7 +43,7 @@ object SparkDatalogExample
     // We can now save the paths RDD to distributed storage or perform further computations on it.
     // We can of course also print it to stdout:
     val resultPathsRdd: RDD[Fact] = resultDatabase("Path")
-    println(resultPathsRdd.collect().map("Path(" + _.mkString(", ") + ")").mkString("\n"))
+    println("computed %d results".format(resultPathsRdd.count()))
 
   }
 }
