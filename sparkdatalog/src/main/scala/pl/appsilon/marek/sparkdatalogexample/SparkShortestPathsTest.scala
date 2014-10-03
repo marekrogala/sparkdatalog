@@ -11,6 +11,7 @@ object SparkShortestPathsTest
     // Standard Spark setup
     val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster(args(0))
     val sc = new SparkContext(conf)
+    sc.setCheckpointDir("hdfs://ec2-54-165-76-72.compute-1.amazonaws.com:9000/checkpoint")
     sc.setCheckpointDir("checkpoint")
 
     // Generate random graph with random edge lengths

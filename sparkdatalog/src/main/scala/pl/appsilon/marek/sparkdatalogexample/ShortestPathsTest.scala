@@ -5,6 +5,7 @@ import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog.util.Timed
 import pl.appsilon.marek.sparkdatalog.{Relation, Database}
 
+import scala.annotation.target
 import scala.reflect.io.Path
 import scala.util.Random
 
@@ -19,7 +20,8 @@ object ShortestPathsTest
     // Standard Spark setup
     val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster(args(0))
     val sc = new SparkContext(conf)
-    sc.setCheckpointDir("checkpoint")
+    sc.setCheckpointDir("hdfs://ec2-54-165-76-72.compute-1.amazonaws.com:9000/checkpoint")
+    sc.addJar("target/scala-2.10/sparkdatalog_2.10-1.0.0.jar")
 
     val diam: Int = args(1).toInt
     // Generate random graph with random edge lengths
