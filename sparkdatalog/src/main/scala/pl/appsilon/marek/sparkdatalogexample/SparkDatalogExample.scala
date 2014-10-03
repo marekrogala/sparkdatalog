@@ -13,6 +13,7 @@ object SparkDatalogExample
     // Standard Spark setup
     val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster("local[4]")
     val sc = new SparkContext(conf)
+    sc.setCheckpointDir("checkpoint")
 
     // Let us assume we have graph edges represented as triples (source, target, distance) in an RDD.
     // It could have been read for example from HDFS or other distributed file systems, just like any Spark RDD.

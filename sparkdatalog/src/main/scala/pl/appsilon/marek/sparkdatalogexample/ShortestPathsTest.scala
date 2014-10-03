@@ -21,8 +21,9 @@ object ShortestPathsTest
     val sc = new SparkContext(conf)
     sc.setCheckpointDir("checkpoint")
 
+    val diam: Int = args(1).toInt
     // Generate random graph with random edge lengths
-    val graph = GraphGenerators.gridGraph(sc, 128, 128) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
+    val graph = GraphGenerators.gridGraph(sc, diam, diam) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
     val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
     val sourceRdd = sc.parallelize(sourceNode)
 

@@ -9,14 +9,15 @@ object SparkShortestPathsTest
 {
   def main(args: Array[String]): Unit = {
     // Standard Spark setup
-    val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster("local[4]")
+    val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster(args(0))
     val sc = new SparkContext(conf)
     sc.setCheckpointDir("checkpoint")
 
     // Generate random graph with random edge lengths
     // val graph = GraphGenerators.logNormalGraph(sc, numVertices = 10000)
 
-    val graph = GraphGenerators.gridGraph(sc, 128, 128) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
+    val diam: Int = args(1).toInt
+    val graph = GraphGenerators.gridGraph(sc, diam, diam) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
 
     val sourceId: VertexId = 0
 

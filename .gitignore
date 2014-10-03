@@ -9,7 +9,7 @@ parsergen/Makefile
 *.ps
 *.tex*
 */target
-sparkdatalog/src/main/java/socialite
+#sparkdatalog/src/main/java/socialite
 sparkdatalog/lib
 .idea
 *.iml
