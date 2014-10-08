@@ -24,6 +24,7 @@ case class StateShard(relations: Map[String, RelationInstance], delta: Map[Strin
         case (Some(left), None) => left
         case (None, Some(right)) => RelationInstance.createCombined(right, context)
         case (Some(left), Some(right)) => RelationInstance.createCombined(left +: right.toSeq, context)
+        case _ => ???
       })
     })(collection.breakOut)
     StateShard(mergedRelations)

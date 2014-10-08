@@ -6,7 +6,7 @@ import pl.appsilon.marek.sparkdatalog.astbuilder.Parser
 object LocalDatalog {
 
   def datalog(database: Database, programSource: String): Seq[(Long, StateShard)] = {
-    LocalEvaluator.evaluate(database, Parser(programSource))
+    LocalEvaluator.evaluate(database, ExtendWithSwapRelations(Parser(programSource)))
   }
 
 }
