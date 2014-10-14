@@ -21,6 +21,7 @@ object ExtendWithSwapRelations {
 
         val (auxRulesNeeded, newRelationalSubgoals) = relationalSubgoals.zipWithIndex.map({ case (subgoal, subgoalId) =>
           if (subgoal.location != computationLocation) {
+            println("to location " + computationLocation)
             val (sendTo, sendToName) = computationLocation match {
               case ValueVar(_) =>
                 val index = subgoal.predicate.args.indexOf(computationLocation)
