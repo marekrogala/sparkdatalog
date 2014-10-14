@@ -13,4 +13,8 @@ case class GoalAssign(lValueVariable: String, exp: Exp) extends Subgoal {
 
   override def analyze(variableIds: Map[String, Int], boundVariables: Set[Int]): AnalyzedSubgoal =
     AnalyzedGoalAssign(variableIds(lValueVariable), exp.analyze(variableIds))
+
+  override def isRelational: Boolean = false
+
+  override def toString = lValueVariable.toString + " = " + exp.toString
 }

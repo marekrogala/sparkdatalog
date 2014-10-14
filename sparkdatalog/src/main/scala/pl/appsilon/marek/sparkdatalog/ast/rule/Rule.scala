@@ -26,4 +26,8 @@ case class Rule(head: Head, body: RuleBody) {
     generatedRelations.toKeyValue
   }
 
+  override def toString: String = {
+    head.toString + " :- " + body.toString
+  }
+
 }

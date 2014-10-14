@@ -23,4 +23,8 @@ case class Program(declarations: Seq[Declaration], rules: Seq[Rule]) {
 //      (env, declaration) => env + (declaration.name -> declaration.exp.evaluate(Context(env, PartialSolution())))
 //    }
 
+  override def toString: String = {
+    rules.mkString("\n")
+  }
+
 }

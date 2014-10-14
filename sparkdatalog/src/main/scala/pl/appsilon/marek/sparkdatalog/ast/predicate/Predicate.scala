@@ -14,4 +14,6 @@ case class Predicate(tableName: String, args: Seq[Value]) {
     })
     AnalyzedPredicate(tableName, argIds, Valuation(variableIds.size))
   }
+
+  override def toString = tableName + args.mkString("(", ", ", ")")
 }

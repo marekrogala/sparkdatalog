@@ -9,4 +9,8 @@ case class GoalComparison(left: Exp, right: Exp, operator: ComparisonOperator) e
 
   override def analyze(variableIds: Map[String, Int], boundVariables: Set[Int]): AnalyzedSubgoal =
     AnalyzedGoalComparison(left.analyze(variableIds), right.analyze(variableIds), operator)
+
+  override def isRelational: Boolean = false
+
+  override def toString = left.toString + operator.toString + right.toString
 }
