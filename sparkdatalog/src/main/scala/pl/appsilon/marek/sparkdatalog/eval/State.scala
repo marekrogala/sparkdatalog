@@ -43,6 +43,11 @@ case class State(shards: RDD[(Long, StateShard)]) {
     shards.collect().mkString(", ")
   }
 
+  def withAllInDelta: State = {
+    val deltedRelations = shards.map({ case (k, v) => k -> v.delted(None)})
+    new State(deltedRelations)
+  }
+
 }
 
 object State {
@@ -62,8 +67,7 @@ object State {
           case (key, (Some(left), None)) => (key, left)
         })
     })
-    val deltedRelations = relations.map({ case (k, v) => k -> v.delted(None)})
-    new State(deltedRelations)
+    new State(relations).withAllInDelta
   }
 
 }

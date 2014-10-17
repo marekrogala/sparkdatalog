@@ -12,7 +12,7 @@ case class StateShard(relations: Map[String, RelationInstance], delta: Map[Strin
   }
 
   def merge(instance: RelationInstance, context: StaticEvaluationContext): StateShard = {
-    //println("merging " + instance.toString + " into " + this.relations)
+    // println("merging " + instance.toString + " into " + this.relations)
     StateShard(relations + (instance.name ->
       relations.get(instance.name).map(_.merge(instance, context.aggregations.get(instance.name))).getOrElse(instance)))
   }
@@ -37,10 +37,13 @@ case class StateShard(relations: Map[String, RelationInstance], delta: Map[Strin
 
 object StateShard {
   def fromRelationInstance(relation: RelationInstance, context: StaticEvaluationContext) = StateShard(Map()).merge(relation, context)
-  def fromRelationInstances(relations: Map[String, Seq[RelationInstance]], context: StaticEvaluationContext) = {
+  def fromRelationInstances(relations: Map[String, Iterable[RelationInstance]], context: StaticEvaluationContext): StateShard = {
     val mergedRelations: Map[String, RelationInstance] = relations.mapValues({ instances =>
         RelationInstance.createCombined(instances, context)
       })
     StateShard(mergedRelations)
+  }
+  def fromRelationInstances(relations: Iterable[RelationInstance], context: StaticEvaluationContext): StateShard = {
+    fromRelationInstances(relations.groupBy(_.name), context)
   }
 }

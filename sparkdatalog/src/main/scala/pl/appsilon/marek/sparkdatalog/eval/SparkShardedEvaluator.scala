@@ -22,14 +22,15 @@ object SparkShardedEvaluator {
       result
     }
 
-    val messages: RDD[(Long, RelationInstance)] =
-      NTimed("generate Messages", () => state.shards.flatMap(Function.tupled(generateMessages)).reduceByKey(_.merge(_, staticContext)))
-    //println("messages: \n\t" + messages.collect().mkString(", "))
+    val messages: RDD[(Long, StateShard)] =
+      state.shards.flatMap(Function.tupled(generateMessages)).groupByKey().mapValues({ messagesInstances =>
+        StateShard.fromRelationInstances(messagesInstances, staticContext)
+      })
     messages.cache()
 
     val newStateShards: RDD[(Long, StateShard)] = NTimed("newStateShards", () => state.shards.fullOuterJoin(messages) map {
-      case (key, (None, Some(right))) => (key, StateShard(Map()).merge(right, staticContext))
-      case (key, (Some(left), Some(right))) => (key, left.merge(right, staticContext))
+      case (key, (None, Some(right))) => (key, right)
+      case (key, (Some(left), Some(right))) => (key, left.merge(right.relations.mapValues(Seq(_)), staticContext))
       case (key, (Some(left), None)) => (key, left)
     })
     NTimed("materialize NSS", () => newStateShards.count())
@@ -43,20 +44,27 @@ object SparkShardedEvaluator {
     var iteration = 0
     state.cache()
 
-    //println("Initial state= " + state.toString)
+    val strata: Seq[Seq[Rule]] = Stratify(program)
 
-    do {
-      println("Making iteration " + iteration)
+    for ((stratum, stratumId) <- strata.zipWithIndex) {
 
-      val oldState = state
-      state = Timed("iteration", () => makeIteration(StaticEvaluationContext(program.aggregations), program.rules, state))
-      Timed("cache", () => state.cache())
-      Timed("checkpoint", () => state.shards.checkpoint())
-      Timed("materialize", () => state.materialize())
-      Timed("unpersist", () => oldState.unpersist(blocking = false))
+      println("Processing stratum %d: %s".format(stratumId, stratum.toString()))
+      state = state.withAllInDelta
+      iteration = 0
 
-      iteration += 1
-    } while (!Timed("deltaempty", () => state.deltaEmpty))
+      do {
+        println("Making iteration " + iteration)
+
+        val oldState = state
+        state = Timed("iteration", () => makeIteration(StaticEvaluationContext(program.aggregations), stratum, state))
+        Timed("cache", () => state.cache())
+        Timed("checkpoint", () => state.shards.checkpoint())
+        Timed("materialize", () => state.materialize())
+        Timed("unpersist", () => oldState.unpersist(blocking = false))
+
+        iteration += 1
+      } while (!Timed("deltaempty", () => state.deltaEmpty))
+    }
 
 //    println(state.toString)
 

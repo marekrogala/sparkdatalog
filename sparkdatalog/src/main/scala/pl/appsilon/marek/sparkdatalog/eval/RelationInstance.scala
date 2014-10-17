@@ -25,7 +25,7 @@ case class RelationInstance(name: String, facts: Seq[Fact]) {
   })
 
   def merge(other: RelationInstance, aggregation: Option[Aggregation]): RelationInstance = {
-    require(name == other.name)
+    require(name == other.name, "Tried to merge different relations %s and %s".format(name, other.name))
     val result = RelationInstance(name, facts ++ other.facts).combine(aggregation)
     //println("Merge " + other.toString + " into " + this.toString + " with " + aggregation.toString + " ---> " + result.toString)
     result
