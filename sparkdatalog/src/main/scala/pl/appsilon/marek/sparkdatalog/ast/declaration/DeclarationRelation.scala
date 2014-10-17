@@ -9,9 +9,6 @@ case class DeclarationRelation(name: String, columns: Seq[ColumnDeclaration]) ex
     throw new SemanticException("Multiple aggregate columns defined for relation " + name)
   }
 
-  def aggregateColumnFunction: Option[(Int, (ValueLiteral, ValueLiteral) => ValueLiteral)] =
-    aggregatedColumn map (column => (column, columns(column).aggregate.get.toScalaFunction))
-
   def aggregateColumnAndFunction: Option[(Int, (Int, Int) => Int)] =
     aggregatedColumn map (column => (column, columns(column).aggregate.get.toScalaIntFunction))
 

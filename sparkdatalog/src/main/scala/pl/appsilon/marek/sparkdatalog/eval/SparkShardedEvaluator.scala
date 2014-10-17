@@ -35,7 +35,7 @@ object SparkShardedEvaluator {
     })
     NTimed("materialize NSS", () => newStateShards.count())
     messages.unpersist(blocking = false)
-    //println("newStateShards: \n\t" + newStateShards.collect().mkString(", "))
+    println("newStateShards: \n\t" + newStateShards.collect().mkString(", "))
     NTimed("step", () => state.step(newStateShards))
   }
 

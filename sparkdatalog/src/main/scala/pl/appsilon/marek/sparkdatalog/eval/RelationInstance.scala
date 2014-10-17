@@ -20,7 +20,7 @@ case class RelationInstance(name: String, facts: Seq[Fact]) {
       val reduced = NTimed("reduced", () => grouped.map({case (key, values) => key -> values.map(_._2).reduce(operator)}))
       val merged = NTimed("merged", () => reduced.map(aggregation.merge).toSeq) // TODO: moze iterable?
       merged
-    } getOrElse facts
+    } getOrElse facts.distinct
     copy(facts = combined)
   })
 
