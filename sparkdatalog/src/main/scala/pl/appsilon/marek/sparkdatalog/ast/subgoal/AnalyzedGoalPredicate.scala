@@ -1,13 +1,11 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
-import pl.appsilon.marek.sparkdatalog.eval.join.Join
-import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
-
 import scala.collection.mutable
 
 import pl.appsilon.marek.sparkdatalog.Valuation
 import pl.appsilon.marek.sparkdatalog.ast.predicate.AnalyzedPredicate
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
+import pl.appsilon.marek.sparkdatalog.eval.join.Join
 
 case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[String, Int], boundVariables: Set[Int]) extends AnalyzedSubgoal {
 
@@ -28,7 +26,7 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
       .getOrElse(Seq())
 
   override def solveOnSet(valuations: Seq[Valuation], relations: Map[String, RelationInstance]): Seq[Valuation] = {
-    val variablesFromTable: Option[Seq[Valuation]] = NTimed("evaluateLocally", () => relations.get(predicate.tableName).map(predicate.evaluateLocally))
+    val variablesFromTable: Option[Seq[Valuation]] = relations.get(predicate.tableName).map(predicate.evaluateLocally)
     val result = variablesFromTable.map({ currentValuations => {
         val left = extractBoundVariables(currentValuations)
         val right = extractBoundVariables(valuations)

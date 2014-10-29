@@ -1,7 +1,6 @@
 package pl.appsilon.marek.sparkdatalog.eval
 
 import pl.appsilon.marek.sparkdatalog
-import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
 import pl.appsilon.marek.sparkdatalog.{Aggregation, Fact}
 
 case class RelationInstance(name: String, facts: Seq[Fact]) {
@@ -12,17 +11,17 @@ case class RelationInstance(name: String, facts: Seq[Fact]) {
     copy(facts = facts.diff(other.facts))
   }
 
-  def combine(aggregation: Option[Aggregation]): RelationInstance = NTimed("combine %d facts".format(facts.size), () => {
+  def combine(aggregation: Option[Aggregation]): RelationInstance = {
     val combined = aggregation.map { aggregation =>
       val operator = aggregation.operator
-      val partitioned = NTimed("partitioned", () => facts.map(aggregation.partition))
-      val grouped = NTimed("grouped", () => partitioned.groupBy(_._1))
-      val reduced = NTimed("reduced", () => grouped.map({case (key, values) => key -> values.map(_._2).reduce(operator)}))
-      val merged = NTimed("merged", () => reduced.map(aggregation.merge).toSeq) // TODO: moze iterable?
+      val partitioned = facts.map(aggregation.partition)
+      val grouped = partitioned.groupBy(_._1)
+      val reduced = grouped.map({case (key, values) => key -> values.map(_._2).reduce(operator)})
+      val merged = reduced.map(aggregation.merge).toSeq // TODO: moze iterable?
       merged
     } getOrElse facts.distinct
     copy(facts = combined)
-  })
+  }
 
   def merge(other: RelationInstance, aggregation: Option[Aggregation]): RelationInstance = {
     require(name == other.name, "Tried to merge different relations %s and %s".format(name, other.name))

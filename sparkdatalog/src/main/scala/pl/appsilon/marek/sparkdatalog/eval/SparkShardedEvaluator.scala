@@ -1,12 +1,11 @@
 package pl.appsilon.marek.sparkdatalog.eval
 
 import org.apache.spark.SparkContext._
-import pl.appsilon.marek.sparkdatalog.spark.OuterJoinableRDD._
 import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog.Database
 import pl.appsilon.marek.sparkdatalog.ast.Program
 import pl.appsilon.marek.sparkdatalog.ast.rule.Rule
-import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
+import pl.appsilon.marek.sparkdatalog.spark.OuterJoinableRDD._
 
 object SparkShardedEvaluator {
 
@@ -14,6 +13,8 @@ object SparkShardedEvaluator {
       staticContext: StaticEvaluationContext,
       rules: Iterable[Rule],
       state: State): State = {
+    //println("making interation, "+state.deltaEmpty+"delta=" + state.shards.collect().map(_._2.delta).mkString("; "))
+
     def generateMessages(key: Long, shard: StateShard): Seq[(Long, RelationInstance)] = {
       val intermediate = rules.map(_.evaluate(staticContext, shard))
       //println("generateMessages(%s, %s): \n  result: %s".format(key.toString, shard.toString, intermediate.toString))  // TODO: duplikaty?!
@@ -28,15 +29,15 @@ object SparkShardedEvaluator {
       })
     messages.cache()
 
-    val newStateShards: RDD[(Long, StateShard)] = NTimed("newStateShards", () => state.shards.fullOuterJoin(messages) map {
+    val newStateShards: RDD[(Long, StateShard)] = state.shards.fullOuterJoin(messages) map {
       case (key, (None, Some(right))) => (key, right)
       case (key, (Some(left), Some(right))) => (key, left.merge(right.relations.mapValues(Seq(_)), staticContext))
       case (key, (Some(left), None)) => (key, left)
-    })
-    NTimed("materialize NSS", () => newStateShards.count())
+    }
+    newStateShards.count()
     messages.unpersist(blocking = false)
-    println("newStateShards: \n\t" + newStateShards.collect().mkString(", "))
-    NTimed("step", () => state.step(newStateShards))
+    //println("newStateShards: \n\t" + newStateShards.collect().mkString(", "))
+    state.step(newStateShards)
   }
 
   def evaluate(database: Database, program: Program): Database = {
@@ -45,6 +46,7 @@ object SparkShardedEvaluator {
     state.cache()
 
     val strata: Seq[Seq[Rule]] = Stratify(program)
+    val checkpointFrequency = 5
 
     for ((stratum, stratumId) <- strata.zipWithIndex) {
 
@@ -56,14 +58,14 @@ object SparkShardedEvaluator {
         println("Making iteration " + iteration)
 
         val oldState = state
-        state = Timed("iteration", () => makeIteration(StaticEvaluationContext(program.aggregations), stratum, state))
-        Timed("cache", () => state.cache())
-        Timed("checkpoint", () => state.shards.checkpoint())
-        Timed("materialize", () => state.materialize())
-        Timed("unpersist", () => oldState.unpersist(blocking = false))
+        state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state)
+        state.cache()
+        if(iteration % checkpointFrequency == 0) state.shards.checkpoint()
+        state.materialize()
+        oldState.unpersist(blocking = false)
 
         iteration += 1
-      } while (!Timed("deltaempty", () => state.deltaEmpty))
+      } while (!state.deltaEmpty)
     }
 
 //    println(state.toString)

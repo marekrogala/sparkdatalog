@@ -40,7 +40,7 @@ object StateShard {
   def fromRelationInstances(relations: Map[String, Iterable[RelationInstance]], context: StaticEvaluationContext): StateShard = {
     val mergedRelations: Map[String, RelationInstance] = relations.mapValues({ instances =>
         RelationInstance.createCombined(instances, context)
-      })
+      }).map(identity)
     StateShard(mergedRelations)
   }
   def fromRelationInstances(relations: Iterable[RelationInstance], context: StaticEvaluationContext): StateShard = {

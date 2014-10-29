@@ -1,9 +1,8 @@
 package pl.appsilon.marek.sparkdatalog.ast.rule
 
-import pl.appsilon.marek.sparkdatalog.ast.subgoal.GoalPredicate
-import pl.appsilon.marek.sparkdatalog.util.{NTimed, Timed}
-import pl.appsilon.marek.sparkdatalog.{Valuation, Database, Relation}
+import pl.appsilon.marek.sparkdatalog.Valuation
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
+import pl.appsilon.marek.sparkdatalog.ast.subgoal.GoalPredicate
 import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, StaticEvaluationContext}
 
 case class Rule(head: Head, body: RuleBody) {
@@ -21,9 +20,9 @@ case class Rule(head: Head, body: RuleBody) {
   val refferedRelations = body.relationalSubgoals.map(_.asInstanceOf[GoalPredicate].predicate.tableName)
 
   def evaluate(context: StaticEvaluationContext, shard: StateShard): Seq[(Long, RelationInstance)] = {
-    val solutions: Seq[Valuation] = NTimed("findSolutions_"+head, () => analyzedBodies.flatMap(_.findSolutions(context, shard)))
+    val solutions: Seq[Valuation] = analyzedBodies.flatMap(_.findSolutions(context, shard))
 
-    val generatedRelations = NTimed("emitSolutions_"+head, () =>head.emitSolutions(solutions, variableIds))
+    val generatedRelations = head.emitSolutions(solutions, variableIds)
     //println("evaluate shard = " + " \n\n\t -> " + generatedRelations)
     generatedRelations.toKeyValue
   }
