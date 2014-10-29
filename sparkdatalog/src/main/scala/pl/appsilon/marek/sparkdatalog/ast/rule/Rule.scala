@@ -1,8 +1,10 @@
 package pl.appsilon.marek.sparkdatalog.ast.rule
 
-import pl.appsilon.marek.sparkdatalog.Valuation
+import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalog.{Relation, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
 import pl.appsilon.marek.sparkdatalog.ast.subgoal.GoalPredicate
+import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
 import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, StaticEvaluationContext}
 
 case class Rule(head: Head, body: RuleBody) {
@@ -26,6 +28,12 @@ case class Rule(head: Head, body: RuleBody) {
     val generatedRelations = head.emitSolutions(solutions, variableIds)
     //println("evaluate shard = " + " \n\n\t -> " + generatedRelations)
     generatedRelations.toKeyValue
+  }
+
+  def evaluateOnSpark(context: StaticEvaluationContext, state: NonshardedState): Relation = {
+    val solutions: RDD[Valuation] = analyzedBodies.map(_.findSolutionsSpark(context, state)).reduce(_ ++ _)
+    val generatedRelation = head.emitSolutionsSpark(solutions, variableIds)
+    generatedRelation
   }
 
   override def toString: String = {

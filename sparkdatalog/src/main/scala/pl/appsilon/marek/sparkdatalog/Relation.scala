@@ -9,7 +9,7 @@ case class Relation(name: String, data: RDD[Fact]) {
     copy(data = data.subtract(other.data))
   }
 
-  def empty: Boolean = data.count() == 0
+  def isEmpty: Boolean = data.count() == 0
 
   def combine(aggregation: Option[Aggregation]): Relation = {
     val combinedData = aggregation.map { aggregation =>

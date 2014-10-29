@@ -1,10 +1,13 @@
 package pl.appsilon.marek.sparkdatalog.ast.rule
 
 import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
 import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
 import pl.appsilon.marek.sparkdatalog.ast.subgoal._
 import pl.appsilon.marek.sparkdatalog.eval.{StateShard, StaticEvaluationContext, RelationInstance}
+
+import scala.collection.GenTraversableOnce
 
 case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Valuation) {
 
@@ -35,4 +38,16 @@ case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Va
     result
   }
 
+  def processSubgoalSpark(valuations: Option[RDD[Valuation]], subgoal: AnalyzedSubgoal, database: Database): Option[RDD[Valuation]] =
+    valuations.flatMap(subgoal.solveRDD(_, database))
+  
+  def findSolutionsSpark(context: StaticEvaluationContext, state: NonshardedState): RDD[Valuation] = {
+    val head +: tail = dynamicSubgoals
+    val staticParallelized: RDD[Valuation] = state.sc.parallelize(staticallyEvaluated)
+    val firstEvaluated = processSubgoalSpark(Some(staticParallelized), head, state.delta)
+    val result = tail.foldLeft(firstEvaluated)(processSubgoalSpark(_, _, state.database))
+    //val name = head.asInstanceOf[AnalyzedGoalPredicate].predicate.tableName
+
+    result.getOrElse(state.sc.parallelize(Seq()))
+  }
 }

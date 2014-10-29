@@ -1,8 +1,12 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.rdd.RDD
+
 import scala.collection.mutable
 
-import pl.appsilon.marek.sparkdatalog.Valuation
+import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.predicate.AnalyzedPredicate
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 import pl.appsilon.marek.sparkdatalog.eval.join.Join
@@ -14,7 +18,14 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
   override def evaluateStatic(valuation: Valuation): Option[Valuation] = ???
 
   def extractBoundVariables(valuations: Seq[Valuation]): Seq[(Valuation, Valuation)] =
-    // TODO: moze byc jeszcze bardziej efektywne, przejscie jednoczesnie po obu listach
+  // TODO: moze byc jeszcze bardziej efektywne, przejscie jednoczesnie po obu listach
+    for (valuation <- valuations) yield {
+      val key = joinByVariables.map(valuation(_))
+      key -> valuation
+    }
+
+  def extractBoundVariables(valuations: RDD[Valuation]): RDD[(Valuation, Valuation)] =
+  // TODO: moze byc jeszcze bardziej efektywne, przejscie jednoczesnie po obu listach
     for (valuation <- valuations) yield {
       val key = joinByVariables.map(valuation(_))
       key -> valuation
@@ -51,5 +62,23 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
       case Right(varId) => Some(varId)
       case _ => ???
     }
+  }
+
+  override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] = {
+    val variablesFromTable: Option[RDD[Valuation]] = database.relations.get(predicate.tableName).map(predicate.evaluateRDD)
+    val result = variablesFromTable.map({ currentValuations => {
+      val left = extractBoundVariables(currentValuations)
+      val right = extractBoundVariables(valuations)
+
+      val joined = for ((boundVariables, (currentValuation, otherValuation)) <- left.join(right)) yield
+      {
+        currentValuation.zip(otherValuation).map({ case (l, r) => l.orElse(r)})
+      }
+      joined
+    }
+    })
+
+    //println("solve " + predicate + " OnSet " + valuations + " relations = " + relations + "\n\t --> " + result)
+    result
   }
 }
