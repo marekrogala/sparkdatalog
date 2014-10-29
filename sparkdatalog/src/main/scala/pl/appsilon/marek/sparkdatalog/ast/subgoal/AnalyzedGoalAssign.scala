@@ -1,6 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
-import pl.appsilon.marek.sparkdatalog.Valuation
+import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.exp.AnalyzedExp
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 
@@ -23,4 +24,8 @@ case class AnalyzedGoalAssign(lValueVariable: Int, exp: AnalyzedExp) extends Ana
     valuations.map(evaluateStatic).flatten // TODO maybe some more effective way?
 
   override def getLocation: Option[Int] = None
+
+  override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] = {
+    Some(valuations.flatMap(evaluateStatic)) // TODO maybe some more effective way?
+  }
 }

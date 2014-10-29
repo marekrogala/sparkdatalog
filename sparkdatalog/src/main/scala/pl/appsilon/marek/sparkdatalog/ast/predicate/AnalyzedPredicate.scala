@@ -1,6 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.ast.predicate
 
-import pl.appsilon.marek.sparkdatalog.{Fact, Valuation}
+import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalog.{Relation, Fact, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.value.ValueLiteral
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 
@@ -38,5 +39,6 @@ case class AnalyzedPredicate(tableName: String, args: Seq[Either[ValueLiteral, I
   def fetchMatchingInstances(valuation: Valuation, relation: RelationInstance): Seq[Valuation] =
     relation.facts.flatMap(matchArgsGeneric(_, valuation))
 
+  def evaluateRDD(relation: Relation): RDD[Valuation] = relation.data.flatMap(matchArgs)
 
 }

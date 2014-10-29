@@ -1,6 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
-import pl.appsilon.marek.sparkdatalog.Valuation
+import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.comparisonoperator.ComparisonOperator
 import pl.appsilon.marek.sparkdatalog.ast.exp.{AnalyzedExp, Exp}
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
@@ -22,4 +23,7 @@ case class AnalyzedGoalComparison(left: AnalyzedExp, right: AnalyzedExp, operato
     valuations.filter(decideStatic)
 
   override def getLocation: Option[Int] = None
+
+  override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] =
+    Some(valuations.filter(decideStatic))
 }

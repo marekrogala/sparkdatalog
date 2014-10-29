@@ -14,14 +14,14 @@ object TrianglesPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]): Unit = {
-    val edges = Source.fromFile("/home/marek/magisterka/sparkdatalog/sparkdatalog/twitter.txt").getLines().take(100000).map({
-      str =>
-        val s = str.split(" ")
-        val e = (s(0).toInt, s(1).toInt)
-        if(e._1 > e._2) e.swap else e
-    }).toSeq
+//    val edges = Source.fromFile("/home/marek/magisterka/sparkdatalog/sparkdatalog/twitter.txt").getLines().take(1000).map({
+//      str =>
+//        val s = str.split(" ")
+//        val e = (s(0).toInt, s(1).toInt)
+//        if(e._1 > e._2) e.swap else e
+//    }).toSeq
 
-    //val edges = Seq(1->2,2->3, 1->3)
+    val edges = Seq(1->2,2->3, 1->3)
 
     //val diam = args(0).toInt
     //graph = GraphGenerators.logNormalGraph(sc, numVertices = diam)
@@ -45,7 +45,7 @@ object TrianglesPerfTest extends PerformanceTest
   def show[T](rdd: RDD[T]) = println(rdd.collect().mkString(", "))
 
   override def runDatalog(): Unit = {
-
+//
 //    val edga = edgesRdd.map(x => Seq(x._1, x._2))
 //    val canonicalEdges = edgesRdd.distinct()
 //

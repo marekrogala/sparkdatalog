@@ -4,6 +4,8 @@ import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog.eval.{StateShard, LocalDatalog, SparkDatalog}
 
 case class Database(relations: Map[String, Relation]) {
+  def checkpoint(): Unit = relations.foreach(_._2.data.checkpoint())
+
   def subtract(other: Database) = {
     val relationsDifference = for ((name, relation) <- relations) yield {
       name -> other.relations.get(name).map(relation.subtract).getOrElse(relation)
@@ -11,7 +13,7 @@ case class Database(relations: Map[String, Relation]) {
     Database(relationsDifference)
   }
 
-  def empty = relations.forall(_._2.empty)
+  def isEmpty = relations.forall(_._2.isEmpty)
 
   def collect(): Map[String, Set[Fact]] = {
     relations.mapValues(relation => relation.data.collect().toSet)
@@ -59,6 +61,8 @@ case class Database(relations: Map[String, Relation]) {
 }
 
 object Database {
+  def empty: Database = new Database(Map())
+
   def apply(relations: Relation*) =
     new Database(Map() ++ relations.map(relation => (relation.name, relation)))
 }
