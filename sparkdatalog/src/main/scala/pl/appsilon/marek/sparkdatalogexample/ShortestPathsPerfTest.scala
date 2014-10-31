@@ -28,7 +28,9 @@ object ShortestPathsPerfTest extends PerformanceTest
 
   def runPregel() = {
     val initialGraph = graph.mapVertices((id, _) => if (id == sourceId) 0.0 else Double.PositiveInfinity)
-    val sssp =  initialGraph.pregel(Double.PositiveInfinity)(
+
+    val sssp =
+      initialGraph.pregel(Double.PositiveInfinity)(
         (id, dist, newDist) => math.min(dist, newDist), // Vertex Program
         triplet => {  // Send Message
           if (triplet.srcAttr + triplet.attr < triplet.dstAttr) {

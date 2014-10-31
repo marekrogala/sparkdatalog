@@ -14,7 +14,7 @@ object SparkEvaluator {
       staticContext: StaticEvaluationContext,
       rules: Iterable[Rule],
       state: NonshardedState): NonshardedState = {
-    println("making interation, delta=" + state.delta.toString)
+    //println("making interation, delta=" + state.delta.toString)
 
     val generatedRelations = rules.map(_.evaluateOnSpark(staticContext, state))
     val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations)
@@ -41,7 +41,7 @@ object SparkEvaluator {
         val oldState = state
         state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state)
         state.cache()
-        if(iteration % checkpointFrequency == 0) state.checkpoint()
+        state.checkpoint()
         state.materialize()
         oldState.unpersist(blocking = false)
 
