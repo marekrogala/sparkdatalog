@@ -16,7 +16,7 @@ object ShortestPathsPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]) = {
-    val diam = args(1).toInt
+    val diam = args(0).toInt
     graph = GraphGenerators.gridGraph(sc, diam, diam) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
 
     val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
@@ -28,8 +28,7 @@ object ShortestPathsPerfTest extends PerformanceTest
 
   def runPregel() = {
     val initialGraph = graph.mapVertices((id, _) => if (id == sourceId) 0.0 else Double.PositiveInfinity)
-    Timed("pregel", () => {
-      val sssp = initialGraph.pregel(Double.PositiveInfinity)(
+    val sssp =  initialGraph.pregel(Double.PositiveInfinity)(
         (id, dist, newDist) => math.min(dist, newDist), // Vertex Program
         triplet => {  // Send Message
           if (triplet.srcAttr + triplet.attr < triplet.dstAttr) {
@@ -40,7 +39,8 @@ object ShortestPathsPerfTest extends PerformanceTest
         },
         (a,b) => math.min(a,b) // Merge Message
       )
-    })
+
+    println("sssp" + sssp.vertices.collect().map(_._2).sum)
   }
 
   override def runDatalog(): Unit = {
