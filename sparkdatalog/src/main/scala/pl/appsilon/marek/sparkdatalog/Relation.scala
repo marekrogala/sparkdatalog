@@ -6,6 +6,7 @@ import org.apache.spark.rdd.RDD
 case class Relation(name: String, data: RDD[Fact]) {
   def subtract(other: Relation) = {
     require(name == other.name, "Relation cannot be subtracted from a relation with a different name")
+    println("SUBTRACT")
     copy(data = data.subtract(other.data))
   }
 
@@ -13,8 +14,12 @@ case class Relation(name: String, data: RDD[Fact]) {
 
   def combine(aggregation: Option[Aggregation]): Relation = {
     val combinedData = aggregation.map { aggregation =>
+      println("AGGREGATION COMBINE: map to partition; reduce by key; merge")
       data.map(aggregation.partition).reduceByKey(aggregation.operator).map(aggregation.merge)
-    } getOrElse data.distinct()
+    } getOrElse {
+      println("DISTINCT")
+      data.distinct()
+    }
     copy(data = combinedData)
   }
 

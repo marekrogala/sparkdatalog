@@ -7,6 +7,7 @@ import pl.appsilon.marek.sparkdatalog.ast.Program
 import pl.appsilon.marek.sparkdatalog.ast.rule.Rule
 import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
 import pl.appsilon.marek.sparkdatalog.spark.OuterJoinableRDD._
+import pl.appsilon.marek.sparkdatalog.util.Timed
 
 object SparkEvaluator {
 
@@ -41,8 +42,8 @@ object SparkEvaluator {
         val oldState = state
         state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state)
         state.cache()
-        state.checkpoint()
-        state.materialize()
+        Timed("checkpoint", state.checkpoint())
+        Timed("materialize", state.materialize())
         oldState.unpersist(blocking = false)
 
         iteration += 1

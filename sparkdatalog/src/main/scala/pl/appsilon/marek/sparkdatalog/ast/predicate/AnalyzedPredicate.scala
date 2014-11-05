@@ -39,6 +39,9 @@ case class AnalyzedPredicate(tableName: String, args: Seq[Either[ValueLiteral, I
   def fetchMatchingInstances(valuation: Valuation, relation: RelationInstance): Seq[Valuation] =
     relation.facts.flatMap(matchArgsGeneric(_, valuation))
 
-  def evaluateRDD(relation: Relation): RDD[Valuation] = relation.data.flatMap(matchArgs)
+  def evaluateRDD(relation: Relation): RDD[Valuation] = {
+    println("FLATMAP matchArgs")
+    relation.data.flatMap(matchArgs)
+  }
 
 }

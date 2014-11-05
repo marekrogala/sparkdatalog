@@ -43,6 +43,7 @@ case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Va
   
   def findSolutionsSpark(context: StaticEvaluationContext, state: NonshardedState): RDD[Valuation] = {
     val head +: tail = dynamicSubgoals
+    println("PARALLELIZE static")
     val staticParallelized: RDD[Valuation] = state.sc.parallelize(staticallyEvaluated)
     val firstEvaluated = processSubgoalSpark(Some(staticParallelized), head, state.delta)
     val result = tail.foldLeft(firstEvaluated)(processSubgoalSpark(_, _, state.database))

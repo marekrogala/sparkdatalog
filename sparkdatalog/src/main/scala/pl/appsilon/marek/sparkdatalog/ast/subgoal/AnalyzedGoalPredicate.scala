@@ -24,12 +24,14 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
       key -> valuation
     }
 
-  def extractBoundVariables(valuations: RDD[Valuation]): RDD[(Valuation, Valuation)] =
-  // TODO: moze byc jeszcze bardziej efektywne, przejscie jednoczesnie po obu listach
+  def extractBoundVariables(valuations: RDD[Valuation]): RDD[(Valuation, Valuation)] = {
+    // TODO: moze byc jeszcze bardziej efektywne, przejscie jednoczesnie po obu listach
+    println("MAP in extractBoundVariables")
     for (valuation <- valuations) yield {
       val key = joinByVariables.map(valuation(_))
       key -> valuation
     }
+  }
 
   override def solveOn(valuation: Valuation, relations: Map[String, RelationInstance]): Seq[Valuation] =
     relations.get(predicate.tableName)
@@ -70,6 +72,7 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
       val left = extractBoundVariables(currentValuations)
       val right = extractBoundVariables(valuations)
 
+      println("JOIN; MAP zip")
       val joined = for ((boundVariables, (currentValuation, otherValuation)) <- left.join(right)) yield
       {
         currentValuation.zip(otherValuation).map({ case (l, r) => l.orElse(r)})
