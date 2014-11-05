@@ -28,4 +28,6 @@ case class AnalyzedGoalComparison(left: AnalyzedExp, right: AnalyzedExp, operato
     println("FILTER decideStatic")
     Some(valuations.filter(decideStatic))
   }
+
+  override def selectRDD(database: Database): Option[RDD[Valuation]] = ???
 }

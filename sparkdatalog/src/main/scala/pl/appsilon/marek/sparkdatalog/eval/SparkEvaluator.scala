@@ -14,8 +14,8 @@ object SparkEvaluator {
       state: NonshardedState,
       calculateDelta: Boolean,
       onlyRecursiveRules: Boolean): NonshardedState = {
-    println("making interation, delta=" + state.delta.relations.values.headOption.map(_.data.mapPartitionsWithIndex({ case (ind, f) => if(f.isEmpty) Iterator() else Iterator(ind -> f.toSeq) }).collect().mkString(", ")))
-    println("partitions: " + state.database.relations.values.map(_.data.partitions.size) + " delta "  + state.delta.relations.values.map(_.data.partitions.size))
+    //println("making interation, delta=" + state.delta.relations.values.headOption.map(_.data.mapPartitionsWithIndex({ case (ind, f) => if(f.isEmpty) Iterator() else Iterator(ind -> f.toSeq) }).collect().mkString(", ")))
+    //println("partitions: " + state.database.relations.values.map(_.data.partitions.size) + " delta "  + state.delta.relations.values.map(_.data.partitions.size))
 
     val generatedRelations = rules.filter(!onlyRecursiveRules || _.isRecursiveInStratum).map(_.evaluateOnSpark(staticContext, state))
     val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations).coalesce(8)

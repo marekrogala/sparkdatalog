@@ -67,7 +67,7 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
   }
 
   override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] = {
-    val variablesFromTable: Option[RDD[Valuation]] = database.relations.get(predicate.tableName).map(predicate.evaluateRDD)
+    val variablesFromTable: Option[RDD[Valuation]] = selectRDD(database)
     val result = variablesFromTable.map({ currentValuations => {
       val left = extractBoundVariables(currentValuations)
       val right = extractBoundVariables(valuations)
@@ -83,5 +83,9 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
 
     //println("solve " + predicate + " OnSet " + valuations + " relations = " + relations + "\n\t --> " + result)
     result
+  }
+
+  override def selectRDD(database: Database): Option[RDD[Valuation]] = {
+    database.relations.get(predicate.tableName).map(predicate.evaluateRDD)
   }
 }

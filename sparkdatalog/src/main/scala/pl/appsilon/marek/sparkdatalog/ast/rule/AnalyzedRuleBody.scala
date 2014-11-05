@@ -14,7 +14,11 @@ case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Va
   /** Semantic analysis */
   val firstRelationalSubgoal = subgoals.indexWhere(isRelational)
   val (staticSubgoals, dynamicSubgoals) = subgoals.splitAt(firstRelationalSubgoal)
-  val staticallyEvaluated = staticSubgoals.foldLeft(Seq(initialValuation))(processSubgoal(_, _, Map()))
+  val staticallyEvaluated = if(staticSubgoals.nonEmpty) {
+    Some(staticSubgoals.foldLeft(Seq(initialValuation))(processSubgoal(_, _, Map())))
+  } else {
+    None
+  }
 
   def isRelational: (AnalyzedSubgoal) => Boolean = {
     case AnalyzedGoalPredicate(_, _, _) => true
@@ -29,7 +33,7 @@ case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Va
 
   def findSolutions(context: StaticEvaluationContext, shard: StateShard): Seq[Valuation] = {
     val head +: tail = dynamicSubgoals
-    val firstEvaluated = processSubgoal(staticallyEvaluated, head, shard.delta)
+    val firstEvaluated = processSubgoal(staticallyEvaluated.getOrElse(Seq(initialValuation)), head, shard.delta)
     val result = tail.foldLeft(firstEvaluated)(processSubgoal(_, _, shard.relations))
     val name = head.asInstanceOf[AnalyzedGoalPredicate].predicate.tableName
 //    println("find solutions, first head " + name + " delta size = " + shard.delta.get(name).map(_.facts.size).getOrElse(0)
@@ -38,19 +42,20 @@ case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Va
     result
   }
 
+  def processFirstSubgoalSpark(valuations: Option[RDD[Valuation]], subgoal: AnalyzedSubgoal, database: Database): Option[RDD[Valuation]] =
+    valuations match {
+      case Some(v) => subgoal.solveRDD(v, database)
+      case None => subgoal.selectRDD(database)
+    }
+
   def processSubgoalSpark(valuations: Option[RDD[Valuation]], subgoal: AnalyzedSubgoal, database: Database): Option[RDD[Valuation]] =
     valuations.flatMap(subgoal.solveRDD(_, database))
   
   def findSolutionsSpark(context: StaticEvaluationContext, state: NonshardedState): RDD[Valuation] = {
     println(" ---- evaluating body " + subgoals.toString)
     val head +: tail = dynamicSubgoals
-    println("PARALLELIZE static")
-    val staticParallelized: RDD[Valuation] = state.sc.parallelize(staticallyEvaluated)
-    val firstEvaluated = if(isRecursive) {
-      processSubgoalSpark(Some(staticParallelized), head, state.delta)
-    } else {
-      processSubgoalSpark(Some(staticParallelized), head, state.database)
-    }
+    val staticParallelized: Option[RDD[Valuation]] = staticallyEvaluated.map(state.sc.parallelize(_))
+    val firstEvaluated = processFirstSubgoalSpark(staticParallelized, head, if(isRecursive) { state.delta } else { state.database })
     val result = tail.foldLeft(firstEvaluated)(processSubgoalSpark(_, _, state.database))
     //val name = head.asInstanceOf[AnalyzedGoalPredicate].predicate.tableName
 

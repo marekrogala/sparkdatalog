@@ -11,6 +11,7 @@ trait AnalyzedSubgoal {
   def solveOnSet(valuations: Seq[Valuation], relations: Map[String, RelationInstance]): Seq[Valuation]
 
   def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]]
+  def selectRDD(database: Database): Option[RDD[Valuation]]
 
   def evaluateStatic(valuation: Valuation): Option[Valuation]
 }

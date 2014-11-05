@@ -29,4 +29,6 @@ case class AnalyzedGoalAssign(lValueVariable: Int, exp: AnalyzedExp) extends Ana
     println("FLATMAP evaluateStatic")
     Some(valuations.flatMap(evaluateStatic)) // TODO maybe some more effective way?
   }
+
+  override def selectRDD(database: Database): Option[RDD[Valuation]] = ???
 }

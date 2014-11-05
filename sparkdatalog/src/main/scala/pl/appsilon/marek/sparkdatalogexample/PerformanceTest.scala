@@ -18,7 +18,7 @@ trait PerformanceTest {
     val master +: version +: moreArgs = args.toList
 
     val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster(master)
-    conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+    //conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     sc = new SparkContext(conf)
     sc.setCheckpointDir("checkpoint")
     //sc.setCheckpointDir("hdfs://ec2-54-165-76-72.compute-1.amazonaws.com:9000/checkpoint")
