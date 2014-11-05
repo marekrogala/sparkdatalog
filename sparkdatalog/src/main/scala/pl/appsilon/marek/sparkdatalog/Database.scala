@@ -4,6 +4,8 @@ import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog.eval.{StateShard, LocalDatalog, SparkDatalog}
 
 case class Database(relations: Map[String, Relation]) {
+  def coalesce(numPartitions: Int): Database = copy(relations = relations.mapValues(_.coalesce(numPartitions)))
+
   def restrictTo(relationsSubset: Set[String]): Database = Database(relations.filterKeys(relationsSubset))
 
   def checkpoint(): Unit = relations.foreach(_._2.data.checkpoint())
@@ -23,19 +25,20 @@ case class Database(relations: Map[String, Relation]) {
     relations.mapValues(relation => relation.data.collect().toSet)
   }
 
-  def union(other: Database, aggregations: Map[String, Aggregation]) =
-    this.mergeIn(other.relations.values, aggregations)
-
   def mergeIn(relation: Relation, aggregation: Option[Aggregation]): Database = {
-    val newInstance = relations.get(relation.name) match {
-      case None => relation.combine(aggregation)
-      case Some(previousInstance) => previousInstance.union(relation, aggregation)
-    }
+    val newInstance = (relations.get(relation.name) match {
+      case None => relation
+      case Some(previousInstance) => previousInstance.union(relation)
+    }).combine(aggregation)
     new Database(relations + (newInstance.name -> newInstance))
   }
 
   def mergeIn(relations: Iterable[Relation], aggregations: Map[String, Aggregation]): Database =
-    relations.foldLeft(this)({ case (db, rel) => db.mergeIn(rel, aggregations.get(rel.name)) })
+    relations.groupBy(_.name).foldLeft(this)({ case (db, rel) =>
+      val (name, rels) = rel
+      println("merging " + name + " into db")
+      val mergedRels = rels.reduce(_.union(_))
+      db.mergeIn(mergedRels, aggregations.get(name)) })
 
   def datalog(datalogQuery: String): Database = {
     SparkDatalog.datalog(this, datalogQuery)

@@ -7,8 +7,8 @@ case class NonshardedState(database: Database, idb: Set[String] = Set(), delta: 
   val sc: SparkContext = database.relations.head._2.data.context
 
   def checkpoint() = {
-    database.checkpoint()
-    delta.checkpoint()
+    database.restrictTo(idb).checkpoint()
+    delta.restrictTo(idb).checkpoint()
   }
 
   def deltaEmpty: Boolean = delta.isEmpty
@@ -20,20 +20,20 @@ case class NonshardedState(database: Database, idb: Set[String] = Set(), delta: 
   }
 
   def cache(): this.type = {
-    database.cache()
-    delta.cache()
+    database.restrictTo(idb).cache()
+    delta.restrictTo(idb).cache()
     this
   }
 
   def unpersist(blocking: Boolean = true): this.type = {
-    database.unpersist(blocking)
-    delta.unpersist(blocking)
+    database.restrictTo(idb).unpersist(blocking)
+    delta.restrictTo(idb).unpersist(blocking)
     this
   }
 
   def materialize(): this.type = {
-    database.materialize()
-    delta.materialize()
+    database.restrictTo(idb).materialize()
+    delta.restrictTo(idb).materialize()
     this
   }
 

@@ -4,6 +4,8 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 case class Relation(name: String, data: RDD[Fact]) {
+  def coalesce(numPartitions: Int): Relation = copy(data = data.coalesce(numPartitions))
+
   def subtract(other: Relation) = {
     require(name == other.name, "Relation cannot be subtracted from a relation with a different name")
     println("SUBTRACT")
@@ -23,9 +25,9 @@ case class Relation(name: String, data: RDD[Fact]) {
     copy(data = combinedData)
   }
 
-  def union(relation: Relation, aggregation: Option[Aggregation]): Relation = {
+  def union(relation: Relation): Relation = {
     println("UNION")
-    copy(data = data.union(relation.data)).combine(aggregation)
+    copy(data = data.union(relation.data))
   }
 
   def + (relation: Relation): Relation = copy(data = data.union(relation.data))

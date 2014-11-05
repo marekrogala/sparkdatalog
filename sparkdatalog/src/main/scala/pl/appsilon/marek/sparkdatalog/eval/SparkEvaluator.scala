@@ -12,15 +12,17 @@ object SparkEvaluator {
       staticContext: StaticEvaluationContext,
       rules: Iterable[Rule],
       state: NonshardedState,
-      calculateDelta: Boolean): NonshardedState = {
-    println("making interation, delta=" + state.delta.relations.keys.toString)
+      calculateDelta: Boolean,
+      onlyRecursiveRules: Boolean): NonshardedState = {
+    println("making interation, delta=" + state.delta.relations.values.headOption.map(_.data.mapPartitionsWithIndex({ case (ind, f) => if(f.isEmpty) Iterator() else Iterator(ind -> f.toSeq) }).collect().mkString(", ")))
+    println("partitions: " + state.database.relations.values.map(_.data.partitions.size) + " delta "  + state.delta.relations.values.map(_.data.partitions.size))
 
-    val generatedRelations = rules.map(_.evaluateOnSpark(staticContext, state))
-    val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations)
+    val generatedRelations = rules.filter(!onlyRecursiveRules || _.isRecursiveInStratum).map(_.evaluateOnSpark(staticContext, state))
+    val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations).coalesce(8)
     if(calculateDelta) {
       state.step(newFullDatabase)
     } else {
-      NonshardedState(newFullDatabase)
+      state.copy(database = newFullDatabase, delta = Database.empty)
     }
   }
 
@@ -45,10 +47,11 @@ object SparkEvaluator {
         println("Making iteration " + iteration)
 
         val oldState = state
+        val isFirstIteration = iteration == 0
         val isLastIteration = iteration + 1 >= maxIters
-        state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state, !isLastIteration)
+        state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state, !isLastIteration, !isFirstIteration)
         state.cache()
-        Timed("checkpoint", state.checkpoint())
+        if(iteration % 5 == 0) Timed("checkpoint", state.checkpoint())
         Timed("materialize", state.materialize())
         oldState.unpersist(blocking = false)
 

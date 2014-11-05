@@ -25,6 +25,7 @@ case class Rule(head: Head, body: RuleBody) {
   def analyze(idb: Set[String]) = {
     analyzedBodies = body.analyze(variableIds, idb)
   }
+  def isRecursiveInStratum = analyzedBodies.exists(_.isRecursive)
 
   def evaluate(context: StaticEvaluationContext, shard: StateShard): Seq[(Long, RelationInstance)] = {
     val solutions: Seq[Valuation] = analyzedBodies.flatMap(_.findSolutions(context, shard))
