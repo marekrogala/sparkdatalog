@@ -7,7 +7,6 @@ import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, Static
 
 case class Rule(head: Head, body: RuleBody) {
 
-
   /** Semantic analysis */
   val notBoundHeadVariables = head.args.toSet -- body.outVariables
   if (notBoundHeadVariables.nonEmpty)
@@ -17,7 +16,9 @@ case class Rule(head: Head, body: RuleBody) {
       "; but positive variables in body are: " + body.outVariables.mkString(", ") + ")")
   val variableIds: Map[String, Int] = body.outVariables.toSeq.zipWithIndex.toMap
   val analyzedBodies = body.analyze(variableIds)
-  val refferedRelations = body.relationalSubgoals.map(_.asInstanceOf[GoalPredicate].predicate.tableName)
+  val refferedRelations = body.relationalSubgoals.map(_.predicate.tableName)
+
+  val isRecursive = refferedRelations.contains(head.name)
 
   def evaluate(context: StaticEvaluationContext, shard: StateShard): Seq[(Long, RelationInstance)] = {
     val solutions: Seq[Valuation] = analyzedBodies.flatMap(_.findSolutions(context, shard))

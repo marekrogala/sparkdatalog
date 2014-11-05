@@ -17,7 +17,8 @@ case class RuleBody(subgoals: Seq[Subgoal]) {
   if(!hasRelationalSubgoal) throw new SemanticException("Rule must contain at least one relational subgoal.")
 
   val (_, outVariables) = SubgoalsTopologicalSort(subgoals)
-  val (relationalSubgoals: Seq[Subgoal], nonRelationalSubgoals: Seq[Subgoal]) = subgoals.partition(_.isRelational)
+  val (rawRelationalSubgoals: Seq[Subgoal], nonRelationalSubgoals: Seq[Subgoal]) = subgoals.partition(_.isRelational)
+  val relationalSubgoals = rawRelationalSubgoals.map(_.asInstanceOf[GoalPredicate])
   private val relationalSubgoalsRotations: IndexedSeq[Seq[Subgoal]] = relationalSubgoals.indices.map(pos => {
     val (nose, tail) = relationalSubgoals.splitAt(pos)
     tail ++ nose

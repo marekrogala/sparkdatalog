@@ -52,6 +52,7 @@ object SparkShardedEvaluator {
 
       println("Processing stratum %d: %s".format(stratumId, stratum.toString()))
       state = state.withAllInDelta
+      val maxIters = if(stratum.size == 1 && !stratum.head.isRecursive) 1 else Int.MaxValue
       iteration = 0
 
       do {
@@ -65,7 +66,7 @@ object SparkShardedEvaluator {
         oldState.unpersist(blocking = false)
 
         iteration += 1
-      } while (!state.deltaEmpty)
+      } while (iteration < maxIters && !state.deltaEmpty)
     }
 
 //    println(state.toString)
