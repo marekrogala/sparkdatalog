@@ -12,6 +12,7 @@ case class Head(name: String, args: Seq[String]) {
 
   def emitSolutionsSpark(valuations: RDD[Valuation], variables: Map[String, Int]): Relation = {
     val argIds = args.map(variables)
+    println("MAP valuation->facts")
     Relation(name, valuations.map(valuation => argIds.map(valuation(_).get)))
   }
 

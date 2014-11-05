@@ -19,23 +19,35 @@ case class RuleBody(subgoals: Seq[Subgoal]) {
   val (_, outVariables) = SubgoalsTopologicalSort(subgoals)
   val (rawRelationalSubgoals: Seq[Subgoal], nonRelationalSubgoals: Seq[Subgoal]) = subgoals.partition(_.isRelational)
   val relationalSubgoals = rawRelationalSubgoals.map(_.asInstanceOf[GoalPredicate])
-  private val relationalSubgoalsRotations: IndexedSeq[Seq[Subgoal]] = relationalSubgoals.indices.map(pos => {
-    val (nose, tail) = relationalSubgoals.splitAt(pos)
-    tail ++ nose
-  })
 
   private def fillWithNonrelational(relationalSubgoalsRotated: Seq[Subgoal]): Seq[Subgoal] =
     NonrelationalSubgoalsTopologicalSort(relationalSubgoalsRotated, nonRelationalSubgoals)
 
-  private val relationalSubgoalsRotationsWithNonrelationals: IndexedSeq[Seq[Subgoal]] = relationalSubgoalsRotations.map(fillWithNonrelational)
 
+  def analyze(variableIds: Map[String, Int], idb: Set[String]): Seq[AnalyzedRuleBody] = {
+    val isRecursiveWithinStratum = idb.intersect(relationalSubgoals.map(_.predicate.tableName).toSet).nonEmpty
+    if(isRecursiveWithinStratum) {
 
-  def analyze(variableIds: Map[String, Int]): Seq[AnalyzedRuleBody] = {
-    for(sortedSubgoals <- relationalSubgoalsRotationsWithNonrelationals) yield {
-      val boundVariables = sortedSubgoals.scanLeft(Set[Int]())((acc, subgoal) => acc ++ subgoal.getOutVariables.map(variableIds)).dropRight(1)
-      val analyzedSubgoals = sortedSubgoals.zip(boundVariables).map(subgoalWithBinding =>
-        subgoalWithBinding._1.analyze(variableIds, subgoalWithBinding._2))
-      AnalyzedRuleBody(analyzedSubgoals, Valuation(variableIds.size))
+      val recursiveSubgoalsRotations: IndexedSeq[Seq[Subgoal]] = relationalSubgoals.indices
+        .filter(pos => idb.contains(relationalSubgoals(pos).predicate.tableName))
+        .map(pos => {
+          val (nose, tail) = relationalSubgoals.splitAt(pos)
+          tail ++ nose
+        })
+      val rotationsWithNonrelationals: IndexedSeq[Seq[Subgoal]] = recursiveSubgoalsRotations.map(fillWithNonrelational)
+
+      for (sortedSubgoals <- rotationsWithNonrelationals) yield {
+        val boundVariables = sortedSubgoals.scanLeft(Set[Int]())((acc, subgoal) => acc ++ subgoal.getOutVariables.map(variableIds)).dropRight(1)
+        val analyzedSubgoals = sortedSubgoals.zip(boundVariables).map(subgoalWithBinding =>
+          subgoalWithBinding._1.analyze(variableIds, subgoalWithBinding._2))
+        AnalyzedRuleBody(analyzedSubgoals, Valuation(variableIds.size), isRecursive = true)
+      }
+    } else {
+        val sortedSubgoals = fillWithNonrelational(rawRelationalSubgoals)
+        val boundVariables = sortedSubgoals.scanLeft(Set[Int]())((acc, subgoal) => acc ++ subgoal.getOutVariables.map(variableIds)).dropRight(1)
+        val analyzedSubgoals = sortedSubgoals.zip(boundVariables).map(subgoalWithBinding =>
+          subgoalWithBinding._1.analyze(variableIds, subgoalWithBinding._2))
+        Seq(AnalyzedRuleBody(analyzedSubgoals, Valuation(variableIds.size), isRecursive = false))
     }
   }
 

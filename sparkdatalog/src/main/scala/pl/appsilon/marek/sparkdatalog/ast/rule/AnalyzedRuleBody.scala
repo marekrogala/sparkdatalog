@@ -9,7 +9,7 @@ import pl.appsilon.marek.sparkdatalog.eval.{StateShard, StaticEvaluationContext,
 
 import scala.collection.GenTraversableOnce
 
-case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Valuation) {
+case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Valuation, isRecursive: Boolean) {
 
   /** Semantic analysis */
   val firstRelationalSubgoal = subgoals.indexWhere(isRelational)
@@ -42,10 +42,15 @@ case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Va
     valuations.flatMap(subgoal.solveRDD(_, database))
   
   def findSolutionsSpark(context: StaticEvaluationContext, state: NonshardedState): RDD[Valuation] = {
+    println(" ---- evaluating body " + subgoals.toString)
     val head +: tail = dynamicSubgoals
     println("PARALLELIZE static")
     val staticParallelized: RDD[Valuation] = state.sc.parallelize(staticallyEvaluated)
-    val firstEvaluated = processSubgoalSpark(Some(staticParallelized), head, state.delta)
+    val firstEvaluated = if(isRecursive) {
+      processSubgoalSpark(Some(staticParallelized), head, state.delta)
+    } else {
+      processSubgoalSpark(Some(staticParallelized), head, state.database)
+    }
     val result = tail.foldLeft(firstEvaluated)(processSubgoalSpark(_, _, state.database))
     //val name = head.asInstanceOf[AnalyzedGoalPredicate].predicate.tableName
 

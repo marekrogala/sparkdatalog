@@ -1,12 +1,9 @@
 package pl.appsilon.marek.sparkdatalog.eval
 
-import org.apache.spark.SparkContext._
-import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog.Database
 import pl.appsilon.marek.sparkdatalog.ast.Program
 import pl.appsilon.marek.sparkdatalog.ast.rule.Rule
 import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
-import pl.appsilon.marek.sparkdatalog.spark.OuterJoinableRDD._
 import pl.appsilon.marek.sparkdatalog.util.Timed
 
 object SparkEvaluator {
@@ -14,12 +11,17 @@ object SparkEvaluator {
   private def makeIteration(
       staticContext: StaticEvaluationContext,
       rules: Iterable[Rule],
-      state: NonshardedState): NonshardedState = {
-    //println("making interation, delta=" + state.delta.toString)
+      state: NonshardedState,
+      calculateDelta: Boolean): NonshardedState = {
+    println("making interation, delta=" + state.delta.relations.keys.toString)
 
     val generatedRelations = rules.map(_.evaluateOnSpark(staticContext, state))
     val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations)
-    state.step(newFullDatabase)
+    if(calculateDelta) {
+      state.step(newFullDatabase)
+    } else {
+      NonshardedState(newFullDatabase)
+    }
   }
 
   def evaluate(database: Database, program: Program): Database = {
@@ -33,21 +35,25 @@ object SparkEvaluator {
     for ((stratum, stratumId) <- strata.zipWithIndex) {
 
       println("Processing stratum %d: %s".format(stratumId, stratum.toString()))
-      state = state.withAllInDelta
+      val idb = stratum.map(_.head.name).toSet
+      stratum.foreach(_.analyze(idb))
+      state = state.prepareForIteration(idb)
       iteration = 0
+      val maxIters = if(stratum.size == 1 && !stratum.head.isRecursive) 1 else Int.MaxValue
 
       do {
         println("Making iteration " + iteration)
 
         val oldState = state
-        state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state)
+        val isLastIteration = iteration + 1 >= maxIters
+        state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state, !isLastIteration)
         state.cache()
         Timed("checkpoint", state.checkpoint())
         Timed("materialize", state.materialize())
         oldState.unpersist(blocking = false)
 
         iteration += 1
-      } while (!state.deltaEmpty)
+      } while (iteration < maxIters && !state.deltaEmpty)
     }
 
 //    println(state.toString)

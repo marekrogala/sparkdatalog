@@ -23,8 +23,10 @@ case class Relation(name: String, data: RDD[Fact]) {
     copy(data = combinedData)
   }
 
-  def union(relation: Relation, aggregation: Option[Aggregation]): Relation =
+  def union(relation: Relation, aggregation: Option[Aggregation]): Relation = {
+    println("UNION")
     copy(data = data.union(relation.data)).combine(aggregation)
+  }
 
   def + (relation: Relation): Relation = copy(data = data.union(relation.data))
 

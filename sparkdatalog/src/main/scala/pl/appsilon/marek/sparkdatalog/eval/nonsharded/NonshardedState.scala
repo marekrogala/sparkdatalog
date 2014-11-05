@@ -3,7 +3,7 @@ package pl.appsilon.marek.sparkdatalog.eval.nonsharded
 import org.apache.spark.SparkContext
 import pl.appsilon.marek.sparkdatalog.Database
 
-case class NonshardedState(database: Database, delta: Database = Database.empty) {
+case class NonshardedState(database: Database, idb: Set[String] = Set(), delta: Database = Database.empty) {
   val sc: SparkContext = database.relations.head._2.data.context
 
   def checkpoint() = {
@@ -13,7 +13,7 @@ case class NonshardedState(database: Database, delta: Database = Database.empty)
 
   def deltaEmpty: Boolean = delta.isEmpty
 
-  def step(newDatabase: Database) = new NonshardedState(newDatabase, newDatabase.subtract(database))
+  def step(newDatabase: Database) = new NonshardedState(newDatabase, idb, newDatabase.subtract(database, idb))
 
   def toDatabase: Database = {
     database
@@ -41,15 +41,15 @@ case class NonshardedState(database: Database, delta: Database = Database.empty)
     "State: " +  database.toString + " Delta: " + delta.toString
   }
 
-  def withAllInDelta: NonshardedState = {
-    copy(delta = database)
+  def prepareForIteration(newIdb: Set[String]): NonshardedState = {
+    copy(idb = newIdb, delta = database.restrictTo(newIdb))
   }
 
 }
 
 object NonshardedState {
   def fromDatabase(database: Database): NonshardedState = {
-    new NonshardedState(database).withAllInDelta
+    new NonshardedState(database)
   }
 
 }

@@ -19,4 +19,6 @@ case class GoalPredicate(predicate: Predicate) extends Subgoal {
   override def isRelational: Boolean = true
 
   override def toString = predicate.toString
+
+  override val evaluationPriority: Int = 3
 }

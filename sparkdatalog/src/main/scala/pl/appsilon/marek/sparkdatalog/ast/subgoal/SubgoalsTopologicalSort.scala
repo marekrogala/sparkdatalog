@@ -18,7 +18,7 @@ object SubgoalsTopologicalSort {
         throw new SemanticException("Unbound variable(s) in rule body: " + notEvaluable.mkString("'", "', '", "'"))
       } else {
         val newBoundVariables = newEvaluable.flatMap(_._3).toSet
-        val newEvaluatedSubgoals = newEvaluable map (_._1)
+        val newEvaluatedSubgoals = (newEvaluable map (_._1)).sortBy(_.evaluationPriority)
         iterate(processed ++ newEvaluatedSubgoals, notEvaluable, available ++ newBoundVariables)
       }
     }

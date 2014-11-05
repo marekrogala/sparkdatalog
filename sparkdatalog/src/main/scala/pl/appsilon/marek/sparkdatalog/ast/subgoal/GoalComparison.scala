@@ -13,4 +13,6 @@ case class GoalComparison(left: Exp, right: Exp, operator: ComparisonOperator) e
   override def isRelational: Boolean = false
 
   override def toString = left.toString + operator.toString + right.toString
+
+  override val evaluationPriority: Int = 1
 }

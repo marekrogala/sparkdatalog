@@ -17,4 +17,6 @@ case class GoalAssign(lValueVariable: String, exp: Exp) extends Subgoal {
   override def isRelational: Boolean = false
 
   override def toString = lValueVariable.toString + " = " + exp.toString
+
+  override val evaluationPriority: Int = 2
 }

@@ -4,11 +4,15 @@ import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog.eval.{StateShard, LocalDatalog, SparkDatalog}
 
 case class Database(relations: Map[String, Relation]) {
+  def restrictTo(relationsSubset: Set[String]): Database = Database(relations.filterKeys(relationsSubset))
+
   def checkpoint(): Unit = relations.foreach(_._2.data.checkpoint())
 
-  def subtract(other: Database) = {
-    val relationsDifference = for ((name, relation) <- relations) yield {
-      name -> other.relations.get(name).map(relation.subtract).getOrElse(relation)
+  def subtract(other: Database, restrictToRelations: Set[String]) = {
+    val myRelations = restrictTo(restrictToRelations).relations
+    val otherRelations = other.restrictTo(restrictToRelations).relations
+    val relationsDifference = for ((name, relation) <- myRelations) yield {
+      name -> otherRelations.get(name).map(relation.subtract).getOrElse(relation)
     }
     Database(relationsDifference)
   }
@@ -24,7 +28,7 @@ case class Database(relations: Map[String, Relation]) {
 
   def mergeIn(relation: Relation, aggregation: Option[Aggregation]): Database = {
     val newInstance = relations.get(relation.name) match {
-      case None => relation
+      case None => relation.combine(aggregation)
       case Some(previousInstance) => previousInstance.union(relation, aggregation)
     }
     new Database(relations + (newInstance.name -> newInstance))

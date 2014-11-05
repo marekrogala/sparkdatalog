@@ -17,10 +17,14 @@ case class Rule(head: Head, body: RuleBody) {
       " (head has free variables: " + head.args.mkString(", ") +
       "; but positive variables in body are: " + body.outVariables.mkString(", ") + ")")
   val variableIds: Map[String, Int] = body.outVariables.toSeq.zipWithIndex.toMap
-  val analyzedBodies = body.analyze(variableIds)
   val refferedRelations = body.relationalSubgoals.map(_.predicate.tableName)
 
   val isRecursive = refferedRelations.contains(head.name)
+
+  var analyzedBodies: Seq[AnalyzedRuleBody] = _
+  def analyze(idb: Set[String]) = {
+    analyzedBodies = body.analyze(variableIds, idb)
+  }
 
   def evaluate(context: StaticEvaluationContext, shard: StateShard): Seq[(Long, RelationInstance)] = {
     val solutions: Seq[Valuation] = analyzedBodies.flatMap(_.findSolutions(context, shard))
