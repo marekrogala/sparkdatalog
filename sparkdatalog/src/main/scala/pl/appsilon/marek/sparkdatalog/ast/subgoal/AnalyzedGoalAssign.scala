@@ -26,6 +26,7 @@ case class AnalyzedGoalAssign(lValueVariable: Int, exp: AnalyzedExp) extends Ana
   override def getLocation: Option[Int] = None
 
   override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] = {
+    println("FLATMAP evaluateStatic")
     Some(valuations.flatMap(evaluateStatic)) // TODO maybe some more effective way?
   }
 }

@@ -24,6 +24,8 @@ case class AnalyzedGoalComparison(left: AnalyzedExp, right: AnalyzedExp, operato
 
   override def getLocation: Option[Int] = None
 
-  override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] =
+  override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] = {
+    println("FILTER decideStatic")
     Some(valuations.filter(decideStatic))
+  }
 }
