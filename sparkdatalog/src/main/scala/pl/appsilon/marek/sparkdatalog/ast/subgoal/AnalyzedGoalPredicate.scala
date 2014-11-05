@@ -18,14 +18,12 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
   override def evaluateStatic(valuation: Valuation): Option[Valuation] = ???
 
   def extractBoundVariables(valuations: Seq[Valuation]): Seq[(Valuation, Valuation)] =
-  // TODO: moze byc jeszcze bardziej efektywne, przejscie jednoczesnie po obu listach
     for (valuation <- valuations) yield {
       val key = joinByVariables.map(valuation(_))
       key -> valuation
     }
 
   def extractBoundVariables(valuations: RDD[Valuation]): RDD[(Valuation, Valuation)] = {
-    // TODO: moze byc jeszcze bardziej efektywne, przejscie jednoczesnie po obu listach
     println("MAP in extractBoundVariables")
     for (valuation <- valuations) yield {
       val key = joinByVariables.map(valuation(_))

@@ -1,25 +1,33 @@
 package pl.appsilon.marek.sparkdatalogexample
 
+import scala.io.Source
 import scala.util.Random
 
-import org.apache.spark.graphx.{Graph, VertexId}
-import org.apache.spark.graphx.util.GraphGenerators
-import org.apache.spark.rdd.RDD
+import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import pl.appsilon.marek.sparkdatalog.{Database, Relation}
-import pl.appsilon.marek.sparkdatalog.util.Timed
 
 object ShortestPathsPerfTest extends PerformanceTest
 {
-  var sourceNumber: Int = 0
-  var sourceId: VertexId = sourceNumber
-  var graph: Graph[(Int, Int), Double] = _
+  var sourceId: VertexId = _
+  var graph: Graph[Int, Double] = _
   var database: Database = _
 
   def initialize(args: Seq[String]) = {
     val diam = args(0).toInt
-    graph = GraphGenerators.gridGraph(sc, diam, diam) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
+    //graph = GraphGenerators.gridGraph(sc, diam, diam) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
 
-    val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
+
+    val edges = Source.fromFile("/home/marek/magisterka/sparkdatalog/sparkdatalog/twitter.txt").getLines().map({
+      str =>
+        val s = str.split(" ")
+        (s(0).toInt, s(1).toInt)
+    }).toSeq
+    val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
+    val edgesRdd = sc.parallelize(edges).map(edge => (edge._1, edge._2, Random.nextInt(1000)))
+
+    sourceId = sourceNumber
+    graph = Graph.fromEdges(edgesRdd.map({case (a, b, c) => Edge(a, b, c)}), 0)
+
     val sourceRdd = sc.parallelize(Seq(sourceNumber))
     database = Database(
       Relation.ternary("Edge", edgesRdd),
