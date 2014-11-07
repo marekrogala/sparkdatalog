@@ -1,6 +1,7 @@
 package pl.appsilon.marek.sparkdatalogexample
 
 import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalogexample.ShortestPathsPerfTest._
 
 import scala.io.Source
 
@@ -14,7 +15,7 @@ object TrianglesPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]): Unit = {
-    val edges = Source.fromFile("/home/marek/magisterka/sparkdatalog/sparkdatalog/twitter.txt").getLines().map({
+    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
       str =>
         val s = str.split(" ")
         val e = (s(0).toInt, s(1).toInt)

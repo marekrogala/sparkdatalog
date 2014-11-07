@@ -10,6 +10,8 @@ trait PerformanceTest {
   def runDatalog(): Unit
   def name: String
 
+  val root = "/root/sparkdatalog/sparkdatalog"
+
   var sc: SparkContext = _
 
   def main(args: Array[String]): Unit = {
