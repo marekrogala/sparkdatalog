@@ -1,8 +1,6 @@
 package pl.appsilon.marek.sparkdatalogexample
 
-import java_cup.version
-
-import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.{SparkConf, SparkContext}
 import pl.appsilon.marek.sparkdatalog.util.Timed
 
 trait PerformanceTest {
@@ -20,9 +18,9 @@ trait PerformanceTest {
     val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster(master)
     //conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     sc = new SparkContext(conf)
-    sc.setCheckpointDir("checkpoint")
-    //sc.setCheckpointDir("hdfs://ec2-54-165-76-72.compute-1.amazonaws.com:9000/checkpoint")
-    //sc.addJar("target/scala-2.10/sparkdatalog_2.10-1.0.0.jar")
+    //sc.setCheckpointDir("checkpoint")
+    sc.setCheckpointDir("hdfs://ec2-54-165-76-72.compute-1.amazonaws.com:9000/checkpoint")
+    sc.addJar("target/scala-2.10/sparkdatalog_2.10-1.0.0.jar")
 
     Timed("initialize data", initialize(moreArgs))
 
