@@ -10,7 +10,7 @@ trait PerformanceTest {
   def runDatalog(): Unit
   def name: String
 
-  val root = "/root/sparkdatalog/sparkdatalog"
+  val root = "hdfs://ec2-54-85-122-130.compute-1.amazonaws.com:9000/input" //"/root/sparkdatalog/sparkdatalog"
 
   var sc: SparkContext = _
 
