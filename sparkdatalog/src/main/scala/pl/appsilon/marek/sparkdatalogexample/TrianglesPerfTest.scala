@@ -36,6 +36,7 @@ object TrianglesPerfTest extends PerformanceTest
           val e = (s(0).toInt, s(1).toInt)
           if(e._1 > e._2) e.swap else e
       })
+    println("Read " + edgesRdd.count() + " edges.")
 
     database = Database(Relation.binary("Edge", edgesRdd))
   }
