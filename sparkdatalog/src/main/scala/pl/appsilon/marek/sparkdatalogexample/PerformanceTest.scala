@@ -19,7 +19,7 @@ trait PerformanceTest {
     //conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     sc = new SparkContext(conf)
     //sc.setCheckpointDir("checkpoint")
-    sc.setCheckpointDir("hdfs://ec2-54-165-76-72.compute-1.amazonaws.com:9000/checkpoint")
+    sc.setCheckpointDir("hdfs://ec2-54-85-122-130.compute-1.amazonaws.com:9000/checkpoint")
     sc.addJar("target/scala-2.10/sparkdatalog_2.10-1.0.0.jar")
 
     Timed("initialize data", initialize(moreArgs))
