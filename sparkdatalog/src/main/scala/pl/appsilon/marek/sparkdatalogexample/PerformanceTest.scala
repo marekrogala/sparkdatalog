@@ -10,19 +10,20 @@ trait PerformanceTest {
   def runDatalog(): Unit
   def name: String
 
-  val root = "hdfs://ec2-54-165-37-132.compute-1.amazonaws.com:9000/input" //"/root/sparkdatalog/sparkdatalog"
+  var root: String = _
 
   var sc: SparkContext = _
 
   def main(args: Array[String]): Unit = {
     val master +: version +: moreArgs = args.toList
 
-    val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster(master)
+    val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster("spark://" + master + ":7077")
     //conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     sc = new SparkContext(conf)
     //sc.setCheckpointDir("checkpoint")
-    sc.setCheckpointDir("hdfs://ec2-54-165-37-132.compute-1.amazonaws.com:9000/checkpoint")
+    sc.setCheckpointDir("hdfs://" + master + "/checkpoint")
     sc.addJar("target/scala-2.10/sparkdatalog_2.10-1.0.0.jar")
+    root =  "hdfs://" + master + ":9000/input" //"/root/sparkdatalog/sparkdatalog"
 
     Timed("initialize data", initialize(moreArgs))
 
