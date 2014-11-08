@@ -18,7 +18,7 @@ object ShortestPathsLocalTest
     val sc = new SparkContext(conf)
 
     // Generate random graph with random edge lengths
-    val graph = GraphGenerators.logNormalGraph(sc, numVertices = 1000)
+    //val graph = GraphGenerators.logNormalGraph(sc, numVertices = 1000)
     //val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
     val edgesRdd = sc.parallelize(exampleEdges)
     val sourceRdd = sc.parallelize(sourceNode)
