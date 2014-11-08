@@ -23,7 +23,7 @@ object ShortestPathsPerfTest extends PerformanceTest
         val s = str.split(" ")
         (s(0).toInt, s(1).toInt)
     }).toSeq
-    val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
+    //val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
     val edgesRawRdd = sc.parallelize(edges)
 
 //    val edgesRawRdd = sc.textFile(root + "/twitter.txt").map({
