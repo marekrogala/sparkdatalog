@@ -18,7 +18,7 @@ object ShortestPathsPerfTest extends PerformanceTest
     //graph = GraphGenerators.gridGraph(sc, diam, diam) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
 
 
-    val edges = Source.fromFile("root/sparkdatalog/sparkdatalog/twitter.txt").getLines().map({
+    val edges = Source.fromFile("/root/sparkdatalog/sparkdatalog/twitter.txt").getLines().map({
       str =>
         val s = str.split(" ")
         (s(0).toInt, s(1).toInt)
