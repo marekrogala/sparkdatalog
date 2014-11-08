@@ -18,20 +18,20 @@ object ShortestPathsPerfTest extends PerformanceTest
     //graph = GraphGenerators.gridGraph(sc, diam, diam) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
 
 
-    val edges = Source.fromFile("/root/sparkdatalog/sparkdatalog/twitter.txt").getLines().map({
-      str =>
-        val s = str.split(" ")
-        (s(0).toInt, s(1).toInt)
-    }).toSeq
-    //val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
-    val edgesRawRdd = sc.parallelize(edges)
-
-//    val edgesRawRdd = sc.textFile(root + "/twitter.txt").map({
+//    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
 //      str =>
 //        val s = str.split(" ")
-//        val e = (s(0).toInt, s(1).toInt)
-//        if(e._1 > e._2) e.swap else e
-//    })
+//        (s(0).toInt, s(1).toInt)
+//    }).toSeq
+//    val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
+//    val edgesRawRdd = sc.parallelize(edges)
+
+    val edgesRawRdd = sc.textFile(root + "/twitter.txt").map({
+      str =>
+        val s = str.split(" ")
+        val e = (s(0).toInt, s(1).toInt)
+        if(e._1 > e._2) e.swap else e
+    })
     val edgesRdd = edgesRawRdd.map(edge => (edge._1, edge._2, Random.nextInt(1000)))
     val sourceNumber = edgesRdd.map(_._1).distinct().take(1).head
 
