@@ -11,8 +11,6 @@ import pl.appsilon.marek.sparkdatalog.{Database, Relation}
 
 object ConnectedComponentsPerfTest extends PerformanceTest
 {
-  var sourceNumber: Int = 0
-  var sourceId: VertexId = sourceNumber
   var graph: Graph[Int, Int] = _
   var database: Database = _
 
@@ -36,13 +34,12 @@ object ConnectedComponentsPerfTest extends PerformanceTest
 
     val path: String = root + "/twitter.txt"
     println("reading from " + path)
-    val edgesRawRdd = sc.textFile(path).map({
+    val edgesRdd = sc.textFile(path).map({
       str =>
         val s = str.split(" ")
         val e = (s(0).toInt, s(1).toInt)
         if(e._1 > e._2) e.swap else e
     })
-    val edgesRdd = edgesRawRdd.map(edge => (edge._1, edge._2))
     val verticesRdd = edgesRdd.map(_._1).union(edgesRdd.map(_._2)).distinct()
 
     graph = Graph.fromEdges(edgesRdd.map({case (a, b) => Edge(a, b)}), 0)
