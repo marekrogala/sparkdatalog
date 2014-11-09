@@ -15,7 +15,7 @@ object TrianglesPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]): Unit = {
-    val edges = Source.fromFile("/root/sparkdatalog/sparkdatalog/twitter.txt").getLines().take(100000).map({
+    val edges = Source.fromFile("/root/sparkdatalog/sparkdatalog/twitter.txt").getLines().take(1000000).map({
       str =>
         val s = str.split(" ")
         val e = (s(0).toInt, s(1).toInt)
