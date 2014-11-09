@@ -18,7 +18,7 @@ object SparkEvaluator {
     //println("partitions: " + state.database.relations.values.map(_.data.partitions.size) + " delta "  + state.delta.relations.values.map(_.data.partitions.size))
 
     val generatedRelations = rules.filter(!onlyRecursiveRules || _.isRecursiveInStratum).map(_.evaluateOnSpark(staticContext, state))
-    val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations).coalesce(8)
+    val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations).coalesce(32)
     if(calculateDelta) {
       state.step(newFullDatabase)
     } else {
