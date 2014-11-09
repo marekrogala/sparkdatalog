@@ -15,7 +15,7 @@ trait PerformanceTest {
   var sc: SparkContext = _
 
   def main(args: Array[String]): Unit = {
-    val master +: version +: moreArgs = args.toList
+    val master +: moreArgs = args.toList
 
     val masterUrl: String = "spark://" + master + ":7077"
     println("configuring master: "+ masterUrl)
