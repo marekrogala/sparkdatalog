@@ -27,7 +27,7 @@ object TrianglesPerfTest extends PerformanceTest
     //val diam = args(0).toInt
     //graph = GraphGenerators.logNormalGraph(sc, numVertices = diam)
     //val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
-    edgesRdd = sc.parallelize(edges).repartition(32)
+    edgesRdd = sc.parallelize(edges).repartition(16)
 
 //
 //    edgesRdd = sc.textFile(root + "/twitter.txt").map({
