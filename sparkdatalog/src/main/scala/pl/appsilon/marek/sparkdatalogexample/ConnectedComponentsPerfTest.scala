@@ -61,7 +61,7 @@ object ConnectedComponentsPerfTest extends PerformanceTest
 
 
     val resultDatabase = database.datalog(query)
-    println(resultDatabase("ComponentId").collect().mkString("; "))
+    println(resultDatabase("ComponentId").count())
   }
 
   override def name: String = "Connected Components"
@@ -82,6 +82,6 @@ object ConnectedComponentsPerfTest extends PerformanceTest
     )
 
     val componentIds = sssp.vertices.map(_._2).distinct()
-    println(componentIds.collect().mkString("; "))
+    println(componentIds.count())
   }
 }
