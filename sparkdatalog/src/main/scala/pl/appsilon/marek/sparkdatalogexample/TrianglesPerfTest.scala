@@ -15,27 +15,27 @@ object TrianglesPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]): Unit = {
-//    val edges = Source.fromFile(root + "/twitter.txt").getLines().take(100000).map({
-//      str =>
-//        val s = str.split(" ")
-//        val e = (s(0).toInt, s(1).toInt)
-//        if(e._1 > e._2) e.swap else e
-//    }).toSeq
-//
-////    val edges = Seq(1->2,2->3, 1->3)
-//
-//    //val diam = args(0).toInt
-//    //graph = GraphGenerators.logNormalGraph(sc, numVertices = diam)
-//    //val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
-//    edgesRdd = sc.parallelize(edges)
+    val edges = Source.fromFile(root + "/twitter.txt").getLines().take(100000).map({
+      str =>
+        val s = str.split(" ")
+        val e = (s(0).toInt, s(1).toInt)
+        if(e._1 > e._2) e.swap else e
+    }).toSeq
 
+//    val edges = Seq(1->2,2->3, 1->3)
 
-    edgesRdd = sc.textFile(root + "/twitter.txt").map({
-        str =>
-          val s = str.split(" ")
-          val e = (s(0).toInt, s(1).toInt)
-          if(e._1 > e._2) e.swap else e
-      })
+    //val diam = args(0).toInt
+    //graph = GraphGenerators.logNormalGraph(sc, numVertices = diam)
+    //val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
+    edgesRdd = sc.parallelize(edges).repartition(8)
+
+//
+//    edgesRdd = sc.textFile(root + "/twitter.txt").map({
+//        str =>
+//          val s = str.split(" ")
+//          val e = (s(0).toInt, s(1).toInt)
+//          if(e._1 > e._2) e.swap else e
+//      })
     println("Read " + edgesRdd.count() + " edges in " + edgesRdd.partitions.size + " partitions.")
 
     database = Database(Relation.binary("Edge", edgesRdd))
