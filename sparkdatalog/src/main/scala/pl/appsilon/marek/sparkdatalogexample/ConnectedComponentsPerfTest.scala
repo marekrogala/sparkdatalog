@@ -1,5 +1,7 @@
 package pl.appsilon.marek.sparkdatalogexample
 
+import pl.appsilon.marek.sparkdatalogexample.ShortestPathsPerfTest._
+
 import scala.io.Source
 import scala.util.Random
 
@@ -15,19 +17,34 @@ object ConnectedComponentsPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]): Unit = {
-    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
-      str =>
-        val s = str.split(" ")
-        (s(0).toInt, s(1).toInt)
-    }).toSeq
-    val vertices = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted
+//    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
+//      str =>
+//        val s = str.split(" ")
+//        (s(0).toInt, s(1).toInt)
+//    }).toSeq
+//    val vertices = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted
 
     //val diam = args(0).toInt
     //graph = GraphGenerators.logNormalGraph(sc, numVertices = diam)
     //val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
     //val verticesRdd = sc.parallelize(0 until diam)
-    val edgesRdd = sc.parallelize(edges)
-    val verticesRdd = sc.parallelize(vertices)
+//    val edgesRdd = sc.parallelize(edges)
+//    val verticesRdd = sc.parallelize(vertices)
+
+
+
+
+    val path: String = root + "/twitter.txt"
+    println("reading from " + path)
+    val edgesRawRdd = sc.textFile(path).map({
+      str =>
+        val s = str.split(" ")
+        val e = (s(0).toInt, s(1).toInt)
+        if(e._1 > e._2) e.swap else e
+    })
+    val edgesRdd = edgesRawRdd.map(edge => (edge._1, edge._2))
+    val verticesRdd = edgesRdd.map(_._1).union(edgesRdd.map(_._2)).distinct()
+
     graph = Graph.fromEdges(edgesRdd.map({case (a, b) => Edge(a, b)}), 0)
 
     database = Database(
