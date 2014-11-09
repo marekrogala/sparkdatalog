@@ -26,7 +26,9 @@ object ShortestPathsPerfTest extends PerformanceTest
 //    val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
 //    val edgesRawRdd = sc.parallelize(edges)
 
-    val edgesRawRdd = sc.textFile(root + "/twitter.txt").map({
+    val path: String = root + "/twitter.txt"
+    println("reading from " + path)
+    val edgesRawRdd = sc.textFile(path).map({
       str =>
         val s = str.split(" ")
         val e = (s(0).toInt, s(1).toInt)
