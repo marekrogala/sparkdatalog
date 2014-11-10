@@ -39,7 +39,7 @@ object ConnectedComponentsPerfTest extends PerformanceTest
         val s = str.split(" ")
         val e = (s(0).toInt, s(1).toInt)
         if(e._1 > e._2) e.swap else e
-    })
+    }).repartition(64)
     val verticesRdd = edgesRdd.map(_._1).union(edgesRdd.map(_._2)).distinct()
 
     graph = Graph.fromEdges(edgesRdd.map({case (a, b) => Edge(a, b)}), 0)
