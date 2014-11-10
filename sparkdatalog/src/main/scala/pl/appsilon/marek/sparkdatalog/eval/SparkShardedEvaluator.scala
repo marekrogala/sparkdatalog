@@ -51,6 +51,8 @@ object SparkShardedEvaluator {
     for ((stratum, stratumId) <- strata.zipWithIndex) {
 
       println("Processing stratum %d: %s".format(stratumId, stratum.toString()))
+      val idb = stratum.map(_.head.name).toSet
+      stratum.foreach(_.analyze(idb))
       state = state.withAllInDelta
       val maxIters = if(stratum.size == 1 && !stratum.head.isRecursive) 1 else Int.MaxValue
       iteration = 0
