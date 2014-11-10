@@ -33,7 +33,7 @@ object ShortestPathsPerfTest extends PerformanceTest
         val s = str.split(" ")
         val e = (s(0).toInt, s(1).toInt)
         if(e._1 > e._2) e.swap else e
-    }).repartition(128)
+    }).repartition(64)
     val edgesRdd = edgesRawRdd.map(edge => (edge._1, edge._2, Random.nextInt(1000)))
     val sourceNumber = edgesRdd.map(_._1).distinct().take(1).head
 
