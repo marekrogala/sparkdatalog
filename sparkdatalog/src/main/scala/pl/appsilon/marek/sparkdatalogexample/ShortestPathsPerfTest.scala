@@ -35,7 +35,8 @@ object ShortestPathsPerfTest extends PerformanceTest
 //    }).repartition(64)
 
     val diam = 10000
-    graph = GraphGenerators.rmatGraph(sc, diam, 4*diam).mapEdges(_ => Random.nextInt(1000)) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
+    graph = GraphGenerators.rmatGraph(sc, diam, 10*diam).mapEdges(_ => Random.nextInt(1000))
+    graph = Graph(graph.vertices, graph.edges.union(graph.reverse.edges))
 
     val edgesRdd = graph.edges.map({case Edge(a, b, c) => (a.toInt, b.toInt, c)})
     val sourceNumber = edgesRdd.map(_._1).distinct().take(1).head
