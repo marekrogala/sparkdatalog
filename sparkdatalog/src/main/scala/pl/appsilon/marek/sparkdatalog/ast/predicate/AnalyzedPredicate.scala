@@ -22,9 +22,9 @@ case class AnalyzedPredicate(tableName: String, args: Seq[Either[ValueLiteral, I
           }
         case Right(varId) =>
           valuation(varId) match {
-            case Some(`actualValue`) => // OK
-            case Some(_) => return None
-            case None => valuation.update(varId, Some(actualValue))
+            case valuationNone => valuation(varId) = actualValue
+            case `actualValue` => // OK
+            case _ => return None
           }
       }
     }

@@ -7,13 +7,13 @@ import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 case class Head(name: String, args: Seq[String]) {
   def emitSolutions(valuations: Seq[Valuation], variables: Map[String, Int]): RelationInstance = {
     val argIds = args.map(variables)
-    RelationInstance(name, valuations.map(valuation => argIds.map(valuation(_).get)))
+    RelationInstance(name, valuations.map(valuation => argIds.map(valuation(_))))
   }
 
   def emitSolutionsSpark(valuations: RDD[Valuation], variables: Map[String, Int]): Relation = {
     val argIds = args.map(variables)
     println("MAP valuation->facts")
-    Relation(name, valuations.map(valuation => argIds.map(valuation(_).get)))
+    Relation(name, valuations.map(valuation => argIds.map(valuation(_))))
   }
 
   override def toString = name + args.mkString("(", ", ", ")")

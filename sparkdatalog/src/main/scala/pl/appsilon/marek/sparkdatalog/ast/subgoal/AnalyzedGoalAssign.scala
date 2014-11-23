@@ -10,10 +10,10 @@ case class AnalyzedGoalAssign(lValueVariable: Int, exp: AnalyzedExp) extends Ana
   override def evaluateStatic(valuation: Valuation): Option[Valuation] = {
     val value = exp.evaluate(valuation)
     valuation(lValueVariable) match {
-      case None =>
-        valuation.update(lValueVariable, Some(value))
+      case valuationNone =>
+        valuation(lValueVariable) = value
         Some(valuation)
-      case Some(`value`) => Some(valuation)
+      case `value` => Some(valuation)
       case _ => None
     }
   }

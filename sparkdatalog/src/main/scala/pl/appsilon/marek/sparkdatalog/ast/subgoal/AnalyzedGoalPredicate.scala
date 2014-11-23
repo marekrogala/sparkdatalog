@@ -1,11 +1,10 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
-import org.apache.spark.rdd.RDD
-
 import scala.collection.mutable
 
+import org.apache.spark.SparkContext._
+import org.apache.spark.rdd.RDD
+import pl.appsilon.marek
 import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.predicate.AnalyzedPredicate
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
@@ -13,7 +12,7 @@ import pl.appsilon.marek.sparkdatalog.eval.join.Join
 
 case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[String, Int], boundVariables: Set[Int]) extends AnalyzedSubgoal {
 
-  private val joinByVariables = mutable.ArraySeq() ++ boundVariables.intersect(predicate.variables)
+  private val joinByVariables: mutable.WrappedArray[Int] = boundVariables.intersect(predicate.variables).toArray
 
   override def evaluateStatic(valuation: Valuation): Option[Valuation] = ???
 
@@ -25,10 +24,11 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
 
   def extractBoundVariables(valuations: RDD[Valuation]): RDD[(Valuation, Valuation)] = {
     println("MAP in extractBoundVariables")
-    for (valuation <- valuations) yield {
+    val result = for (valuation <- valuations) yield {
       val key = joinByVariables.map(valuation(_))
       key -> valuation
     }
+    result
   }
 
   override def solveOn(valuation: Valuation, relations: Map[String, RelationInstance]): Seq[Valuation] =
@@ -46,7 +46,7 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
         {
           for (currentValuation <- currentKeyValuations;
                otherValuation <- otherKeyValuations) yield {
-            currentValuation.zip(otherValuation).map({ case (l, r) => l.orElse(r)})
+            currentValuation.zip(otherValuation).map({ case (l, r) => if(l != marek.sparkdatalog.valuationNone) l else r})
           }
         }
         joined.toSeq.flatten
@@ -54,6 +54,7 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
     }).getOrElse(Seq())
 
     //println("solve " + predicate + " OnSet " + valuations + " relations = " + relations + "\n\t --> " + result)
+
     result
   }
 
@@ -73,13 +74,13 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
       println("JOIN; MAP zip")
       val joined = for ((boundVariables, (currentValuation, otherValuation)) <- left.join(right)) yield
       {
-        currentValuation.zip(otherValuation).map({ case (l, r) => l.orElse(r)})
+        currentValuation.zip(otherValuation).map({ case (l, r) => if(l != marek.sparkdatalog.valuationNone) l else r})
       }
       joined
     }
     })
 
-    //println("solve " + predicate + " OnSet " + valuations + " relations = " + relations + "\n\t --> " + result)
+//    println("solve " + predicate + " OnSet " + valuations + " relations = " + database.relations + "\n\t --> " + result.map(_.collect().map(_.mkString("(", ",", ")")).mkString(";")))
     result
   }
 
