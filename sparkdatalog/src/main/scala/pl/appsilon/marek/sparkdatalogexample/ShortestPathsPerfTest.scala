@@ -28,13 +28,15 @@ object ShortestPathsPerfTest extends PerformanceTest
 
     val path: String = root + "/twitter.txt"
     println("reading from " + path)
-    val edgesRawRdd = sc.textFile(path).map({
+    val edgesXRdd = sc.textFile(path).map({
       str =>
         val s = str.split(" ")
         val e = (s(0).toInt, s(1).toInt)
         if(e._1 > e._2) e.swap else e
     }).repartition(64)
+    val edgesRawRdd = edgesXRdd.union(edgesXRdd.map(_.swap))
     val edgesRdd = edgesRawRdd.map(edge => (edge._1, edge._2, Random.nextInt(1000)))
+    edgesRdd.cache()
     val sourceNumber = edgesRdd.map(_._1).distinct().take(1).head
 
     println("Read " + edgesRdd.count() + " edges in " + edgesRdd.partitions.size + " partitions.")
@@ -46,6 +48,7 @@ object ShortestPathsPerfTest extends PerformanceTest
     database = Database(
       Relation.ternary("Edge", edgesRdd),
       Relation.unary("IsSource", sourceRdd))
+    database.materialize()
   }
 
   def runPregel() = {
