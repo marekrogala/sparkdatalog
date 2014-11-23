@@ -12,7 +12,7 @@ import pl.appsilon.marek.sparkdatalog.{Database, Relation}
 object ShortestPathsPerfTest extends PerformanceTest
 {
   var sourceId: VertexId = _
-  var graph: Graph[(Int, Int), Int] = _
+  var graph: Graph[Int, Int] = _
   var database: Database = _
 
   def initialize(args: Seq[String]) = {
@@ -34,8 +34,8 @@ object ShortestPathsPerfTest extends PerformanceTest
 //        if(e._1 > e._2) e.swap else e
 //    }).repartition(64)
 
-    val diam = 100
-    graph = GraphGenerators.gridGraph(sc, diam, diam).mapEdges(_ => Random.nextInt(1000)) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
+    val diam = 10000
+    graph = GraphGenerators.rmatGraph(sc, diam, 4*diam).mapEdges(_ => Random.nextInt(1000)) //GraphGenerators.logNormalGraph(sc, numVertices = args(1).toInt)
 
     val edgesRdd = graph.edges.map({case Edge(a, b, c) => (a.toInt, b.toInt, c)})
     val sourceNumber = edgesRdd.map(_._1).distinct().take(1).head
