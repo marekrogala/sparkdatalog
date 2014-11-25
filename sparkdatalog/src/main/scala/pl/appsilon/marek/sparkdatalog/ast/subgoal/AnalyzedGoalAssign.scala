@@ -1,6 +1,8 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
 import org.apache.spark.rdd.RDD
+import pl.appsilon.marek
+import pl.appsilon.marek.sparkdatalog
 import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.exp.AnalyzedExp
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
@@ -10,7 +12,7 @@ case class AnalyzedGoalAssign(lValueVariable: Int, exp: AnalyzedExp) extends Ana
   override def evaluateStatic(valuation: Valuation): Option[Valuation] = {
     val value = exp.evaluate(valuation)
     valuation(lValueVariable) match {
-      case valuationNone =>
+      case marek.sparkdatalog.valuationNone =>
         valuation(lValueVariable) = value
         Some(valuation)
       case `value` => Some(valuation)

@@ -1,6 +1,8 @@
 package pl.appsilon.marek.sparkdatalog.ast.predicate
 
 import org.apache.spark.rdd.RDD
+import pl.appsilon.marek
+import pl.appsilon.marek.sparkdatalog
 import pl.appsilon.marek.sparkdatalog.{Relation, Fact, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.value.ValueLiteral
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
@@ -22,8 +24,8 @@ case class AnalyzedPredicate(tableName: String, args: Seq[Either[ValueLiteral, I
           }
         case Right(varId) =>
           valuation(varId) match {
-            case valuationNone => valuation(varId) = actualValue
             case `actualValue` => // OK
+            case marek.sparkdatalog.valuationNone => valuation(varId) = actualValue
             case _ => return None
           }
       }
