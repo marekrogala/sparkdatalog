@@ -32,7 +32,7 @@ object ShortestPathsPerfTest extends PerformanceTest
         val s = str.split(" ")
         val e = (s(0).toInt, s(1).toInt)
         if(e._1 > e._2) e.swap else e
-    }).repartition(marek.sparkdatalog.numPartitions)
+    }).repartition(marek.sparkdatalog.numPartitions/2)
     val edgesRawRdd = edgesOriginalRdd.map({case (a, b) => (a, b, 1 + Random.nextInt(10))})
 
     graph = Graph.fromEdges(edgesRawRdd.map({case (a, b, c) => Edge(a, b, c)}), 0)
