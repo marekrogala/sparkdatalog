@@ -1,5 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
+import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
+
 import scala.collection.mutable
 
 import org.apache.spark.SparkContext._
@@ -10,7 +12,10 @@ import pl.appsilon.marek.sparkdatalog.ast.predicate.AnalyzedPredicate
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 import pl.appsilon.marek.sparkdatalog.eval.join.Join
 
-case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[String, Int], boundVariables: Set[Int]) extends AnalyzedSubgoal {
+case class AnalyzedGoalPredicate(
+    predicate: AnalyzedPredicate,
+    variableIds: Map[String, Int],
+    boundVariables: Set[Int]) extends AnalyzedSubgoal {
 
   private val joinByVariables: mutable.WrappedArray[Int] = boundVariables.intersect(predicate.variables).toArray
 
@@ -65,10 +70,33 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
     }
   }
 
+
+  def selectRDDFromDatabase(database: Database): Option[RDD[Valuation]] = {
+    database.relations.get(predicate.tableName).map(predicate.evaluateRDD)
+  }
+
+  var preselectedRelationRDD: Option[Option[RDD[Valuation]]] = _
+  var preextractedRelationBoundVariables: Option[Option[RDD[(Valuation, Valuation)]]] = _
+
+  def prepareForIteration(state: NonshardedState) = {
+    preselectedRelationRDD = if(!state.idb.contains(predicate.tableName)) {
+      val valuations = selectRDDFromDatabase(state.database)
+      valuations.foreach(_.cache()) // TODO: unpersist
+      Some(valuations)
+    } else None
+
+    preextractedRelationBoundVariables = preselectedRelationRDD.map(_.map(extractBoundVariables))
+  }
+
+  def getRelationExtractedBoundVariables(database: Database) =
+    preextractedRelationBoundVariables.getOrElse(selectRDDFromDatabase(database).map(extractBoundVariables))
+
+  override def selectRDD(database: Database): Option[RDD[Valuation]] =
+    preselectedRelationRDD.getOrElse(selectRDDFromDatabase(database))
+
   override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] = {
-    val variablesFromTable: Option[RDD[Valuation]] = selectRDD(database)
-    val result = variablesFromTable.map({ currentValuations => {
-      val left = extractBoundVariables(currentValuations)
+    val relation = getRelationExtractedBoundVariables(database)
+    val result = relation.map({ left => {
       val right = extractBoundVariables(valuations)
 
       println("JOIN; MAP zip")
@@ -84,7 +112,4 @@ case class AnalyzedGoalPredicate(predicate: AnalyzedPredicate, variableIds: Map[
     result
   }
 
-  override def selectRDD(database: Database): Option[RDD[Valuation]] = {
-    database.relations.get(predicate.tableName).map(predicate.evaluateRDD)
-  }
 }

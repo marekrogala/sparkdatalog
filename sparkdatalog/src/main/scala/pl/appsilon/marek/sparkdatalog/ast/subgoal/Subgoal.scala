@@ -1,5 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
+import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
+
 trait Subgoal {
   val evaluationPriority: Int
 
@@ -7,5 +9,5 @@ trait Subgoal {
   def getOutVariables: Set[String]
   def isRelational: Boolean
 
-  def analyze(variableIds: Map[String, Int], boundVariables: Set[Int]): AnalyzedSubgoal
+  def analyze(variableIds: Map[String, Int], boundVariables: Set[Int], state: NonshardedState): AnalyzedSubgoal
 }

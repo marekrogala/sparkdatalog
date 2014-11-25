@@ -1,13 +1,10 @@
 package pl.appsilon.marek.sparkdatalogexample
 
-import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog
-import pl.appsilon.marek.sparkdatalogexample.ShortestPathsPerfTest._
-
 import scala.io.Source
 
 import org.apache.spark.SparkContext._
-import org.apache.spark.graphx.{Edge, Graph, PartitionStrategy}
+import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalog
 import pl.appsilon.marek.sparkdatalog.{Database, Relation}
 
 object TrianglesPerfTest extends PerformanceTest

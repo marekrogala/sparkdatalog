@@ -22,8 +22,8 @@ case class Rule(head: Head, body: RuleBody) {
   val isRecursive = refferedRelations.contains(head.name)
 
   var analyzedBodies: Seq[AnalyzedRuleBody] = _
-  def analyze(idb: Set[String]) = {
-    analyzedBodies = body.analyze(variableIds, idb)
+  def analyze(state: NonshardedState) = {
+    analyzedBodies = body.analyze(variableIds, state)
   }
   def isRecursiveInStratum = analyzedBodies.exists(_.isRecursive)
 

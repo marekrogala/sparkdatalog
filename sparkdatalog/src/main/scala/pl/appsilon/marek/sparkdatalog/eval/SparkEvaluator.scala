@@ -39,8 +39,8 @@ object SparkEvaluator {
 
       println("Processing stratum %d: %s".format(stratumId, stratum.toString()))
       val idb = stratum.map(_.head.name).toSet
-      stratum.foreach(_.analyze(idb))
       state = state.prepareForIteration(idb)
+      stratum.foreach(_.analyze(state))
       iteration = 0
       val maxIters = if(stratum.size == 1 && !stratum.head.isRecursive) 1 else Int.MaxValue
 
