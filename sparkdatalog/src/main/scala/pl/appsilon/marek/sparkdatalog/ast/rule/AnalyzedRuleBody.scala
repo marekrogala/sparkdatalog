@@ -58,10 +58,10 @@ case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Va
     val head +: tail = dynamicSubgoals
     val staticParallelized: Option[RDD[Valuation]] = staticallyEvaluated.map(state.sc.parallelize(_))
     val firstEvaluated = processFirstSubgoalSpark(staticParallelized, head, if(isRecursive) { state.delta } else { state.database })
-    println("firstEvaluated: " + firstEvaluated.map(_.collect().map(_.mkString("(",",", ")")).mkString(";")).getOrElse("--"))
+//    println("firstEvaluated: " + firstEvaluated.map(_.collect().map(_.mkString("(",",", ")")).mkString(";")).getOrElse("--"))
     val result = tail.foldLeft(firstEvaluated)(processSubgoalSpark(_, _, state.database))
     //val name = head.asInstanceOf[AnalyzedGoalPredicate].predicate.tableName
-    println("found: " + result.map(_.collect().map(_.mkString("(",",", ")")).mkString(";")).getOrElse("--"))
+//    println("found: " + result.map(_.collect().map(_.mkString("(",",", ")")).mkString(";")).getOrElse("--"))
     result.getOrElse(state.sc.parallelize(Seq()))
   }
 }

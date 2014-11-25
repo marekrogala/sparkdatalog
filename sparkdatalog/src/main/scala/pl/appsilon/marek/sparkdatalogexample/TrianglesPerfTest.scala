@@ -1,6 +1,7 @@
 package pl.appsilon.marek.sparkdatalogexample
 
 import org.apache.spark.rdd.RDD
+import pl.appsilon.marek.sparkdatalog
 import pl.appsilon.marek.sparkdatalogexample.ShortestPathsPerfTest._
 
 import scala.io.Source
@@ -27,7 +28,7 @@ object TrianglesPerfTest extends PerformanceTest
     //val diam = args(0).toInt
     //graph = GraphGenerators.logNormalGraph(sc, numVertices = diam)
     //val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
-    edgesRdd = sc.parallelize(edges).repartition(64)
+    edgesRdd = sc.parallelize(edges).repartition(sparkdatalog.numPartitions)
 
 //
 //    edgesRdd = sc.textFile(root + "/twitter.txt").map({

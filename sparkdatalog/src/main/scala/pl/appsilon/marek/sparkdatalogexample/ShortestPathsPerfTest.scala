@@ -1,9 +1,11 @@
 package pl.appsilon.marek.sparkdatalogexample
 
 import org.apache.spark.graphx.util.GraphGenerators
+import pl.appsilon.marek.sparkdatalog.spark.FixedGraphGenerators
 import pl.appsilon.marek.sparkdatalogexample.TrianglesPerfTest._
 
 import scala.io.Source
+import scala.reflect.io.Path
 import scala.util.Random
 
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
@@ -17,13 +19,14 @@ object ShortestPathsPerfTest extends PerformanceTest
 
   def initialize(args: Seq[String]) = {
 
-//    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
-//      str =>
-//        val s = str.split(" ")
-//        (s(0).toInt, s(1).toInt)
-//    }).toSeq
-//    val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
-//    val edgesRawRdd = sc.parallelize(edges)
+    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
+      str =>
+        val s = str.split(" ")
+        (s(0).toInt, s(1).toInt)
+    }).toSeq
+    //val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
+    val edgesRawRdd = sc.parallelize(edges).map({case (a, b) => (a, b, 1 + Random.nextInt(10))})
+
 
     //val path: String = root + "/twitter.txt"
     //println("reading from " + path)
@@ -32,23 +35,23 @@ object ShortestPathsPerfTest extends PerformanceTest
 //        val s = str.split(" ")
 //        val e = (s(0).toInt, s(1).toInt)
 //        if(e._1 > e._2) e.swap else e
-//    }).repartition(64)
+//    }).repartition(sparkdatalog.numPartitions)
 
-    val diam = 10000
-    graph = GraphGenerators.rmatGraph(sc, diam, 10*diam).mapEdges(_ => Random.nextInt(1000))
-    graph = Graph(graph.vertices, graph.edges.union(graph.reverse.edges))
+    //val diam = 10000
+    //graph = GraphGenerators.rmatGraph(sc, diam, 100*diam).mapEdges(_ => 1 + Random.nextInt(10))
+    //graph = FixedGraphGenerators.logNormalGraph(sc, diam).mapEdges(_ => Random.nextInt(1000))
 
-    val edgesRdd = graph.edges.map({case Edge(a, b, c) => (a.toInt, b.toInt, c)})
-    val sourceNumber = edgesRdd.map(_._1).distinct().take(1).head
+    graph = Graph.fromEdges(edgesRawRdd.map({case (a, b, c) => Edge(a, b, c)}), 0)
+    graph = Graph(graph.vertices, graph.edges.union(graph.reverse.edges).distinct())
+
+    val edgesRdd = graph.edges.map({case Edge(a, b, c) => (a.toInt, b.toInt, c)}).cache()
 
     println("Read " + edgesRdd.count() + " edges in " + edgesRdd.partitions.size + " partitions.")
+    //println("Edges: " + graph.edges.collect().mkString(", "))
 
-    sourceId = sourceNumber
-
-    val sourceRdd = sc.parallelize(Seq(sourceNumber))
-    database = Database(
-      Relation.ternary("Edge", edgesRdd),
-      Relation.unary("IsSource", sourceRdd))
+    sourceId = edgesRdd.map(_._1).take(1).head
+    println("source: " + sourceId)
+    database = Database(Relation.ternary("Edge", edgesRdd))
     database.materialize()
   }
 
@@ -72,12 +75,11 @@ object ShortestPathsPerfTest extends PerformanceTest
   }
 
   override def runDatalog(): Unit = {
-    val query = """
+    val query = ("""
                   |declare Path(int v, int dist aggregate Min).
-                  |Path(x, d) :- IsSource(s), Edge(s, x, d).
+                  |Path(x, d) :- s == """ + sourceId + """ , Edge(s, x, d).
                   |Path(x, d) :- Path(y, da), Edge(y, x, db), d = da + db.
-                """.stripMargin
-
+                """).stripMargin
     val resultDatabase = database.datalog(query)
   }
 

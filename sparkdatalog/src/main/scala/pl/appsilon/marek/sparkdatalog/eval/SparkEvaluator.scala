@@ -1,5 +1,6 @@
 package pl.appsilon.marek.sparkdatalog.eval
 
+import pl.appsilon.marek.sparkdatalog
 import pl.appsilon.marek.sparkdatalog.Database
 import pl.appsilon.marek.sparkdatalog.ast.Program
 import pl.appsilon.marek.sparkdatalog.ast.rule.Rule
@@ -18,7 +19,7 @@ object SparkEvaluator {
     //println("partitions: " + state.database.relations.values.map(_.data.partitions.size) + " delta "  + state.delta.relations.values.map(_.data.partitions.size))
 
     val generatedRelations = rules.filter(!onlyRecursiveRules || _.isRecursiveInStratum).map(_.evaluateOnSpark(staticContext, state))
-    val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations).coalesce(64)
+    val newFullDatabase = state.database.mergeIn(generatedRelations, staticContext.aggregations).coalesce(sparkdatalog.numPartitions)
     if(calculateDelta) {
       state.step(newFullDatabase)
     } else {
@@ -51,7 +52,7 @@ object SparkEvaluator {
         val isLastIteration = iteration + 1 >= maxIters
         state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state, !isLastIteration, !isFirstIteration)
         state.cache()
-        if(iteration % 5 == 0) Timed("checkpoint", state.checkpoint())
+        if((iteration + checkpointFrequency - 1) % checkpointFrequency == 0) Timed("checkpoint", state.checkpoint())
         Timed("materialize", state.materialize())
         oldState.unpersist(blocking = false)
 

@@ -9,7 +9,7 @@ package object sparkdatalog {
   val valuationNone = Int.MinValue
   type Fact = Seq[Int]
 
-  val defaultArrayPartitioner = new ArrayHashPartitioner(64)
+  val numPartitions = 8
 
   def keyForFact: (sparkdatalog.Fact) => Long = _(0)%2
 }
