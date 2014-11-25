@@ -22,7 +22,7 @@ object ShortestPathsPerfTest extends PerformanceTest
 //        val s = str.split(" ")
 //        (s(0).toInt, s(1).toInt)
 //    }).toSeq
-    //val sourceNumber = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted.head
+//    val edgesOriginalRdd = sc.parallelize(edges)
 
 
     val path: String = root + "/twitter.txt"

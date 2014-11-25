@@ -28,7 +28,7 @@ trait PerformanceTest {
 
     println("sprawdzenie: " + sc.parallelize(Seq(1,2,3)).count())
 
-
+//
 //    val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster("local[4]")
 //    //conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 //    sc = new SparkContext(conf)
