@@ -9,7 +9,7 @@ package object sparkdatalog {
   val valuationNone = Int.MinValue
   type Fact = Seq[Int]
 
-  val numPartitions = 16
+  val numPartitions = 64
 
   def keyForFact: (sparkdatalog.Fact) => Long = _(0)%numPartitions
 }
