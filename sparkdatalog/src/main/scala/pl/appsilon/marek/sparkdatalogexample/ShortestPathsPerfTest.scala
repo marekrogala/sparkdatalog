@@ -36,7 +36,6 @@ object ShortestPathsPerfTest extends PerformanceTest
     val edgesRawRdd = edgesOriginalRdd.map({case (a, b) => (a, b, 1 + Random.nextInt(10))})
 
     graph = Graph.fromEdges(edgesRawRdd.map({case (a, b, c) => Edge(a, b, c)}), 0)
-    //graph = Graph(graph.vertices, graph.edges.union(graph.reverse.edges).distinct())
 
     val edgesRdd = graph.edges.map({case Edge(a, b, c) => (a.toInt, b.toInt, c)}).cache()
 
@@ -69,11 +68,9 @@ object ShortestPathsPerfTest extends PerformanceTest
   }
 
   override def runDatalog(): Unit = {
-    val query = ("""
-                  |declare Path(int v, int dist aggregate Min).
-                  |Path(x, d) :- s == """ + sourceId + """ , Edge(s, x, d).
-                  |Path(x, d) :- Path(y, da), Edge(y, x, db), d = da + db.
-                """).stripMargin
+    val query = """ declare Path(int v, int dist aggregate Min).
+                     Path(x, d) :- s == """ + sourceId + """ , Edge(s, x, d).
+                     Path(x, d) :- Path(y, da), Edge(y, x, db), d = da + db."""
     val resultDatabase = database.datalog(query)
   }
 

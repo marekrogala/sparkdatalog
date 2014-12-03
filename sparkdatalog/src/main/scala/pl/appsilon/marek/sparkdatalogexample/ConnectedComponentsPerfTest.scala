@@ -53,16 +53,13 @@ object ConnectedComponentsPerfTest extends PerformanceTest
   }
 
   override def runDatalog(): Unit = {
-    val query = """
-                  |declare Component(int n, int component aggregate Min).
-                  |declare ComponentId(int n).
-                  |Component(n, i) :- Node(n), i = n.
-                  |Component(n, i) :- Component(p, i), Edge(p, n).
-                  |ComponentId(id) :- Component(x, id).
-                """.stripMargin
-
-
+    val query = """ |declare Component(int n, int component aggregate Min).
+                    |declare ComponentId(int n).
+                    |Component(n, i) :- Node(n), i = n.
+                    |Component(n, i) :- Component(p, i), Edge(p, n).
+                    |ComponentId(id) :- Component(x, id). """.stripMargin
     val resultDatabase = database.datalog(query)
+
     println(resultDatabase("ComponentId").count())
   }
 

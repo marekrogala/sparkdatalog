@@ -16,7 +16,7 @@ trait PerformanceTest {
 
   def main(args: Array[String]): Unit = {
     val master +: moreArgs = args.toList
-
+//
     val masterUrl: String = "spark://" + master + ":7077"
     println("configuring master: "+ masterUrl)
     val conf = new SparkConf().setAppName("Perf test: " + name).setMaster(masterUrl)
@@ -28,7 +28,7 @@ trait PerformanceTest {
 
     println("sprawdzenie: " + sc.parallelize(Seq(1,2,3)).count())
 
-//
+
 //    val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster("local[4]")
 //    //conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 //    sc = new SparkContext(conf)
