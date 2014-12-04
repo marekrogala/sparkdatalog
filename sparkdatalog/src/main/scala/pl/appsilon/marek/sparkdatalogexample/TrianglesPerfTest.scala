@@ -33,7 +33,7 @@ object TrianglesPerfTest extends PerformanceTest
     //val diam = args(0).toInt
     //graph = GraphGenerators.logNormalGraph(sc, numVertices = diam)
     //val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
-    edgesRdd = sc.parallelize(edges).repartition(sparkdatalog.numPartitions)
+    edgesRdd = sc.parallelize(edges).repartition(sparkdatalog.numPartitions).cache()
 
 //
 //    edgesRdd = sc.textFile(root + "/twitter.txt").map({
@@ -50,7 +50,7 @@ object TrianglesPerfTest extends PerformanceTest
   override def runPregel(): Unit = {
 //    val result = graph.triangleCount()
 //    println("triangles:", result.vertices.collect().map(_._2).sum)
-    val canonicalEdges = edgesRdd.filter(Function.tupled(_ < _)).distinct()
+    val canonicalEdges = edgesRdd.filter(Function.tupled(_ < _)).distinct().cache()
     val swappedEdgesRdd = canonicalEdges.map(_.swap)
     val pathOf2 = swappedEdgesRdd.join(canonicalEdges).map( {case (y, (x, z)) => (x, (y, z)) } )
     val triangle = pathOf2.join(canonicalEdges).flatMap({
