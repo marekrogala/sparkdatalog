@@ -48,15 +48,16 @@ object TrianglesPerfTest extends PerformanceTest
   }
 
   override def runPregel(): Unit = {
+//    GraphGenerators.logNormalGraph(sc, numVertices = 6).triangleCount()
 //    val result = graph.triangleCount()
 //    println("triangles:", result.vertices.collect().map(_._2).sum)
     val canonicalEdges = edgesRdd.filter(Function.tupled(_ < _)).distinct().cache()
     val swappedEdgesRdd = canonicalEdges.map(_.swap)
-    val pathOf2 = swappedEdgesRdd.join(canonicalEdges).map( {case (y, (x, z)) => (x, (y, z)) } )
-    val triangle = pathOf2.join(canonicalEdges).flatMap({
-      case (x, ((y, z), zp)) => if (z == zp) Seq((x, y, z)) else Seq()
-    })
-    val count = triangle.map(_ => 1).aggregate(0)(_ + _,  _ + _)
+    val pathOf2 = swappedEdgesRdd.join(canonicalEdges).map( { case (y, (x, z)) => (x, (y, z)) } )
+    val triangle = pathOf2.join(canonicalEdges)
+      .filter({ case (x, ((y, z), zp)) => z == zp })
+      .map({ case (x, ((y, z), zp)) => (x, y, z) })
+    val count = triangle.count()
     println("Triangle count: " + count)
   }
 

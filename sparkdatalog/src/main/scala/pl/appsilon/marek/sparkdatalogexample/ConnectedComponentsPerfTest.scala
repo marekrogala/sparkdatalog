@@ -80,7 +80,9 @@ object ConnectedComponentsPerfTest extends PerformanceTest
       (a, b) => math.min(a, b) // Merge Message
     )
 
-    val componentIds = sssp.vertices.map(_._2).distinct()
+    //val componentIds = sssp.vertices.map(_._2)
+
+    val componentIds = sssp.vertices.map(_._2)
     println(componentIds.count())
   }
 }

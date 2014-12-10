@@ -64,7 +64,8 @@ object ShortestPathsPerfTest extends PerformanceTest
         (a,b) => math.min(a,b) // Merge Message
       )
 
-    println("sssp" + sssp.vertices.map(v => (v._1, v._2)).reduce({case (a, b) => (a._1 + b._1, a._2 + b._2)}))
+    //println("sssp" + sssp.vertices.map(v => (v._1, v._2)).reduce({case (a, b) => (a._1 + b._1, a._2 + b._2)}))
+    val shortestPaths = sssp.vertices.map(v => (v._1, v._2))
   }
 
   override def runDatalog(): Unit = {
