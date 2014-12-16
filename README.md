@@ -4,7 +4,6 @@ SparkDatalog
 A Datalog API for Spark, which allows for mix Datalog queries into Spark computations.
 Written entirely in Scala.
 
-
 Example
 -------
 ```scala
@@ -56,10 +55,4 @@ sbt run
 ```
 
 To compile and run the program, you need to have SBT installed (http://www.scala-sbt.org/download.html). 
-
-
-
-
-
-
 
