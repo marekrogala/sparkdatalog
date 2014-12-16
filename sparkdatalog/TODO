@@ -1,4 +1,0 @@
-operators -, *, /
-other types than int (string, double) - skipped 
-constants
-caching, persisting & unpersisting RDDs

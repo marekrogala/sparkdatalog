@@ -7,6 +7,5 @@ The following programs are currently required to run the parser: bnfc, alex, lat
 
 ```
 sudo apt-get install bnfc alex texlive-full happy ghc -y
+bnfc -java -m socialite.cf
 ```
-
-Futher steps... (TODO)
