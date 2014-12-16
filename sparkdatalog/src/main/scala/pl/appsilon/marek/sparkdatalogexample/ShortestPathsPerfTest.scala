@@ -1,12 +1,9 @@
 package pl.appsilon.marek.sparkdatalogexample
 
-import pl.appsilon.marek
-import pl.appsilon.marek.sparkdatalog
-
-import scala.io.Source
 import scala.util.Random
 
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
+import pl.appsilon.marek
 import pl.appsilon.marek.sparkdatalog.{Database, Relation}
 
 object ShortestPathsPerfTest extends PerformanceTest
@@ -16,15 +13,6 @@ object ShortestPathsPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]) = {
-
-//    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
-//      str =>
-//        val s = str.split(" ")
-//        (s(0).toInt, s(1).toInt)
-//    }).toSeq
-//    val edgesOriginalRdd = sc.parallelize(edges)
-
-
     val path: String = root + "/twitter.txt"
     println("reading from " + path)
     val edgesOriginalRdd = sc.textFile(path).map({
@@ -40,7 +28,6 @@ object ShortestPathsPerfTest extends PerformanceTest
     val edgesRdd = graph.edges.map({case Edge(a, b, c) => (a.toInt, b.toInt, c)}).cache()
 
     println("Read " + edgesRdd.count() + " edges in " + edgesRdd.partitions.size + " partitions.")
-    //println("Edges: " + graph.edges.collect().mkString(", "))
 
     sourceId = edgesRdd.map(_._1).take(1).head
     println("source: " + sourceId)
@@ -64,7 +51,6 @@ object ShortestPathsPerfTest extends PerformanceTest
         (a,b) => math.min(a,b) // Merge Message
       )
 
-    //println("sssp" + sssp.vertices.map(v => (v._1, v._2)).reduce({case (a, b) => (a._1 + b._1, a._2 + b._2)}))
     val shortestPaths = sssp.vertices.map(v => (v._1, v._2))
   }
 

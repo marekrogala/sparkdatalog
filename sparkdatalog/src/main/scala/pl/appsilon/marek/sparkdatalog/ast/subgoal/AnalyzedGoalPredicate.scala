@@ -1,7 +1,5 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
-import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
-
 import scala.collection.mutable
 
 import org.apache.spark.SparkContext._
@@ -11,6 +9,7 @@ import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.predicate.AnalyzedPredicate
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 import pl.appsilon.marek.sparkdatalog.eval.join.Join
+import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
 
 case class AnalyzedGoalPredicate(
     predicate: AnalyzedPredicate,
@@ -28,7 +27,6 @@ case class AnalyzedGoalPredicate(
     }
 
   def extractBoundVariables(valuations: RDD[Valuation]): RDD[(Valuation, Valuation)] = {
-    println("MAP in extractBoundVariables")
     val result = for (valuation <- valuations) yield {
       val key = joinByVariables.map(valuation(_))
       key -> valuation
@@ -58,8 +56,6 @@ case class AnalyzedGoalPredicate(
     }
     }).getOrElse(Seq())
 
-    //println("solve " + predicate + " OnSet " + valuations + " relations = " + relations + "\n\t --> " + result)
-
     result
   }
 
@@ -81,7 +77,7 @@ case class AnalyzedGoalPredicate(
   def prepareForIteration(state: NonshardedState) = {
     preselectedRelationRDD = if(!state.idb.contains(predicate.tableName)) {
       val valuations = selectRDDFromDatabase(state.database)
-      valuations.foreach(_.cache()) // TODO: unpersist
+      valuations.foreach(_.cache())
       Some(valuations)
     } else None
 
@@ -99,7 +95,6 @@ case class AnalyzedGoalPredicate(
     val result = relation.map({ left => {
       val right = extractBoundVariables(valuations)
 
-      println("JOIN; MAP zip")
       val joined = for ((boundVariables, (currentValuation, otherValuation)) <- left.join(right)) yield
       {
         currentValuation.zip(otherValuation).map({ case (l, r) => if(l != marek.sparkdatalog.valuationNone) l else r})
@@ -108,7 +103,6 @@ case class AnalyzedGoalPredicate(
     }
     })
 
-//    println("solve " + predicate + " OnSet " + valuations + " relations = " + database.relations + "\n\t --> " + result.map(_.collect().map(_.mkString("(", ",", ")")).mkString(";")))
     result
   }
 

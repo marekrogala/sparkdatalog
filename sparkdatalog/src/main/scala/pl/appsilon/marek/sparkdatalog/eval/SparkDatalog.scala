@@ -8,9 +8,6 @@ object SparkDatalog {
 
   def datalog(database: Database, programSource: String): Database = {
     SparkEvaluator.evaluate(database, Parser(programSource))
-//    val program: Program = ExtendWithSwapRelations(Parser(programSource))
-//    println("Program:\n" + program.toString)
-//    SparkShardedEvaluator.evaluate(database, program)
   }
 
 }

@@ -19,7 +19,6 @@ class ArrayHashPartitioner(partitions: Int) extends Partitioner {
         case k: Array[Int] => util.Arrays.hashCode(k)
         case k => k.hashCode()
       }
-      println("hash for --> " + hash)
       nonNegativeMod(hash, numPartitions)
   }
 

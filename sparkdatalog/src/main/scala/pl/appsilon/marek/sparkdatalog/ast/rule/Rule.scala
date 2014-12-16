@@ -3,9 +3,8 @@ package pl.appsilon.marek.sparkdatalog.ast.rule
 import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog.{Relation, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
-import pl.appsilon.marek.sparkdatalog.ast.subgoal.GoalPredicate
+import pl.appsilon.marek.sparkdatalog.eval.StaticEvaluationContext
 import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
-import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, StaticEvaluationContext}
 
 case class Rule(head: Head, body: RuleBody) {
 
@@ -26,14 +25,6 @@ case class Rule(head: Head, body: RuleBody) {
     analyzedBodies = body.analyze(variableIds, state)
   }
   def isRecursiveInStratum = analyzedBodies.exists(_.isRecursive)
-
-  def evaluate(context: StaticEvaluationContext, shard: StateShard): Seq[(Long, RelationInstance)] = {
-    val solutions: Seq[Valuation] = analyzedBodies.flatMap(_.findSolutions(context, shard))
-
-    val generatedRelations = head.emitSolutions(solutions, variableIds)
-    //println("evaluate shard = " + " \n\n\t -> " + generatedRelations)
-    generatedRelations.toKeyValue
-  }
 
   def evaluateOnSpark(context: StaticEvaluationContext, state: NonshardedState): Relation = {
     val solutions: RDD[Valuation] = analyzedBodies.map(_.findSolutionsSpark(context, state)).reduce(_ ++ _)

@@ -1,12 +1,8 @@
 package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
-import org.apache.spark.SparkContext._
-import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog.ast.value.{Value, ValueVar}
-import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
-import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
-import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.predicate.Predicate
+import pl.appsilon.marek.sparkdatalog.ast.value.Value
+import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
 
 case class GoalPredicate(predicate: Predicate) extends Subgoal {
   val location: Value = predicate.args.head

@@ -1,7 +1,5 @@
 package pl.appsilon.marek
 
-import pl.appsilon.marek.sparkdatalog.spark.ArrayHashPartitioner
-
 import scala.collection.mutable
 
 package object sparkdatalog {

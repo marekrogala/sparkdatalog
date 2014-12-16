@@ -17,7 +17,7 @@ case class RelationInstance(name: String, facts: Seq[Fact]) {
       val partitioned = facts.map(aggregation.partition)
       val grouped = partitioned.groupBy(_._1)
       val reduced = grouped.map({case (key, values) => key -> values.map(_._2).reduce(operator)})
-      val merged = reduced.map(aggregation.merge).toSeq // TODO: moze iterable?
+      val merged = reduced.map(aggregation.merge).toSeq
       merged
     } getOrElse facts.distinct
     copy(facts = combined)
@@ -26,7 +26,6 @@ case class RelationInstance(name: String, facts: Seq[Fact]) {
   def merge(other: RelationInstance, aggregation: Option[Aggregation]): RelationInstance = {
     require(name == other.name, "Tried to merge different relations %s and %s".format(name, other.name))
     val result = RelationInstance(name, facts ++ other.facts).combine(aggregation)
-    //println("Merge " + other.toString + " into " + this.toString + " with " + aggregation.toString + " ---> " + result.toString)
     result
   }
 

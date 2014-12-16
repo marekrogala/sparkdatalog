@@ -1,14 +1,11 @@
 package pl.appsilon.marek.sparkdatalog.ast.rule
 
-import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog
-import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
-import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
-import pl.appsilon.marek.sparkdatalog.ast.SemanticException
-import pl.appsilon.marek.sparkdatalog.ast.subgoal.{NonrelationalSubgoalsTopologicalSort, GoalPredicate, Subgoal, SubgoalsTopologicalSort}
-import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StateShard, State, StaticEvaluationContext}
-
 import scala.collection.immutable.IndexedSeq
+
+import pl.appsilon.marek.sparkdatalog.Valuation
+import pl.appsilon.marek.sparkdatalog.ast.SemanticException
+import pl.appsilon.marek.sparkdatalog.ast.subgoal.{GoalPredicate, NonrelationalSubgoalsTopologicalSort, Subgoal, SubgoalsTopologicalSort}
+import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
 
 case class RuleBody(subgoals: Seq[Subgoal]) {
 

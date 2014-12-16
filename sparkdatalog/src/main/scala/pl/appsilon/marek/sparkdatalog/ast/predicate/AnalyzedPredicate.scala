@@ -2,8 +2,7 @@ package pl.appsilon.marek.sparkdatalog.ast.predicate
 
 import org.apache.spark.rdd.RDD
 import pl.appsilon.marek
-import pl.appsilon.marek.sparkdatalog
-import pl.appsilon.marek.sparkdatalog.{Relation, Fact, Valuation}
+import pl.appsilon.marek.sparkdatalog.{Fact, Relation, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.value.ValueLiteral
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 
@@ -11,8 +10,6 @@ case class AnalyzedPredicate(tableName: String, args: Seq[Either[ValueLiteral, I
 
   val variables: Set[Int] = args.flatMap(_.right.toOption).toSet
 
-  // TODO: co z R(x, x, .... ) ?
-  // Moze najpierw obliczac valuation dla tego fact, a potem tylko porownywac
   def matchArgsGeneric(fact: Fact, initialValuation: Valuation): Option[Valuation] = {
     val valuation = initialValuation.clone()
 
@@ -42,7 +39,6 @@ case class AnalyzedPredicate(tableName: String, args: Seq[Either[ValueLiteral, I
     relation.facts.flatMap(matchArgsGeneric(_, valuation))
 
   def evaluateRDD(relation: Relation): RDD[Valuation] = {
-    println("FLATMAP matchArgs")
     relation.data.flatMap(matchArgs)
   }
 

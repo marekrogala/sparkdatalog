@@ -1,14 +1,7 @@
 package pl.appsilon.marek.sparkdatalogexample
 
+import org.apache.spark.graphx.{Edge, Graph}
 import pl.appsilon.marek
-import pl.appsilon.marek.sparkdatalog
-import pl.appsilon.marek.sparkdatalogexample.ShortestPathsPerfTest._
-
-import scala.io.Source
-import scala.util.Random
-
-import org.apache.spark.graphx.{Edge, Graph, VertexId}
-import org.apache.spark.graphx.util.GraphGenerators
 import pl.appsilon.marek.sparkdatalog.{Database, Relation}
 
 object ConnectedComponentsPerfTest extends PerformanceTest
@@ -17,23 +10,6 @@ object ConnectedComponentsPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]): Unit = {
-//    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
-//      str =>
-//        val s = str.split(" ")
-//        (s(0).toInt, s(1).toInt)
-//    }).toSeq
-//    val vertices = (edges.map(_._1) ++ edges.map(_._2)).distinct.sorted
-
-    //val diam = args(0).toInt
-    //graph = GraphGenerators.logNormalGraph(sc, numVertices = diam)
-    //val edgesRdd = graph.edges.map(edge => (edge.srcId.toInt, edge.dstId.toInt, Random.nextInt(1000)))
-    //val verticesRdd = sc.parallelize(0 until diam)
-//    val edgesRdd = sc.parallelize(edges)
-//    val verticesRdd = sc.parallelize(vertices)
-
-
-
-
     val path: String = root + "/twitter.txt"
     println("reading from " + path)
     val edgesRdd = sc.textFile(path).map({
@@ -79,8 +55,6 @@ object ConnectedComponentsPerfTest extends PerformanceTest
       },
       (a, b) => math.min(a, b) // Merge Message
     )
-
-    //val componentIds = sssp.vertices.map(_._2)
 
     val componentIds = sssp.vertices.map(_._2)
     println(componentIds.count())

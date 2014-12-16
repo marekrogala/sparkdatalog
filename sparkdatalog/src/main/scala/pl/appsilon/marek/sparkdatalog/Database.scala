@@ -1,7 +1,7 @@
 package pl.appsilon.marek.sparkdatalog
 
 import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog.eval.{StateShard, LocalDatalog, SparkDatalog}
+import pl.appsilon.marek.sparkdatalog.eval.SparkDatalog
 
 case class Database(relations: Map[String, Relation]) {
   def coalesce(numPartitions: Int): Database = copy(relations = relations.mapValues(_.coalesce(numPartitions)))
@@ -36,16 +36,11 @@ case class Database(relations: Map[String, Relation]) {
   def mergeIn(relations: Iterable[Relation], aggregations: Map[String, Aggregation]): Database =
     relations.groupBy(_.name).foldLeft(this)({ case (db, rel) =>
       val (name, rels) = rel
-      println("merging " + name + " into db")
       val mergedRels = rels.reduce(_.union(_))
       db.mergeIn(mergedRels, aggregations.get(name)) })
 
   def datalog(datalogQuery: String): Database = {
     SparkDatalog.datalog(this, datalogQuery)
-  }
-
-  def datalogLocally(datalogQuery: String): Seq[(Long, StateShard)] = {
-    LocalDatalog.datalog(this, datalogQuery)
   }
 
   def apply(relationName: String): RDD[Fact] = relations(relationName).data

@@ -9,7 +9,7 @@ case class Function(name: String) {
     name match {
       case "Max" => math.max
       case "Min" => math.min
-      case "Sum" => _ + _ // TODO: error if used in recurence
+      case "Sum" => _ + _ // TODO: Error if used in recursive subgoal.
       case _ => throw new SemanticException("Unknown aggregate function '%s', available functions are 'Min', 'Max' and 'Sum'".format(name))
     }
   }

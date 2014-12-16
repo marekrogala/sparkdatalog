@@ -39,12 +39,12 @@ object SparkDatalogExample
 
     // -----------------------------------------------------------------------------------
 
-    println(resultDatabase.relations)
+    println("Result: " + resultDatabase.relations)
 
     // We can now save the paths RDD to distributed storage or perform further computations on it.
     // We can of course also print it to stdout:
     val resultPathsRdd: RDD[Fact] = resultDatabase("Path")
-    println("computed %d results".format(resultPathsRdd.count()))
+    println("Computed %d results.".format(resultPathsRdd.count()))
 
   }
 }
