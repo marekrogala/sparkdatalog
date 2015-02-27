@@ -5,7 +5,7 @@ import scala.collection.mutable
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import pl.appsilon.marek
-import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
+import pl.appsilon.marek.sparkdatalog.{DatabaseRepr, Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.predicate.AnalyzedPredicate
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 import pl.appsilon.marek.sparkdatalog.eval.join.Join
@@ -44,7 +44,7 @@ case class AnalyzedGoalPredicate(
     val result = variablesFromTable.map({ currentValuations => {
         val left = extractBoundVariables(currentValuations)
         val right = extractBoundVariables(valuations)
-  
+
         val joined = for ((boundVariables, (currentKeyValuations, otherKeyValuations)) <- Join.innerJoin(left, right)) yield
         {
           for (currentValuation <- currentKeyValuations;
@@ -67,7 +67,7 @@ case class AnalyzedGoalPredicate(
   }
 
 
-  def selectRDDFromDatabase(database: Database): Option[RDD[Valuation]] = {
+  def selectRDDFromDatabase(database: DatabaseRepr): Option[RDD[Valuation]] = {
     database.relations.get(predicate.tableName).map(predicate.evaluateRDD)
   }
 
@@ -84,13 +84,13 @@ case class AnalyzedGoalPredicate(
     preextractedRelationBoundVariables = preselectedRelationRDD.map(_.map(extractBoundVariables))
   }
 
-  def getRelationExtractedBoundVariables(database: Database) =
+  def getRelationExtractedBoundVariables(database: DatabaseRepr) =
     preextractedRelationBoundVariables.getOrElse(selectRDDFromDatabase(database).map(extractBoundVariables))
 
-  override def selectRDD(database: Database): Option[RDD[Valuation]] =
+  override def selectRDD(database: DatabaseRepr): Option[RDD[Valuation]] =
     preselectedRelationRDD.getOrElse(selectRDDFromDatabase(database))
 
-  override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] = {
+  override def solveRDD(valuations: RDD[Valuation], database: DatabaseRepr): Option[RDD[Valuation]] = {
     val relation = getRelationExtractedBoundVariables(database)
     val result = relation.map({ left => {
       val right = extractBoundVariables(valuations)

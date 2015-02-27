@@ -2,7 +2,7 @@ package pl.appsilon.marek.sparkdatalog.ast.predicate
 
 import org.apache.spark.rdd.RDD
 import pl.appsilon.marek
-import pl.appsilon.marek.sparkdatalog.{Fact, Relation, Valuation}
+import pl.appsilon.marek.sparkdatalog._
 import pl.appsilon.marek.sparkdatalog.ast.value.ValueLiteral
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 
@@ -31,15 +31,18 @@ case class AnalyzedPredicate(tableName: String, args: Seq[Either[ValueLiteral, I
     Some(valuation)
   }
 
-  def matchArgs(fact: Fact): Option[Valuation] = matchArgsGeneric(fact, emptyValuation)
+  def matchArgsFact(fact: Fact): Option[Valuation] = matchArgsGeneric(fact, emptyValuation)
 
-  def evaluateLocally(relation: RelationInstance): Seq[Valuation] = relation.facts.flatMap(matchArgs)
+  def evaluateLocally(relation: RelationInstance): Seq[Valuation] = relation.facts.flatMap(matchArgsFact)
 
   def fetchMatchingInstances(valuation: Valuation, relation: RelationInstance): Seq[Valuation] =
     relation.facts.flatMap(matchArgsGeneric(_, valuation))
 
-  def evaluateRDD(relation: Relation): RDD[Valuation] = {
-    relation.data.flatMap(matchArgs)
+  def matchArgs(fact: FactW, aggregation: Option[Aggregation]): Option[Valuation] =
+    matchArgsFact(aggregation.map(_.merge(fact)).getOrElse(fact._1))
+
+  def evaluateRDD(relation: RelationRepr): RDD[Valuation] = {
+    relation.data.flatMap(matchArgs(_, relation.aggregation))
   }
 
 }

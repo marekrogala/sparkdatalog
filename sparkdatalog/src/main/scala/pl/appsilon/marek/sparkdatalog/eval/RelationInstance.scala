@@ -32,11 +32,6 @@ case class RelationInstance(name: String, facts: Seq[Fact]) {
   def merge(instance: RelationInstance, context: StaticEvaluationContext): RelationInstance =
     merge(instance, context.aggregations.get(name))
 
-  def toKeyValue: Seq[(Long, RelationInstance)] =
-    facts.groupBy(sparkdatalog.keyForFact).map({
-      case (key, value) => (key, RelationInstance(name, value))
-    }).toSeq
-
   override def toString = "RelationInstance " + name + " : " + facts.map(fact => fact.toString + fact.mkString("(", ", ", ")")).mkString(" ")
 }
 

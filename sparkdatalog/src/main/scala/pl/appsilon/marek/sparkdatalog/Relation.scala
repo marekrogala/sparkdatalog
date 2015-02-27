@@ -1,6 +1,5 @@
 package pl.appsilon.marek.sparkdatalog
 
-import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 case class Relation(name: String, data: RDD[Fact]) {
@@ -12,15 +11,6 @@ case class Relation(name: String, data: RDD[Fact]) {
   }
 
   def isEmpty: Boolean = data.count() == 0
-
-  def combine(aggregation: Option[Aggregation]): Relation = {
-    val combinedData = aggregation.map { aggregation =>
-      data.map(aggregation.partition).reduceByKey(aggregation.operator).map(aggregation.merge)
-    } getOrElse {
-      data.distinct()
-    }
-    copy(data = combinedData)
-  }
 
   def union(relation: Relation): Relation = {
     copy(data = data.union(relation.data))

@@ -1,7 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.ast.rule
 
 import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog.{Relation, Valuation}
+import pl.appsilon.marek.sparkdatalog.{FactW, RelationRepr, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.SemanticException
 import pl.appsilon.marek.sparkdatalog.eval.StaticEvaluationContext
 import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
@@ -26,10 +26,9 @@ case class Rule(head: Head, body: RuleBody) {
   }
   def isRecursiveInStratum = analyzedBodies.exists(_.isRecursive)
 
-  def evaluateOnSpark(context: StaticEvaluationContext, state: NonshardedState): Relation = {
+  def evaluateOnSpark(context: StaticEvaluationContext, state: NonshardedState): RelationRepr = {
     val solutions: RDD[Valuation] = analyzedBodies.map(_.findSolutionsSpark(context, state)).reduce(_ ++ _)
-    val generatedRelation = head.emitSolutionsSpark(solutions, variableIds)
-    generatedRelation
+    head.emitSolutionsSpark(solutions, context, variableIds)
   }
 
   override def toString: String = {

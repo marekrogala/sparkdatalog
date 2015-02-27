@@ -1,7 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.ast.rule
 
 import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
+import pl.appsilon.marek.sparkdatalog.{Database, DatabaseRepr, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.subgoal._
 import pl.appsilon.marek.sparkdatalog.eval.{RelationInstance, StaticEvaluationContext}
 import pl.appsilon.marek.sparkdatalog.eval.nonsharded.NonshardedState
@@ -27,13 +27,13 @@ case class AnalyzedRuleBody(subgoals: Seq[AnalyzedSubgoal], initialValuation: Va
   def processSubgoal(valuations: Seq[Valuation], subgoal: AnalyzedSubgoal, relations: Map[String, RelationInstance]): Seq[Valuation] =
     subgoal.solveOnSet(valuations, relations)
 
-  def processFirstSubgoalSpark(valuations: Option[RDD[Valuation]], subgoal: AnalyzedSubgoal, database: Database): Option[RDD[Valuation]] =
+  def processFirstSubgoalSpark(valuations: Option[RDD[Valuation]], subgoal: AnalyzedSubgoal, database: DatabaseRepr): Option[RDD[Valuation]] =
     valuations match {
       case Some(v) => subgoal.solveRDD(v, database)
       case None => subgoal.selectRDD(database)
     }
 
-  def processSubgoalSpark(valuations: Option[RDD[Valuation]], subgoal: AnalyzedSubgoal, database: Database): Option[RDD[Valuation]] =
+  def processSubgoalSpark(valuations: Option[RDD[Valuation]], subgoal: AnalyzedSubgoal, database: DatabaseRepr): Option[RDD[Valuation]] =
     valuations.flatMap(subgoal.solveRDD(_, database))
   
   def findSolutionsSpark(context: StaticEvaluationContext, state: NonshardedState): RDD[Valuation] = {

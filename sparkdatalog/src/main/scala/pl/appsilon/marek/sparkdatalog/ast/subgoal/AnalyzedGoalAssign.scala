@@ -2,7 +2,7 @@ package pl.appsilon.marek.sparkdatalog.ast.subgoal
 
 import org.apache.spark.rdd.RDD
 import pl.appsilon.marek
-import pl.appsilon.marek.sparkdatalog.{Database, Valuation}
+import pl.appsilon.marek.sparkdatalog.{DatabaseRepr, Database, Valuation}
 import pl.appsilon.marek.sparkdatalog.ast.exp.AnalyzedExp
 import pl.appsilon.marek.sparkdatalog.eval.RelationInstance
 
@@ -26,9 +26,9 @@ case class AnalyzedGoalAssign(lValueVariable: Int, exp: AnalyzedExp) extends Ana
 
   override def getLocation: Option[Int] = None
 
-  override def solveRDD(valuations: RDD[Valuation], database: Database): Option[RDD[Valuation]] = {
+  override def solveRDD(valuations: RDD[Valuation], database: DatabaseRepr): Option[RDD[Valuation]] = {
     Some(valuations.flatMap(evaluateStatic))
   }
 
-  override def selectRDD(database: Database): Option[RDD[Valuation]] = ???
+  override def selectRDD(database: DatabaseRepr): Option[RDD[Valuation]] = ???
 }

@@ -1,7 +1,6 @@
 package pl.appsilon.marek.sparkdatalog.eval
 
 import pl.appsilon.marek.sparkdatalog.Database
-import pl.appsilon.marek.sparkdatalog.ast.Program
 import pl.appsilon.marek.sparkdatalog.astbuilder.Parser
 
 object SparkDatalog {
