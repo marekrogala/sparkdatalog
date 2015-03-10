@@ -23,12 +23,12 @@ trait PerformanceTest {
     val conf = new SparkConf().setAppName("Perf test: " + name).setMaster(masterUrl)
     sc = new SparkContext(conf)
     println("spark version: " + sc.version)
+    root =  "hdfs://" + master + ":9000/input"
     println("root hdfs: ", root)
     println("root checkpint: ", "hdfs://" + master + ":9000/checkpoint")
     sc.setCheckpointDir("hdfs://" + master + ":9000/checkpoint")
     //    sc.setCheckpointDir("checkpoint")
     sc.addJar("target/scala-2.10/sparkdatalog_2.10-1.0.0.jar")
-    root =  "hdfs://" + master + ":9000/input"
 //    root =  "/home/marek/magisterka/sparkdatalog/sparkdatalog"
 
     Timed("initialize data", initialize(moreArgs))
