@@ -28,19 +28,23 @@ case class DatabaseRepr(relations: Map[String, RelationRepr]) {
     relations.mapValues(relation => relation.data.collect().toSet)
   }
 
-  def mergeIn(relation: RelationRepr, aggregation: Option[Aggregation]): DatabaseRepr = {
-    val newInstance = (relations.get(relation.name) match {
-      case None => relation
-      case Some(previousInstance) => previousInstance.union(relation)
-    }).combined
-    new DatabaseRepr(relations + (newInstance.name -> newInstance))
+  def mergeIn(relation: RelationRepr, aggregation: Option[Aggregation]): (RelationRepr, RelationRepr) = {
+    relations.get(relation.name) match {
+      case None =>
+        val combined = relation.combined
+        (combined, combined)
+      case Some(previousInstance) => previousInstance.unionDelta(relation)
+    }
   }
 
-  def mergeIn(relations: Iterable[RelationRepr], aggregations: Map[String, Aggregation]): DatabaseRepr =
-    relations.groupBy(_.name).foldLeft(this)({ case (db, rel) =>
-      val (name, rels) = rel
+  def mergeIn(newRelations: Iterable[RelationRepr], aggregations: Map[String, Aggregation]): (DatabaseRepr, DatabaseRepr) = {
+    val (fullRelations, deltaRelations) = newRelations.groupBy(_.name).toSeq.map({ case (name, rels) =>
       val mergedRels = rels.reduce(_.union(_))
-      db.mergeIn(mergedRels, aggregations.get(name)) })
+      val (fullRel, deltaRel) = mergeIn(mergedRels, aggregations.get(name))
+      (name -> fullRel, name -> deltaRel)
+    }).unzip
+    (DatabaseRepr(relations ++ fullRelations), DatabaseRepr(Map() ++ deltaRelations))
+  }
 
   def apply(relationName: String): RDD[FactW] = relations(relationName).data
 

@@ -16,13 +16,8 @@ object SparkEvaluator {
       calculateDelta: Boolean,
       onlyRecursiveRules: Boolean): NonshardedState = {
     val generatedRelations = rules.filter(!onlyRecursiveRules || _.isRecursiveInStratum).map(_.evaluateOnSpark(staticContext, state))
-    val databaseWithNewValues: DatabaseRepr = state.database.mergeIn(generatedRelations, staticContext.aggregations)
-    val newFullDatabase = databaseWithNewValues//.coalesce(sparkdatalog.numPartitions) /// >?>??????
-    if(calculateDelta) {
-      state.step(newFullDatabase)
-    } else {
-      state.copy(database = newFullDatabase, delta = DatabaseRepr.empty)
-    }
+    val (newFullDatabase, deltaDatabase) = state.database.mergeIn(generatedRelations, staticContext.aggregations)
+    state.copy(database = newFullDatabase, delta = deltaDatabase)
   }
 
   def evaluate(database: Database, program: Program): Database = {

@@ -32,11 +32,36 @@ case class RelationRepr(name: String, aggregation: Option[Aggregation], data: RD
   def union(relation: RelationRepr): RelationRepr = {
     println("Union", data.partitioner, data.partitions.size, relation.data.partitioner)
 //    val combinedData: RDD[(Fact, Int)] = data.union(relation.data)
-    val combinedData: RDD[(Fact, Int)] = data.cogroup(relation.data).flatMapValues {
-      case (vs, ws) => vs.iterator ++ ws.iterator
-    } //           ????????????????/
-    println("after Union", combinedData.partitioner, combinedData.partitions.size)
-    copy(data =  combinedData)
+    val combinedData: RDD[(Fact, Int)] = data.cogroup(relation.data).mapValues {
+      case (vs, ws) => mergeOldAndNew(vs, ws, aggregation)._1
+    }
+    println("after Union single", combinedData.partitioner, combinedData.partitions.size)
+    copy(data = combinedData)
+  }
+
+  def unionDelta(relation: RelationRepr): (RelationRepr, RelationRepr) = {
+    println("Union", data.partitioner, data.partitions.size, relation.data.partitioner)
+    //    val combinedData: RDD[(Fact, Int)] = data.union(relation.data)
+    val combinedData: RDD[(Fact, (Int, Boolean))] = data.cogroup(relation.data).mapValues {
+      case (vs, ws) => mergeOldAndNew(vs, ws, aggregation)
+    }
+    val delta = combinedData.filter(_._2._2).mapValues(_._1)
+    val full = combinedData.mapValues(_._1)
+    println("after Union delta", delta.partitioner, delta.partitions.size)
+    println("after Union full", full.partitioner, full.partitions.size)
+    (copy(data = full), copy(data = delta))
+  }
+
+  def mergeOldAndNew(vs: Iterable[Int], ws: Iterable[Int], aggregation: Option[Aggregation]): (Int, Boolean) = {
+    val aggrOperator = aggregation.map(_.operator).getOrElse((x: Int, y: Int) => 0)
+
+    (vs, ws) match {
+      case (Seq(), r) => (r.reduce(aggrOperator), true)
+      case (Seq(l), Seq()) => (l, false)
+      case (Seq(l), r) =>
+        val rv = aggrOperator(r.reduce(aggrOperator), l)
+        (rv, rv == l)
+    }
   }
 
   def partitionByAndPersist(partitioner: Partitioner): RelationRepr = {
