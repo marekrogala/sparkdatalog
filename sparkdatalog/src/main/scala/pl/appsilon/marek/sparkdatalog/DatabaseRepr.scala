@@ -28,7 +28,7 @@ case class DatabaseRepr(relations: Map[String, RelationRepr]) {
     relations.mapValues(relation => relation.data.collect().toSet)
   }
 
-  def mergeIn(relation: RelationRepr, aggregation: Option[Aggregation]): (RelationRepr, RelationRepr) = {
+  private def mergeInRelation(relation: RelationRepr): (RelationRepr, RelationRepr) = {
     relations.get(relation.name) match {
       case None =>
         val combined = relation.combined
@@ -37,10 +37,10 @@ case class DatabaseRepr(relations: Map[String, RelationRepr]) {
     }
   }
 
-  def mergeIn(newRelations: Iterable[RelationRepr], aggregations: Map[String, Aggregation]): (DatabaseRepr, DatabaseRepr) = {
+  def mergeIn(newRelations: Iterable[RelationRepr]): (DatabaseRepr, DatabaseRepr) = {
     val (fullRelations, deltaRelations) = newRelations.groupBy(_.name).toSeq.map({ case (name, rels) =>
       val mergedRels = rels.reduce(_.union(_))
-      val (fullRel, deltaRel) = mergeIn(mergedRels, aggregations.get(name))
+      val (fullRel, deltaRel) = mergeInRelation(mergedRels)
       (name -> fullRel, name -> deltaRel)
     }).unzip
     (DatabaseRepr(relations ++ fullRelations), DatabaseRepr(Map() ++ deltaRelations))

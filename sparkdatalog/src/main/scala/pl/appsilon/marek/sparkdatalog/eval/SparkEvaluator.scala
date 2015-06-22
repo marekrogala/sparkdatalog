@@ -16,7 +16,7 @@ object SparkEvaluator {
       calculateDelta: Boolean,
       onlyRecursiveRules: Boolean): NonshardedState = {
     val generatedRelations = rules.filter(!onlyRecursiveRules || _.isRecursiveInStratum).map(_.evaluateOnSpark(staticContext, state))
-    val (newFullDatabase, deltaDatabase) = state.database.mergeIn(generatedRelations, staticContext.aggregations)
+    val (newFullDatabase, deltaDatabase) = state.database.mergeIn(generatedRelations)
     state.copy(database = newFullDatabase, delta = deltaDatabase)
   }
 
@@ -27,10 +27,6 @@ object SparkEvaluator {
 
     val strata: Seq[Seq[Rule]] = Stratify(program)
     val checkpointFrequency = 5
-
-    for (rel <- state.database.relations.values) {
-      println(rel.name, "partitioner at start", rel.data.partitioner)
-    }
 
     for ((stratum, stratumId) <- strata.zipWithIndex) {
 
