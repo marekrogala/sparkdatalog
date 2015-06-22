@@ -28,9 +28,9 @@ object SparkEvaluator {
     val strata: Seq[Seq[Rule]] = Stratify(program)
     val checkpointFrequency = 5
 
-    for (rel <- state.database.relations.values) {
-      println(rel.name, "partitioner at start", rel.data.partitioner)
-    }
+    // for (rel <- state.database.relations.values) {
+    //  println(rel.name, "partitioner at start", rel.data.partitioner)
+    // }
 
     for ((stratum, stratumId) <- strata.zipWithIndex) {
 
@@ -46,8 +46,8 @@ object SparkEvaluator {
         val isLastIteration = iteration + 1 >= maxIters
         state = makeIteration(StaticEvaluationContext(program.aggregations), stratum, state, !isLastIteration, !isFirstIteration)
         state.cache()
-        if((iteration + checkpointFrequency - 1) % checkpointFrequency == 0) Timed("checkpoint", state.checkpoint())
-        Timed("materialize", state.materialize())
+        if((iteration + checkpointFrequency - 1) % checkpointFrequency == 0) state.checkpoint()
+        state.materialize()
         oldState.unpersist(blocking = false)
 
         iteration += 1

@@ -3,7 +3,6 @@ package pl.appsilon.marek.sparkdatalog.astbuilder
 import pl.appsilon.marek.sparkdatalog.ast
 import pl.appsilon.marek.sparkdatalog.ast.comparisonoperator._
 import pl.appsilon.marek.sparkdatalog.ast.declaration
-import pl.appsilon.marek.sparkdatalog.ast.types.TypeDouble
 import socialite.Absyn._
 import scala.collection.JavaConversions._
 
@@ -42,7 +41,7 @@ class Visitor[A]
 
   override def visit(p: Var, arg: A): String = p.lident_
 
-  override def visit(p: ValueDouble, arg: A): ast.value.Value = ast.value.ValueLiteral(new ast.types.TypeDouble(), p.double_)
+  override def visit(p: ValueDouble, arg: A): ast.value.Value = ???
 
   override def visit(p: ValueVar, arg: A): ast.value.Value = ast.value.ValueVar(p.variable_.accept(this, arg))
 
@@ -76,11 +75,11 @@ class Visitor[A]
 
   override def visit(p: EValue, arg: A): ast.exp.Exp = ast.exp.EValue(p.value_.accept(this, arg))
 
-  override def visit(p: EDiv, arg: A): ast.exp.Exp = ???
+  override def visit(p: EDiv, arg: A): ast.exp.Exp = ast.exp.EBinaryOp(p.exp_1.accept(this, arg), p.exp_2.accept(this, arg), ast.binaryoperator.BinaryDiv())
 
-  override def visit(p: EMul, arg: A): ast.exp.Exp = ???
+  override def visit(p: EMul, arg: A): ast.exp.Exp = ast.exp.EBinaryOp(p.exp_1.accept(this, arg), p.exp_2.accept(this, arg), ast.binaryoperator.BinaryMul())
 
-  override def visit(p: ESub, arg: A): ast.exp.Exp = ???
+  override def visit(p: ESub, arg: A): ast.exp.Exp = ast.exp.EBinaryOp(p.exp_1.accept(this, arg), p.exp_2.accept(this, arg), ast.binaryoperator.BinarySub())
 
   override def visit(p: EAdd, arg: A): ast.exp.Exp = ast.exp.EBinaryOp(p.exp_1.accept(this, arg), p.exp_2.accept(this, arg), ast.binaryoperator.BinaryAdd())
 

@@ -20,7 +20,3 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 libraryDependencies += "log4j" % "log4j" % "1.2.17"
 
 libraryDependencies += "net.sf.squirrel-sql.thirdparty-non-maven" % "java-cup" % "0.11a"
-
-mainClass in (Compile, run) := Some("pl.appsilon.marek.sparkdatalogexample.SparkDatalogExample")
-
-
