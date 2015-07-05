@@ -17,7 +17,7 @@ object SparkEvaluator {
       onlyRecursiveRules: Boolean): NonshardedState = {
     val generatedRelations = rules.filter(!onlyRecursiveRules || _.isRecursiveInStratum).map(_.evaluateOnSpark(staticContext, state))
     val (newFullDatabase, deltaDatabase) = state.database.mergeIn(generatedRelations)
-    state.copy(database = newFullDatabase, delta = deltaDatabase)
+    state.copy(database = newFullDatabase, previousDatabase = state.database, delta = deltaDatabase)
   }
 
   def evaluate(database: Database, program: Program): Database = {
@@ -44,7 +44,9 @@ object SparkEvaluator {
         state.cache()
         if((iteration + checkpointFrequency - 1) % checkpointFrequency == 0) Timed("checkpoint", state.checkpoint())
         Timed("materialize", state.materialize())
-        oldState.unpersist(blocking = false)
+        if (!isFirstIteration) {
+          oldState.unpersistExceptLast(blocking = false)
+        }
 
         iteration += 1
       } while (iteration < maxIters && !state.deltaEmpty)
