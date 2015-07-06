@@ -38,7 +38,7 @@ object ShortestPathsPerfTest extends PerformanceTest
 
     sourceId = edgesRdd.map(_._1).take(1).head
     println("source: " + sourceId)
-    database = Database(Relation.ternary("Edge", edgesRdd))
+//    database = Database(Relation.ternary("Edge", edgesRdd))
     database.materialize()
   }
 

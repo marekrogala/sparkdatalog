@@ -1,8 +1,6 @@
 package pl.appsilon.marek.sparkdatalog
 
-import org.apache.spark.HashPartitioner
-import org.apache.spark.rdd.RDD
-import pl.appsilon.marek.sparkdatalog.eval.SparkDatalog
+import org.apache.spark.sql.{DataFrame, Row}
 
 case class DatabaseRepr(relations: Map[String, RelationRepr]) {
   def toDatabase: Database = Database(relations.mapValues(_.toRelation))
@@ -11,20 +9,11 @@ case class DatabaseRepr(relations: Map[String, RelationRepr]) {
 
   def restrictTo(relationsSubset: Set[String]): DatabaseRepr = DatabaseRepr(relations.filterKeys(relationsSubset))
 
-  def checkpoint(): Unit = relations.foreach(_._2.data.checkpoint())
-
-  def subtract(other: DatabaseRepr, restrictToRelations: Set[String]) = {
-    val myRelations = restrictTo(restrictToRelations).relations
-    val otherRelations = other.restrictTo(restrictToRelations).relations
-    val relationsDifference = for ((name, relation) <- myRelations) yield {
-      name -> otherRelations.get(name).map(relation.subtract).getOrElse(relation)
-    }
-    copy(relationsDifference)
-  }
+  def checkpoint(): Unit = () // TODO how to checkpoint? relations.foreach(_._2.data.checkpoint())
 
   def isEmpty = relations.forall(_._2.isEmpty)
 
-  def collect(): Map[String, Set[FactW]] = {
+  def collect(): Map[String, Set[Row]] = {
     relations.mapValues(relation => relation.data.collect().toSet)
   }
 
@@ -46,7 +35,7 @@ case class DatabaseRepr(relations: Map[String, RelationRepr]) {
     (DatabaseRepr(relations ++ fullRelations), DatabaseRepr(Map() ++ deltaRelations))
   }
 
-  def apply(relationName: String): RDD[FactW] = relations(relationName).data
+  def apply(relationName: String): DataFrame = relations(relationName).data
 
   def cache(): this.type = {
     relations.foreach(_._2.data.cache())
@@ -70,5 +59,5 @@ object DatabaseRepr {
 
   def apply(from: Database, aggregations: Map[String, Aggregation]) =
     new DatabaseRepr(from.relations.map(relation =>
-      relation._1 -> RelationRepr(relation._2, aggregations.get(relation._1)).partitionByAndPersist(new HashPartitioner(8))))
+      relation._1 -> RelationRepr(relation._2, aggregations.get(relation._1)).persist()))
 }

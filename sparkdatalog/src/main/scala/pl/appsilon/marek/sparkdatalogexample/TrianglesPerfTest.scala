@@ -32,7 +32,7 @@ object TrianglesPerfTest extends PerformanceTest
     }).repartition(marek.sparkdatalog.numPartitions)
 
     println("Read " + edgesRdd.count() + " edges in " + edgesRdd.partitions.size + " partitions.")
-    database = Database(Relation.binary("Edge", edgesRdd))
+//    database = Database(Relation.binary("Edge", edgesRdd))
   }
 
   override def runPregel(): Unit = {

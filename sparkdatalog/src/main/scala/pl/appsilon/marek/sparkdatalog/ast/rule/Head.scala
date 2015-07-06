@@ -1,6 +1,7 @@
 package pl.appsilon.marek.sparkdatalog.ast.rule
 
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.DataFrame
 import pl.appsilon.marek.sparkdatalog.{Relation, RelationRepr, FactW, Valuation}
 import pl.appsilon.marek.sparkdatalog.eval.{StaticEvaluationContext, RelationInstance}
 
@@ -10,9 +11,18 @@ case class Head(name: String, args: Seq[String]) {
     RelationInstance(name, valuations.map(valuation => argIds.map(valuation(_))))
   }
 
-  def emitSolutionsSpark(valuations: RDD[Valuation], context: StaticEvaluationContext, variables: Map[String, Int]): RelationRepr = {
+  def dataFrameWithColumnsRenamed(dataframe: DataFrame, mapping: Map[String, String]): DataFrame =
+    mapping.foldLeft(dataframe)({case (acc, (as, col)) => acc.withColumnRenamed(col, as)})
+
+  def dataFrameSelectAs(dataframe: DataFrame, mapping: Map[String, String]): DataFrame = {
+    val keysHead :: keysTail = mapping.keys
+    dataFrameWithColumnsRenamed(dataframe, mapping).select(keysHead, keysTail :_*)
+  }
+
+
+  def emitSolutionsSpark(valuations: DataFrame, context: StaticEvaluationContext, variables: Map[String, String]): RelationRepr = {
     val argIds = args.map(variables)
-    RelationRepr(Relation(name, valuations.map(valuation => argIds.map(valuation(_)))), context.aggregations.get(name))
+    RelationRepr(Relation(name, dataFrameSelectAs(valuations, variables)), context.aggregations.get(name))
   }
 
   override def toString = name + args.mkString("(", ", ", ")")

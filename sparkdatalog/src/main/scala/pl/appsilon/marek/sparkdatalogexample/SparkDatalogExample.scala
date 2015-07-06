@@ -1,24 +1,31 @@
 package pl.appsilon.marek.sparkdatalogexample
 
+import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
+import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
 import pl.appsilon.marek.sparkdatalog._
 
 object SparkDatalogExample
 {
-  val exampleEdges = Seq((1, 2, 1), (1, 3, 5), (2, 3, 1))
-  val sourceNode = Seq(1)
+  val exampleEdges = Seq(Row(1, 2, 1), Row(1, 3, 5), Row(2, 3, 1))
+  val sourceNode = Seq(Row(1))
 
   def main(args: Array[String]): Unit = {
     // Standard Spark setup
     val conf = new SparkConf().setAppName("Spark Datalog SSSP Computation").setMaster("local[4]")
     val sc = new SparkContext(conf)
     sc.setCheckpointDir("checkpoint")
+    val sq = new SQLContext(sc)
 
     // Let us assume we have graph edges represented as triples (source, target, distance) in an RDD.
     // It could have been read for example from HDFS or other distributed file systems, just like any Spark RDD.
-    val edgesRdd = sc.parallelize(exampleEdges)
-    val sourceRdd = sc.parallelize(sourceNode)
+    val edgesRdd = sq.createDataFrame(sc.parallelize(exampleEdges),
+      StructType(Seq(StructField("u", IntegerType, false), StructField("v", IntegerType, false), StructField("d", IntegerType, false))))
+    val sourceRdd = sq.createDataFrame(sc.parallelize(sourceNode),
+      StructType(Seq(StructField("u", IntegerType, false))))
+
+
 
     // -----------------------------------------------------------------------------------
     // Compute shortests paths from the source node using Spark Datalog API:
@@ -27,8 +34,8 @@ object SparkDatalogExample
     //   3. Retrieve the result from the new Database.
     
     val database = Database(
-      Relation.ternary("Edge", edgesRdd),
-      Relation.unary("IsSource", sourceRdd))
+      Relation("Edge", edgesRdd),
+      Relation("IsSource", sourceRdd))
 
     val query = """
         |declare Path(int v, int dist aggregate Min).
@@ -43,7 +50,7 @@ object SparkDatalogExample
 
     // We can now save the paths RDD to distributed storage or perform further computations on it.
     // We can of course also print it to stdout:
-    val resultPathsRdd: RDD[Fact] = resultDatabase("Path")
+    val resultPathsRdd: DataFrame = resultDatabase("Path")
     println("Computed %d results.".format(resultPathsRdd.count()))
 
   }

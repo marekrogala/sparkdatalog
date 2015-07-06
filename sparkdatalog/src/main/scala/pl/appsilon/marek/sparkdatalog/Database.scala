@@ -1,6 +1,7 @@
 package pl.appsilon.marek.sparkdatalog
 
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{Row, DataFrame}
 import pl.appsilon.marek.sparkdatalog.eval.SparkDatalog
 
 case class Database(relations: Map[String, Relation]) {
@@ -9,7 +10,7 @@ case class Database(relations: Map[String, Relation]) {
     SparkDatalog.datalog(this, datalogQuery)
   }
 
-  def apply(relationName: String): RDD[Fact] = relations(relationName).data
+  def apply(relationName: String): DataFrame = relations(relationName).data
 
 
   def materialize(): this.type = {
@@ -17,7 +18,7 @@ case class Database(relations: Map[String, Relation]) {
     this
   }
 
-  def collect(): Map[String, Set[Fact]] = {
+  def collect(): Map[String, Set[Row]] = {
     relations.mapValues(relation => relation.data.collect().toSet)
   }
 

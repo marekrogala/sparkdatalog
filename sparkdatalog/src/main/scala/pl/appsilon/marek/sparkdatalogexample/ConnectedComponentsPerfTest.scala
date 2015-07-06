@@ -23,9 +23,9 @@ object ConnectedComponentsPerfTest extends PerformanceTest
 
     graph = Graph.fromEdges(edgesRdd.map({case (a, b) => Edge(a, b)}), 0)
 
-    database = Database(
-      Relation.binary("Edge", edgesRdd),
-      Relation.unary("Node", verticesRdd))
+//    database = Database(
+//      Relation("Edge", edgesRdd),
+//      Relation("Node", verticesRdd))
 
   }
 
