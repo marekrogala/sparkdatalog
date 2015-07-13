@@ -46,12 +46,14 @@ case class RelationRepr(name: String, aggregation: Option[Aggregation], data: RD
   def mergeOldAndNew(vs: Iterable[Int], ws: Iterable[Int], aggregation: Option[Aggregation]): (Int, Boolean) = {
     val aggrOperator = aggregation.map(_.operator).getOrElse((x: Int, y: Int) => 0)
 
-    (vs, ws) match {
-      case (Seq(), r) => (r.reduce(aggrOperator), true)
-      case (Seq(l), Seq()) => (l, false)
-      case (Seq(l), r) =>
-        val rv = aggrOperator(r.reduce(aggrOperator), l)
-        (rv, rv == l)
+    if(vs.isEmpty) {
+      (ws.reduce(aggrOperator), true)
+    } else if (ws.isEmpty) {
+      (vs.head, false)
+    } else {
+      val l = vs.head
+      val rv = aggrOperator(ws.reduce(aggrOperator), l)
+      (rv, rv == l)
     }
   }
 

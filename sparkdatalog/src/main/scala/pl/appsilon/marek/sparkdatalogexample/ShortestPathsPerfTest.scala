@@ -14,20 +14,20 @@ object ShortestPathsPerfTest extends PerformanceTest
   var database: Database = _
 
   def initialize(args: Seq[String]) = {
-//    val edges = Source.fromFile(root + "/twitter.txt").getLines().map({
-//      str =>
-//        val s = str.split(" ")
-//        (s(0).toInt, s(1).toInt)
-//    }).toSeq
-//    val edgesOriginalRdd = sc.parallelize(edges)
-    val path: String = root + "/twitter.txt"
-    println("reading from " + path)
-    val edgesOriginalRdd = sc.textFile(path).map({
+    val edges = Source.fromFile(root + "/twitter.txt").getLines().take(10000).map({
       str =>
         val s = str.split(" ")
-        val e = (s(0).toInt, s(1).toInt)
-        if(e._1 > e._2) e.swap else e
-    }).repartition(marek.sparkdatalog.numPartitions)
+        (s(0).toInt, s(1).toInt)
+    }).toSeq
+    val edgesOriginalRdd = sc.parallelize(edges)
+    val path: String = root + "/twitter.txt"
+    println("reading from " + path)
+//    val edgesOriginalRdd = sc.textFile(path).map({
+//      str =>
+//        val s = str.split(" ")
+//        val e = (s(0).toInt, s(1).toInt)
+//        if(e._1 > e._2) e.swap else e
+//    }).repartition(marek.sparkdatalog.numPartitions)
     val edgesRawRdd = edgesOriginalRdd.map({case (a, b) => (a, b, 1 + Random.nextInt(10))})
 
     graph = Graph.fromEdges(edgesRawRdd.map({case (a, b, c) => Edge(a, b, c)}), 0)
