@@ -8,12 +8,16 @@ import scala.collection.mutable
 object Stratify {
 
   def transpose(graph: Map[String, Seq[String]]) = {
-    val grapht = mutable.Map[String, mutable.ArrayBuffer[String]]().withDefaultValue(mutable.ArrayBuffer[String]())
+    val grapht = mutable.Map[String, mutable.ArrayBuffer[String]]()
     for (
       (s, ts) <- graph;
       t <- ts
     ) {
-      grapht(t) += s
+      if (grapht.contains(t)) {
+        grapht(t).append(s)
+      } else {
+        grapht(t) = mutable.ArrayBuffer[String](s)
+      }
     }
     val result: Map[String, Seq[String]] = grapht.mapValues(_.toSeq).toMap
     result
@@ -25,11 +29,9 @@ object Stratify {
       visited: mutable.Set[String],
       sccOrder: mutable.ArrayBuffer[String]): Unit = {
     visited += v
-
     for (u <- graph.getOrElse(v, Seq()) if !visited.contains(u)) {
       dfsVisit1(u, graph, visited, sccOrder)
     }
-
     sccOrder += v
   }
 
@@ -56,8 +58,9 @@ object Stratify {
 
     visited.clear()
     val grapht = transpose(graph)
-    val sccs = for(v <- sccOrder.reverse.toSeq if !visited.contains(v))
-      yield dfsVisit2(v, grapht, visited)
+    val sccs = for(v <- sccOrder.reverse.toSeq if !visited.contains(v)) yield {
+      dfsVisit2(v, grapht, visited)
+    }
 
     sccs
   }
