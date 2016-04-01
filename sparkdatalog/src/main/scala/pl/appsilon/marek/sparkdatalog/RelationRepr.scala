@@ -53,7 +53,7 @@ case class RelationRepr(name: String, aggregation: Option[Aggregation], data: RD
     } else {
       val l = vs.head
       val rv = aggrOperator(ws.reduce(aggrOperator), l)
-      (rv, rv == l)
+      (rv, rv != l)
     }
   }
 
